@@ -1,0 +1,13 @@
+opgui: control program for open programmer, 
+an USB programmer for PIC and ATMEL micros, I2C/SPI/MicroWire memories, and other I2C/SPI devices.
+Website: http://openprog.altervista.org
+These sources are given free of charge under the GNU General Public License version 2 
+
+Changelog (to use new features the corresponding firmware is required):
+
+V 0.7.9	april 2011:		first public version, using the same version number as op
+
+To compile: make
+To install: make install
+Can be compiled under windows with MinGW/MSYS and GTK bundle
+
