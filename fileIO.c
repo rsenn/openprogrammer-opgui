@@ -31,6 +31,12 @@
 #include "common.h"
 #endif
 
+#include "progP12.h"
+#include "progP16.h"
+#include "progP18.h"
+#include "progP24.h"
+#include "progAVR.h"
+
 #ifdef _MSC_VER
 	unsigned int COpenProgDlg::htoi(const char *hex, int length)
 #else
@@ -64,17 +70,17 @@ void Save(char* dev,char* savefile)
 		int x=0xfff,addr;
 		if(!strncmp(dev,"16",2)||!strncmp(dev,"12F6",4)) x=0x3fff;
 		fprintf(f,":020000040000FA\n");			//extended address=0
-		for(i=0;i<sizeW;i++) dati_hex[i]&=x;
-		for(i=0;i<sizeW&&dati_hex[i]>=x;i++); //remove leading 0xFFF
+		for(i=0;i<sizeW;i++) memCODE_W[i]&=x;
+		for(i=0;i<sizeW&&memCODE_W[i]>=x;i++); //remove leading 0xFFF
 		for(;i<sizeW;i++){
-			sum+=(dati_hex[i]>>8)+dati_hex[i]&0xff;
-			sprintf(str,"%02X%02X",dati_hex[i]&0xff,dati_hex[i]>>8);
+			sum+=(memCODE_W[i]>>8)+(memCODE_W[i]&0xff);
+			sprintf(str,"%02X%02X",memCODE_W[i]&0xff,memCODE_W[i]>>8);
 			strcat(str1,str);
 			count++;
 			if(count==8||i==sizeW-1){
 				base=i-count+1;
-				for(s=i;s>=base&&dati_hex[s]>=x;s--){	//remove trailing 0xFFF
-					sum-=(dati_hex[s]>>8)+dati_hex[s]&0xff;
+				for(s=i;s>=base&&memCODE_W[s]>=x;s--){	//remove trailing 0xFFF
+					sum-=(memCODE_W[s]>>8)+(memCODE_W[s]&0xff);
 					str1[strlen(str1)-4]=0;
 				}
 				count-=i-s;
@@ -357,7 +363,7 @@ void SaveEE(char* dev,char* savefile){
 //**************** ATMEL *******************************************
 	if(!strncmp(dev,"AT",2)){
 		char str[512],str1[512]="";
-		int i,ext=0,base;
+		int i,base;
 		fprintf(f,":020000040000FA\n");			//extended address=0
 		int sum=0,count=0,s;
 		for(i=0,count=sum=0;i<sizeEE;i++){
@@ -391,7 +397,7 @@ int COpenProgDlg::Load(char*dev,char*loadfile){
 int Load(char*dev,char*loadfile){
 #endif
 	int i,input_address=0,ext_addr=0,sum,valid,empty;
-	char s[256]="",t[256]="",v[256]="",line[256];
+	char s[256]="",line[256];
 	FILE* f=fopen(loadfile,"r");
 	if(!f) return -1;
 	PrintMessage1("%s :\r\n\r\n",loadfile);
@@ -441,10 +447,10 @@ int Load(char*dev,char*loadfile){
 			}
 		}
 		sizeW/=2;
-		if(dati_hex) free(dati_hex);
-		dati_hex=(WORD*)malloc(sizeof(WORD)*sizeW);
+		if(memCODE_W) free(memCODE_W);
+		memCODE_W=(WORD*)malloc(sizeof(WORD)*sizeW);
 		for(i=0;i<sizeW;i++){		//Swap bytes
-			dati_hex[i]=(buffer[i*2+1]<<8)+buffer[i*2];
+			memCODE_W[i]=(buffer[i*2+1]<<8)+buffer[i*2];
 		}
 		if(memEE) free(memEE);
 		if(sizeEE){
@@ -467,7 +473,6 @@ int Load(char*dev,char*loadfile){
 //**************** 18F *******************************************
 	else if(!strncmp(dev,"18F",3)){
 		unsigned char buffer[0x30000],bufferEE[0x1000];
-		int end_address=0;
 		memset(buffer,0xFF,sizeof(buffer));
 		memset(bufferEE,0xFF,sizeof(bufferEE));
 		memset(memID,0xFF,sizeof(memID));
@@ -543,7 +548,7 @@ int Load(char*dev,char*loadfile){
 //**************** 24F *******************************************
 	else if(!strncmp(dev,"24F",3)||!strncmp(dev,"24H",3)||!strncmp(dev,"30F",3)||!strncmp(dev,"33F",3)){
 		unsigned char *buffer,bufferEE[0x2000];
-		int end_address=0,d;
+		int d;
 		buffer=(unsigned char*)malloc(0x100000);
 		memset(buffer,0xFF,0x100000);
 		memset(bufferEE,0xFF,sizeof(bufferEE));

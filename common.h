@@ -4,7 +4,6 @@
 #include <sys/stat.h>
 #include <asm/types.h>
 #include <fcntl.h>
-#include <unistd.h>
 #include <linux/hiddev.h>
 #include <linux/input.h>
 #include <sys/timeb.h>
@@ -19,6 +18,7 @@
 #endif
 
 #include <gtk/gtk.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
@@ -37,13 +37,13 @@ typedef unsigned char BYTE;
 #define PrintMessage2(s,p1,p2) {sprintf(str,s,p1,p2); PrintMessage(str);}
 #define PrintMessage3(s,p1,p2,p3) {sprintf(str,s,p1,p2,p3); PrintMessage(str);}
 #define PrintMessage4(s,p1,p2,p3,p4) {sprintf(str,s,p1,p2,p3,p4); PrintMessage(str);}
-#define PrintStatus(s,p1,p2) {sprintf(str,s,p1,p2); gtk_statusbar_push(status,statusID,str);while (gtk_events_pending ()) gtk_main_iteration();}
+#define PrintStatus(s,p1,p2) {sprintf(str,s,p1,p2); gtk_statusbar_push(GTK_STATUSBAR(status_bar),statusID,str);while (gtk_events_pending ()) gtk_main_iteration();}
 #define	PrintStatusSetup() //only needed for console version
 #define	PrintStatusEnd() //only needed for console version
-#define	PrintStatusClear() gtk_statusbar_push(status,statusID,"");
+#define	PrintStatusClear() gtk_statusbar_push(GTK_STATUSBAR(status_bar),statusID,"");
 
 #define COL 16
-#define VERSION "0.7.9"
+#define VERSION "0.7.9c"
 #define G (12.0/34*1024/5)		//=72,2823529412
 #define LOCK	1
 #define FUSE	2
@@ -58,7 +58,9 @@ typedef unsigned char BYTE;
 #define read() ioctl(fd, HIDIOCGUSAGES, &ref_multi_i); ioctl(fd,HIDIOCGREPORT, &rep_info_i);
 #define bufferU ref_multi_u.values
 #define bufferI ref_multi_i.values
-extern DWORD GetTickCount();
+DWORD GetTickCount();
+struct hiddev_report_info rep_info_i,rep_info_u;
+struct hiddev_usage_ref_multi ref_multi_i,ref_multi_u;
 
 #else
 	#define write()	Result = WriteFile(WriteHandle,bufferU,DIMBUF,&BytesWritten,NULL);
@@ -69,78 +71,43 @@ extern DWORD GetTickCount();
 						PrintMessage(strings[S_comTimeout]);	/*"comm timeout\r\n"*/\
 					}
 
-extern unsigned char bufferU[128],bufferI[128];
-extern DWORD NumberOfBytesRead,BytesWritten;
-extern ULONG Result;
-extern HANDLE WriteHandle,ReadHandle;
-extern OVERLAPPED HIDOverlapped;
-extern HANDLE hEventObject;
+unsigned char bufferU[128],bufferI[128];
+DWORD NumberOfBytesRead,BytesWritten;
+ULONG Result;
+HANDLE WriteHandle,ReadHandle;
+OVERLAPPED HIDOverlapped;
+HANDLE hEventObject;
 
 #endif
 
-extern int statusID;
-extern int * status;
-extern char str[4096];
-extern int saveLog;
-extern char** strings;
-extern int fd;
-extern int DIMBUF;
-extern int saveLog,programID,MinDly,load_osccal,load_BKosccal;
-extern int use_osccal,use_BKosccal;
-extern int load_calibword,max_err;
-extern int AVRlock,AVRfuse,AVRfuse_h,AVRfuse_x;
-extern int ICDenable,ICDaddr;
-extern int FWVersion,HwID;
-extern FILE* logfile;
-extern char LogFileName[512];
-extern char loadfile[512],savefile[512];
-extern WORD *dati_hex;
-extern int size,sizeW,sizeEE,sizeCONFIG;
-extern unsigned char *memCODE,*memEE,memID[8],memCONFIG[48];
-extern double hvreg;
-extern struct hiddev_report_info rep_info_i,rep_info_u;
-extern struct hiddev_usage_ref_multi ref_multi_i,ref_multi_u;
+int statusID;
+GtkWidget *status_bar;
+char str[4096];
+int saveLog;
+char** strings;
+int fd;
+int DIMBUF;
+int saveLog,programID,MinDly,load_osccal,load_BKosccal;
+int use_osccal,use_BKosccal;
+int load_calibword,max_err;
+int AVRlock,AVRfuse,AVRfuse_h,AVRfuse_x;
+int ICDenable,ICDaddr;
+int FWVersion,HwID;
+FILE* logfile;
+char LogFileName[512];
+char loadfile[512],savefile[512];
+WORD *memCODE_W;
+int size,sizeW,sizeEE,sizeCONFIG;
+unsigned char *memCODE,*memEE,memID[8],memCONFIG[48];
+double hvreg;
 
 int StartHVReg(double V);
 void msDelay(double delay);
-void WriteLogIO();
-void PIC_ID(int id);
 void DisplayEE();
-void CloseLogFile();
 void PrintMessage(const char *msg);
 void PrintMessageI2C(const char *msg);
-void Read12F5xx(int dim, int dim2);
-void Read16Fxxx(int dim,int dim2,int dim3,int vdd);
-void Write12F5xx(int dim,int OscAddr);
-void Write12F6xx(int dim,int dim2);
-void Write12F61x(int dim);
-void Write12F62x(int dim,int dim2);
-void Write16F7x(int dim,int vdd);
-void Write16F71x(int dim,int vdd);
-void Write16F72x(int dim);
-void Write16F8x(int dim,int dim2);
-void Write16F81x(int dim,int dim2);
-void Write16F87x(int dim,int dim2);
-void Write16F87xA(int dim,int dim2,int seq);
-void Write16F88x(int dim,int dim2);
-void Read16F1xxx(int dim,int dim2,int dim3,int options);
-void Write16F1xxx(int dim,int dim2,int options);
-void Read18Fx(int dim,int dim2,int options);
-void Write18Fx(int dim,int dim2,int wbuf,int eraseW1,int eraseW2,int options);
-void Read24Fx(int dim,int dim2,int options,int appIDaddr,int executiveArea);
-void Write24Fx(int dim,int dim2,int options,int appIDaddr,int rowSize, double wait);
-void ReadAT(int dim, int dim2, int options);
-void WriteAT(int dim, int dim2);
-void WriteATmega(int dim, int dim2, int page, int options);
-void ReadI2C(int dim,int addr);
-void WriteI2C(int dim,int addr,int page);
-void Read93x(int dim,int na,int options);
-void Write93Sx(int dim,int na,int page);
-void Write93Cx(int dim,int na, int options);
-void Read25xx(int dim);
-void Write25xx(int dim,int page);
-void DisplayCODE16F(int size);
-void DisplayEE16F(int size);
-void DisplayCODE18F(int dim);
-void DisplayCODE24F(int dim);
-void DisplayEE24F();
+int CheckV33Regulator(void);
+void OpenLogFile(void);
+void WriteLogIO();
+void CloseLogFile();
+
