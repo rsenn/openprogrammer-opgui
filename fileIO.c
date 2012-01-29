@@ -28,14 +28,13 @@
 	#include "msvc_common.h"
 #else
 	#define _CMD
-#include "common.h"
+	#include "common.h"
+	#include "progP12.h"
+	#include "progP16.h"
+	#include "progP18.h"
+	#include "progP24.h"
+	#include "progAVR.h"
 #endif
-
-#include "progP12.h"
-#include "progP16.h"
-#include "progP18.h"
-#include "progP24.h"
-#include "progAVR.h"
 
 #ifdef _MSC_VER
 	unsigned int COpenProgDlg::htoi(const char *hex, int length)
@@ -320,6 +319,11 @@ void Save(char* dev,char* savefile)
 //**************** 24xxx / 93xxx / 25xxx *******************************************
 	else if(!strncmp(dev,"24",2)||!strncmp(dev,"93",2)||!strncmp(dev,"25",2)){
 		if(strstr(savefile,".bin")||strstr(savefile,".BIN")){
+			#ifdef _MSC_VER
+			//brain-damaged op. systems need this to avoid messing with some bytes
+			f=freopen(savefile,"wb",f); 
+			if(!f) return;
+			#endif
 			fwrite(memEE,1,sizeEE,f);
 		}
 		else{			//HEX
@@ -404,6 +408,7 @@ int Load(char*dev,char*loadfile){
 //**************** 10-16F *******************************************
 	if(!strncmp(dev,"10",2)||!strncmp(dev,"12",2)||!strncmp(dev,"16",2)){
 		unsigned char buffer[0x20000],bufferEE[0x1000];
+		int sizeM=0;
 		memset(buffer,0xFF,sizeof(buffer));
 		memset(bufferEE,0xFF,sizeof(bufferEE));
 		sizeEE=0;
@@ -424,13 +429,15 @@ int Load(char*dev,char*loadfile){
 						switch(htoi(line+7,2)){
 							case 0:		//Data record
 								if(ext_addr<=0x01&&input_address<0xE000){		//Code
-									sizeW=(ext_addr<<16)+input_address+hex_count;
+									sizeM=(ext_addr<<16)+input_address+hex_count;
+									if(sizeM>sizeW) sizeW=sizeM;
 									for (i=0;i<hex_count;i++){
 										buffer[(ext_addr<<16)+input_address+i]=htoi(line+9+i*2,2);
 									}
 								}
 								else if(ext_addr==0x1&&input_address>=0xE000&&input_address<0xF000){	//EEPROM
-									sizeEE=(input_address-0xE000+hex_count)/2;
+									sizeM=(input_address-0xE000+hex_count)/2;
+									if(sizeM>sizeEE) sizeEE=sizeM;
 									for (i=0;i<hex_count;i+=2){
 										bufferEE[(input_address-0xE000)/2+i/2]=htoi(line+9+i*2,2);
 									}
@@ -473,6 +480,7 @@ int Load(char*dev,char*loadfile){
 //**************** 18F *******************************************
 	else if(!strncmp(dev,"18F",3)){
 		unsigned char buffer[0x30000],bufferEE[0x1000];
+		int sizeM;
 		memset(buffer,0xFF,sizeof(buffer));
 		memset(bufferEE,0xFF,sizeof(bufferEE));
 		memset(memID,0xFF,sizeof(memID));
@@ -495,7 +503,8 @@ int Load(char*dev,char*loadfile){
 						switch(htoi(line+7,2)){
 							case 0:		//Data record
 								if(ext_addr<0x20){		//Code
-									size=(ext_addr<<16)+input_address+hex_count;
+									sizeM=(ext_addr<<16)+input_address+hex_count;
+									if(sizeM>size) size=sizeM;
 									for (i=0;i<hex_count;i++){
 										buffer[(ext_addr<<16)+input_address+i]=htoi(line+9+i*2,2);
 									}
@@ -514,7 +523,9 @@ int Load(char*dev,char*loadfile){
 									for (i=0;i<hex_count;i++){
 										bufferEE[input_address+i]=htoi(line+9+i*2,2);
 									}
-									sizeEE=input_address+hex_count;
+									sizeM=input_address+hex_count;
+									if(sizeM>sizeEE) sizeEE=sizeM;
+									
 								}
 								break;
 							case 4:		//extended linear address record
@@ -675,6 +686,11 @@ int Load(char*dev,char*loadfile){
 //**************** 24xxx / 93xxx / 25xxx **************************************
 	else if(!strncmp(dev,"24",2)||!strncmp(dev,"93",2)||!strncmp(dev,"25",2)){
 		if(strstr(loadfile,".bin")||strstr(loadfile,".BIN")){
+			#ifdef _MSC_VER
+			//brain-damaged op. systems need this to avoid messing with some bytes
+			f=freopen(loadfile,"rb",f); 
+			if(!f) return -1;
+			#endif
 			fseek(f, 0L, SEEK_END);
 			sizeEE=ftell(f);
 			fseek(f, 0L, SEEK_SET);
@@ -727,6 +743,9 @@ int Load(char*dev,char*loadfile){
 			free(bufferEE);
 		}
 		DisplayEE();	//visualize
+		int sum=0;
+		for(i=0;i<sizeEE;i++) sum+=memEE[i];
+		PrintMessage1("Checksum: 0x%X\r\n",sum&0xFFFF);
 		PrintMessage("\r\n");
 	}
 	fclose(f);
@@ -798,7 +817,11 @@ void OpenLogFile()
 {
 	logfile=fopen(LogFileName,"w");
 	if(!logfile) return;
+#ifdef _MSC_VER	
+	fprintf(logfile,"OpenProg version %s\n",VERSION);
+#else
 	fprintf(logfile,"OPGUI version %s\n",VERSION);
+#endif
 	fprintf(logfile,"Firmware version %d.%d.%d\n",FWVersion>>16,(FWVersion>>8)&0xFF,FWVersion&0xFF);
 	struct tm * timeinfo;
 	time_t rawtime;

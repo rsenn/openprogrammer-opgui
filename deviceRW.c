@@ -1,6 +1,6 @@
 /*
  * deviceRW.c - Read-write calls for various devices
- * Copyright (C) 2010 Alberto Maccioni
+ * Copyright (C) 2010-2012 Alberto Maccioni
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,54 +29,57 @@
 #else
 	#define _CMD
 	#include "common.h"
+	#include "progP12.h"
+	#include "progP16.h"
+	#include "progP18.h"
+	#include "progP24.h"
+	#include "progEEPROM.h"
+	#include "progAVR.h"
 #endif
 #ifdef __GTK_H__
 #define _GTKGUI
 #endif
 
-#include "progP12.h"
-#include "progP16.h"
-#include "progP18.h"
-#include "progP24.h"
-#include "progEEPROM.h"
-#include "progAVR.h"
-
 #define EQ(s) !strncmp(s,dev,64)
 
 char* devices[]={
 "10F200","10F202","10F204","10F206","10F220","10F222","12C508","12C508A",
-"12C509","12C509A","12F508","12F509","12F510","12F519","12F609","12F615",
+"12C509","12C509A","12F508","12F509","12F510","12F519","12F609","12F615","12F617",
 "12F629","12F635","12C671","12C672","12CE673","12CE674","12F675","12F683",
-"12F1822","12F1840",
+"12F1501","12F1822","12F1840",
 "16F505","16F506","16F526","16F54","16F57","16F59",
 "16F610","16F616","16F627","16F627A","16F628","16F628A","16F630","16F631",
 "16F636","16F639","16F648A","16F676","16F677","16F684","16F685","16F687",
-"16F688","16F689","16F690","16F716","16F722","16F722A","16F723","16F723A",
+"16F688","16F689","16F690","16F707","16F716","16F72","16F720","16F721",
+"16F722","16F722A","16F723","16F723A",
 "16F724","16F726","16F727","16F73","16F737","16F74","16F747","16F76",
 "16F767","16F77","16F777","16F785","16F818","16F819","16C83","16F83",
 "16F83A","16C84","16F84","16F84A","16F87","16F870","16F871","16F872",
 "16F873","16F873A","16F874","16F874A","16F876","16F876A","16F877","16F877A",
 "16F88","16F882","16F883","16F884","16F886","16F887","16F913","16F914",
-"16F916","16F917","16F946","16F1516","16F1517","16F1518","16F1519","16F1526",
+"16F916","16F917","16F946",
+"16F1503","16F1507","16F1508","16F1509","16F1516","16F1517","16F1518","16F1519","16F1526",
 "16F1527","16F1823","16F1824","16F1825","16F1826","16F1827","16F1828",
 "16F1829","16F1847","16LF1902","16LF1903","16LF1904","16LF1906","16LF1907",
 "16F1933","16F1934","16F1936","16F1937","16F1938","16F1939","16F1946",
 "16F1947",
 "18F242","18F248","18F252","18F258","18F442","18F448","18F452",
-"18F458","18F1220","18F1230","18F1320","18F1330","18F13K50","18F14K50",
-"18F2220","18F2221","18F2320","18F23K20","18F2321","18F2331","18F2410",
-"18F24J10","18F24J11","18F2420","18F24K20","18F2423","18F2431","18F2439",
+"18F458","18F1220","18F1230","18F1320","18F1330","18F13K22","18F13K50","18F14K22","18F14K50",
+"18F2220","18F2221","18F2320","18F23K20","18F23K22","18F2321","18F2331","18F2410",
+"18F24J10","18F24J11","18F2420","18F24K20","18F24K22","18F2423","18F2431","18F2439",
 "18F2450","18F24J50","18F2455","18F2458","18F2480","18F2510","18F25J10",
-"18F25J11","18F2515","18F25K20","18F2520","18F2523","18F2525","18F2539",
+"18F25J11","18F2515","18F25K20","18F25K22","18F2520","18F2523","18F2525","18F2539",
 "18F2550","18F25J50","18F2553","18F2580","18F2585","18F2610","18F26J11",
-"18F26J13","18F2620","18F26K20","18F26J50","18F26J53","18F2680","18F2682",
-"18F2685","18F27J13","18F27J53","18F4220","18F4221","18F4320","18F43K20",
-"18F4321","18F4331","18F4410","18F44J10","18F44J11","18F4420","18F44K20",
+"18F26J13","18F2620","18F26K20","18F26K22","18F26J50","18F26J53","18F2680","18F2682",
+"18F2685","18F27J13","18F27J53","18F4220","18F4221","18F4320","18F43K20","18F43K22",
+"18F4321","18F4331","18F4410","18F44J10","18F44J11","18F4420","18F44K20","18F44K22",
 "18F4423","18F4431","18F4439","18F4450","18F44J50","18F4455","18F4458",
-"18F4480","18F4510","18F45J10","18F45J11","18F4515","18F4520","18F45K20",
+"18F4480","18F4510","18F45J10","18F45J11","18F4515","18F4520","18F45K20","18F45K22",
 "18F4523","18F4525","18F4539","18F4550","18F45J50","18F4553","18F4580",
-"18F4585","18F4610","18F46J11","18F46J13","18F4620","18F46K20","18F46J50",
-"18F46J53","18F4680","18F4682","18F4685","18F47J13","18F47J53","18F8722",
+"18F4585","18F4610","18F46J11","18F46J13","18F4620","18F46K20","18F46K22","18F46J50",
+"18F46J53","18F4680","18F4682","18F4685","18F47J13","18F47J53",
+"18F66J60","18F66J65","18F67J60",
+"18F8520","18F86J60","18F86J65","18F87J60","18F8722","18F96J60","18F96J65","18F97J60",
 "24F04KA200","24F04KA201","24F08KA101","24F08KA102","24F16KA101","24F16KA102",
 "24FJ16GA002","24FJ16GA004","24FJ32GA002","24FJ32GA004","24FJ32GA102",
 "24FJ32GA104","24FJ32GB002","24FJ32GB004","24FJ48GA002","24FJ48GA004",
@@ -147,11 +150,11 @@ void AddDevices(char *list){		//make sure list is long enough
 		if(last[0]) strcat(list,", ");
 		if(strncmp(devices[i],last,2)){
 			strcat(list,"\n");
-			last[0]=dev[0];
-			last[1]=dev[1];
+			last[0]=devices[i][0];
+			last[1]=devices[i][1];
 			last[2]=0;
 		}
-		strcat(list,dev);
+		strcat(list,devices[i]);
 	}
 }
 #endif
@@ -187,6 +190,9 @@ void AddDevices(char *list){		//make sure list is long enough
 		else if(EQ("12F609")||EQ("12F615")||EQ("16F610")){
 			Write12F61x(0x400);								//1K
 		}
+		else if(EQ("12F1501")){
+			Write16F1xxx(0x400,0,0);						//1K
+		}
 		else if(EQ("16C84")||EQ("16F84")||EQ("16F84A")){
 			Write16F8x(0x400,ee?0x40:0);					//1K, 64
 		}
@@ -205,16 +211,19 @@ void AddDevices(char *list){		//make sure list is long enough
 		else if(EQ("16F57")||EQ("16F59")){
 			Write12F5xx(0x800,-1);							//2K, no osccal
 		}
-		else if(EQ("16F616")){
+		else if(EQ("16F616")||EQ("12F617")){
 			Write12F61x(0x800);								//2K
+		}
+		else if(EQ("16F72")){
+			Write16F7x(0x800,0);							//2K
 		}
 		else if(EQ("16F716")){
 			Write16F71x(0x800,1);							//2K, vdd
 		}
-		else if(EQ("16F722")||EQ("16F722A")){
+		else if(EQ("16F720")||EQ("16F722")||EQ("16F722A")){
 			Write16F72x(0x800);								//2K, vpp, 3.3V
 		}
-		else if(EQ("16LF1902")){
+		else if(EQ("16LF1902")||EQ("16F1503")||EQ("16F1507")){
 			Write16F1xxx(0x800,0,0);						//2K
 		}
 		else if(EQ("16F870")||EQ("16F871")||EQ("16F872")){
@@ -241,13 +250,13 @@ void AddDevices(char *list){		//make sure list is long enough
 		else if(EQ("16F73")||EQ("16F74")){
 			Write16F7x(0x1000,0);							//4K
 		}
-		else if(EQ("16F723")||EQ("16F723A")||EQ("16F724")){
+		else if(EQ("16F721")||EQ("16F723")||EQ("16F723A")||EQ("16F724")){
 			Write16F72x(0x1000);							//4K, vpp, 3.3V
 		}
 		else if(EQ("16F737")||EQ("16F747")){
 			Write16F7x(0x1000,1);							//4K, vdd no delay
 		}
-		else if(EQ("16LF1903")||EQ("16LF1904")){
+		else if(EQ("16LF1903")||EQ("16LF1904")||EQ("16F1508")){
 			Write16F1xxx(0x1000,0,0);						//4K
 		}
 		else if(EQ("16F873")||EQ("16F874")){
@@ -271,13 +280,13 @@ void AddDevices(char *list){		//make sure list is long enough
 		else if(EQ("16F76")||EQ("16F77")){
 			Write16F7x(0x2000,0);							//8K
 		}
-		else if(EQ("16F726")||EQ("16F727")){
+		else if(EQ("16F726")||EQ("16F727")||EQ("16F707")){
 			Write16F72x(0x2000);							//8K, vpp, 3.3V
 		}
 		else if(EQ("16F767")||EQ("16F777")){
 			Write16F7x(0x2000,1);							//8K, vdd no delay
 		}
-		else if(EQ("16LF1906")||EQ("16LF1907")){
+		else if(EQ("16LF1906")||EQ("16LF1907")||EQ("16F1509")){
 			Write16F1xxx(0x2000,0,0);						//8K
 		}
 		else if(EQ("16F916")||EQ("16F917")||EQ("16F946")){
@@ -340,11 +349,14 @@ void AddDevices(char *list){		//make sure list is long enough
 		else if(EQ("18F1320")||EQ("18F2320")||EQ("18F4320")||EQ("18F2331")||EQ("18F4331")){
 			Write18Fx(0x2000,ee?0x100:0,8,0x10000,0x80,0x10);		//8K, 256, 8, EE with unlock
 		}
-		else if(EQ("18F13K50")){
-			Write18Fx(0x2000,ee?0x100:0,8,0x0F0F,0x8F8F,1);		//8K, 256, 9V
+		else if(EQ("18F13K50")||EQ("18F13K22")){
+			Write18Fx(0x2000,ee?0x100:0,8,0x0F0F,0x8F8F,1);		//8K, 256, 8, 9V
 		}
 		else if(EQ("18F23K20")||EQ("18F43K20")){
-			Write18Fx(0x2000,ee?0x100:0,16,0x0F0F,0x8F8F,1);		//8K, 256, 9V
+			Write18Fx(0x2000,ee?0x100:0,16,0x0F0F,0x8F8F,1);		//8K, 256, 16, 9V
+		}
+		else if(EQ("18F23K22")||EQ("18F43K22")){
+			Write18Fx(0x2000,ee?0x100:0,64,0x0F0F,0x8F8F,1);		//8K, 256, 64, 9V
 		}
 		else if(EQ("18F2439")||EQ("18F4439")){
 			Write18Fx(0x3000,ee?0x100:0,8,0x10000,0x80,0x10);		//12K, 256, 8, EE with unlock
@@ -361,11 +373,14 @@ void AddDevices(char *list){		//make sure list is long enough
 		else if(EQ("18F2450")||EQ("18F4450")){
 			Write18Fx(0x4000,0,16,0x3F3F,0x8F8F,0);				//16K, 0, 16
 		}
-		else if(EQ("18F14K50")){
-			Write18Fx(0x4000,ee?0x100:0,16,0x0F0F,0x8F8F,1);	//16K, 256, 9V
+		else if(EQ("18F14K50")||EQ("18F14K22")){
+			Write18Fx(0x4000,ee?0x100:0,16,0x0F0F,0x8F8F,1);	//16K, 256, 16, 9V
 		}
 		else if(EQ("18F24K20")||EQ("18F44K20")){
-			Write18Fx(0x4000,ee?0x100:0,32,0x0F0F,0x8F8F,1);	//16K, 256, 9V
+			Write18Fx(0x4000,ee?0x100:0,32,0x0F0F,0x8F8F,1);	//16K, 256, 32, 9V
+		}
+		else if(EQ("18F24K22")||EQ("18F44K22")){
+			Write18Fx(0x4000,ee?0x100:0,64,0x0F0F,0x8F8F,1);	//16K, 256, 64, 9V
 		}
 		else if(EQ("18F2431")||EQ("18F4431")||EQ("18F242")||EQ("18F248")||EQ("18F442")||EQ("18F448")){
 			Write18Fx(0x4000,ee?0x100:0,8,0x10000,0x80,0x10);		//16K, 256, 8, EE with unlock
@@ -397,6 +412,12 @@ void AddDevices(char *list){		//make sure list is long enough
 		else if(EQ("18F25K20")||EQ("18F45K20")){
 			Write18Fx(0x8000,ee?0x100:0,32,0x0F0F,0x8F8F,1);	//32K, 256, 32, 9V
 		}
+		else if(EQ("18F25K22")||EQ("18F45K22")){
+			Write18Fx(0x8000,ee?0x100:0,64,0x0F0F,0x8F8F,1);	//32K, 256, 64, 9V
+		}
+		else if(EQ("18F8520")){
+			Write18Fx(0x8000,ee?0x400:0,8,0x10000,0x0080,0x10);	//32K, 1024, 8, EE with unlock
+		}
 		else if(EQ("18F2515")||EQ("18F4515")){
 			Write18Fx(0xC000,0,64,0x3F3F,0x8F8F,0);				//48K, 0, 64
 		}
@@ -409,20 +430,29 @@ void AddDevices(char *list){		//make sure list is long enough
 		else if(EQ("18F26J11")||EQ("18F26J13")||EQ("18F26J50")||EQ("18F26J53")||EQ("18F46J11")||EQ("18F46J13")||EQ("18F46J50")||EQ("18F46J53")){
 			Write18Fx(0x10000,0,64,0x0101,0x8080,0x102);		//64K, 0, 64, LV
 		}
+		else if(EQ("18F66J60")||EQ("18F86J60")||EQ("18F96J60")){
+			Write18Fx(0x10000,0,64,0x0101,0x8080,0x202);		//64K, 0, 64, LV
+		}
 		else if(EQ("18F2620")||EQ("18F2680")||EQ("18F4620")||EQ("18F4680")){
 			Write18Fx(0x10000,ee?0x400:0,64,0x3F3F,0x8F8F,0);	//64K, 1K, 64
 		}
-		else if(EQ("18F26K20")||EQ("18F46K20")){
+		else if(EQ("18F26K20")||EQ("18F46K20")||EQ("18F26K22")||EQ("18F46K22")){
 			Write18Fx(0x10000,ee?0x100:0,64,0x0F0F,0x8F8F,1);	//64K, 256, 64, 9V
 		}
 		else if(EQ("18F2682")||EQ("18F4682")){
 			Write18Fx(0x14000,ee?0x400:0,64,0x3F3F,0x8F8F,0);	//80K, 1K, 64
+		}
+		else if(EQ("18F66J65")||EQ("18F86J65")||EQ("18F96J65")){
+			Write18Fx(0x18000,0,64,0x0101,0x8080,0x202);		//96K, 0, 64, LV
 		}
 		else if(EQ("18F2685")||EQ("18F4685")){
 			Write18Fx(0x18000,ee?0x400:0,64,0x3F3F,0x8F8F,0);	//96K, 1K, 64
 		}
 		else if(EQ("18F27J13")||EQ("18F27J53")||EQ("18F47J13")||EQ("18F47J53")){
 			Write18Fx(0x20000,0,64,0x0101,0x8080,0x102);		//128K, 0, 64, LV
+		}
+		else if(EQ("18F67J60")||EQ("18F87J60")||EQ("18F97J60")){
+			Write18Fx(0x20000,0,64,0x0101,0x8080,0x202);		//128K, 0, 64, LV
 		}
 		else if(EQ("18F8722")){
 			Write18Fx(0x20000,ee?0x400:0,64,0xFFFF,0x8787,0);	//128K, 1K, 64
@@ -773,6 +803,9 @@ void AddDevices(char *list){		//make sure list is long enough
 		else if(EQ("12C671")||EQ("12CE673")){
 			Read16Fxxx(0x400,0,r?0x100:0,0);				//1K, vpp
 		}
+		else if(EQ("12F1501")){
+			Read16F1xxx(0x400,0,r?0x100:11,0);				//1K, vpp
+		}
 		else if(EQ("12F609")||EQ("12F615")||EQ("16F610")){
 			Read16Fxxx(0x400,0,r?0x40:9,0);					//1K, vpp, cal1
 		}
@@ -800,7 +833,10 @@ void AddDevices(char *list){		//make sure list is long enough
 		else if(EQ("16F57")||EQ("16F59")){
 			Read12F5xx(0x800,r?0x40:4);						//2K
 		}
-		else if(EQ("16F722")||EQ("16F722A")){
+		else if(EQ("16F72")){
+			Read16Fxxx(0x800,0,r?0x20:8,1);					//2K, vdd
+		}
+		else if(EQ("16F720")||EQ("16F722")||EQ("16F722A")){
 			Read16Fxxx(0x800,0,r?0x100:11,0);				//2K, vpp, config1-2 + cal1-2, 3.3V
 		}
 		else if(EQ("12C672")||EQ("12CE674")){
@@ -809,10 +845,10 @@ void AddDevices(char *list){		//make sure list is long enough
 		else if(EQ("16F716")){
 			Read16Fxxx(0x800,0,8,2);						//2K, vdd
 		}
-		else if(EQ("16F616")){
+		else if(EQ("16F616")||EQ("12F617")){
 			Read16Fxxx(0x800,0,r?0x40:9,0);					//2K, vpp, cal1
 		}
-		else if(EQ("16LF1902")){
+		else if(EQ("16LF1902")||EQ("16F1503")||EQ("16F1507")){
 			Read16F1xxx(0x800,0,r?0x200:11,0);				//2K, vpp
 		}
 		else if(EQ("16F870")||EQ("16F871")||EQ("16F872")){
@@ -848,10 +884,10 @@ void AddDevices(char *list){		//make sure list is long enough
 		else if(EQ("16F737")||EQ("16F747")){
 			Read16Fxxx(0x1000,0,r?0x40:9,2);				//4K, vdd short delay
 		}
-		else if(EQ("16F723")||EQ("16F723A")||EQ("16F724")){
+		else if(EQ("16F721")||EQ("16F723")||EQ("16F723A")||EQ("16F724")){
 			Read16Fxxx(0x1000,0,r?0x100:11,0);				//4K, vpp, config1-2 + cal1-2, 3.3V
 		}
-		else if(EQ("16LF1903")||EQ("16LF1904")){
+		else if(EQ("16LF1903")||EQ("16LF1904")||EQ("16F1508")){
 			Read16F1xxx(0x1000,0,r?0x200:11,0);				//4K, vpp
 		}
 		else if(EQ("16F873A")||EQ("16F874A")){
@@ -887,10 +923,10 @@ void AddDevices(char *list){		//make sure list is long enough
 		else if(EQ("16F767")||EQ("16F777")){
 			Read16Fxxx(0x2000,0,r?0x40:9,2);				//8K, vdd short delay
 		}
-		else if(EQ("16F726")||EQ("16F727")){
+		else if(EQ("16F726")||EQ("16F727")||EQ("16F707")){
 			Read16Fxxx(0x2000,0,r?0x100:11,0);				//8K, vpp, config1-2 + cal1-2, 3.3V
 		}
-		else if(EQ("16LF1906")||EQ("16LF1907")){
+		else if(EQ("16LF1906")||EQ("16LF1907")||EQ("16F1509")){
 			Read16F1xxx(0x2000,0,r?0x200:11,0);				//8K, vpp
 		}
 		else if(EQ("16F876A")||EQ("16F877A")){
@@ -935,7 +971,7 @@ void AddDevices(char *list){		//make sure list is long enough
 		else if(EQ("18F2321")||EQ("18F4321")||EQ("18F1320")||EQ("18F2320")||EQ("18F4320")||EQ("18F2331")||EQ("18F4331")){
 			Read18Fx(0x2000,ee?0x100:0,0);					//8K, 256
 		}
-		else if(EQ("18F13K50")||EQ("18F23K20")||EQ("18F43K20")){
+		else if(EQ("18F13K50")||EQ("18F13K22")||EQ("18F23K20")||EQ("18F43K20")||EQ("18F23K220")||EQ("18F43K22")){
 			Read18Fx(0x2000,ee?0x100:0,1);					//8K, 256, 9V
 		}
 		else if(EQ("18F2439")||EQ("18F4439")){
@@ -950,7 +986,7 @@ void AddDevices(char *list){		//make sure list is long enough
 		else if(EQ("18F2420")||EQ("18F2423")||EQ("18F4420")||EQ("18F4423")||EQ("18F2431")||EQ("18F4431")||EQ("18F2480")||EQ("18F4480")||EQ("18F242")||EQ("18F248")||EQ("18F442")||EQ("18F448")){
 			Read18Fx(0x4000,ee?0x100:0,0);					//16K, 256
 		}
-		else if(EQ("18F14K50")||EQ("18F24K20")||EQ("18F44K20")){
+		else if(EQ("18F14K50")||EQ("18F14K22")||EQ("18F24K20")||EQ("18F44K20")||EQ("18F24K22")||EQ("18F44K22")){
 			Read18Fx(0x4000,ee?0x100:0,1);					//16K, 256, 9V
 		}
 		else if(EQ("18F2455")||EQ("18F2458")||EQ("18F4455")||EQ("18F4458")||EQ("18F2539")||EQ("18F4539")){
@@ -965,8 +1001,11 @@ void AddDevices(char *list){		//make sure list is long enough
 		else if(EQ("18F2550")||EQ("18F2553")||EQ("18F4550")||EQ("18F4553")||EQ("18F2520")||EQ("18F2523")||EQ("18F4520")||EQ("18F4523")||EQ("18F2580")||EQ("18F4580")||EQ("18F252")||EQ("18F258")||EQ("18F452")||EQ("18F458")){
 			Read18Fx(0x8000,ee?0x100:0,0);					//32K, 256
 		}
-		else if(EQ("18F25K20")||EQ("18F45K20")){
+		else if(EQ("18F25K20")||EQ("18F45K20")||EQ("18F25K22")||EQ("18F45K22")){
 			Read18Fx(0x8000,ee?0x100:0,1);					//32K, 256, 9V
+		}
+		else if(EQ("18F8520")){
+			Read18Fx(0x8000,ee?0x400:0,0);					//32K, 1k
 		}
 		else if(EQ("18F2515")||EQ("18F4515")){
 			Read18Fx(0xC000,0,0);							//48K, 0
@@ -977,22 +1016,25 @@ void AddDevices(char *list){		//make sure list is long enough
 		else if(EQ("18F2610")||EQ("18F4610")){
 			Read18Fx(0x10000,0,0);							//64K, 0
 		}
-		else if(EQ("18F26J11")||EQ("18F26J13")||EQ("18F26J50")||EQ("18F26J53")||EQ("18F46J11")||EQ("18F46J13")||EQ("18F46J50")||EQ("18F46J53")){
+		else if(EQ("18F26J11")||EQ("18F26J13")||EQ("18F26J50")||EQ("18F26J53")||EQ("18F46J11")||EQ("18F46J13")||EQ("18F46J50")||EQ("18F46J53")||EQ("18F66J60")||EQ("18F86J60")||EQ("18F96J60")){
 			Read18Fx(0x10000,0,2);							//64K, 0, LV
 		}
 		else if(EQ("18F2620")||EQ("18F2680")||EQ("18F4620")||EQ("18F4680")){
 			Read18Fx(0x10000,ee?0x400:0,0);					//64K, 1K
 		}
-		else if(EQ("18F26K20")||EQ("18F46K20")){
+		else if(EQ("18F26K20")||EQ("18F46K20")||EQ("18F26K22")||EQ("18F46K22")){
 			Read18Fx(0x10000,ee?0x400:0,1);					//64K, 1K, 9V
 		}
 		else if(EQ("18F2682")||EQ("18F4682")){
 			Read18Fx(0x14000,ee?0x400:0,0);					//80K, 1K
 		}
+		else if(EQ("18F66J65")||EQ("18F86J65")||EQ("18F96J65")){
+			Read18Fx(0x18000,0,2);							//96K, 0, LV
+		}
 		else if(EQ("18F2685")||EQ("18F4685")){
 			Read18Fx(0x18000,ee?0x400:0,0);					//96K, 1K
 		}
-		else if(EQ("18F27J13")||EQ("18F27J53")||EQ("18F47J13")||EQ("18F47J53")){
+		else if(EQ("18F27J13")||EQ("18F27J53")||EQ("18F47J13")||EQ("18F47J53")||EQ("18F67J60")||EQ("18F87J60")||EQ("18F97J60")){
 			Read18Fx(0x20000,0,2);							//128K, 0, LV
 		}
 		else if(EQ("18F8722")){

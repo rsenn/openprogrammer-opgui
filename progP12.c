@@ -29,7 +29,6 @@
 	#include "common.h"
 #endif
 
-
 #ifdef _MSC_VER
 void COpenProgDlg::Read12F5xx(int dim, int dim2)
 #else

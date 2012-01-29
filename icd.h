@@ -59,8 +59,14 @@ void WriteRegister(int addr,int data);
 //Read program memory at address addr
 int ReadProgMem(int addr);
 
+//Read program memory at address addr
+int ReadProgMemN(int addr,int n,int* buf);
+
 //Read data memory at address addr
 int ReadDataMem(int addr);
+
+//Read data memory at address addr
+int ReadDataMemN(int addr,int n,unsigned char* buf);
 
 //Disassemble a command and return string
 char* decodeCmd(int cmd,char *str, int addrH);

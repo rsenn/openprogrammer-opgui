@@ -40,7 +40,6 @@
 #define  RST 0x40
 
 struct AVRID{
-
 	int id;
 	char *device;
 } AVRLIST[]={

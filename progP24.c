@@ -262,7 +262,7 @@ void PIC24_ID(int id)
 	int i;
 	for(i=0;i<sizeof(PIC24LIST)/sizeof(PIC24LIST[0]);i++){
 		if(id==PIC24LIST[i].id){
-			sprintf(s,PIC24LIST[i].device);
+			strcpy(s,PIC24LIST[i].device);
 			PrintMessage(s);
 			return;
 		}
@@ -2089,6 +2089,23 @@ void Write24Fx(int dim,int dim2,int options,int appIDaddr,int rowSize, double wa
 			for(;j<DIMBUF;j++) bufferU[j]=0x0;
 			write();
 			msDelay(4);
+			read();
+			j=1;
+			if(saveLog)WriteLogIO();
+		}
+		else if(eewrite==1){		//30Fxx
+			bufferU[j++]=SIX;				//MOV 0x7F,W0
+			bufferU[j++]=0x20;
+			bufferU[j++]=0x07;
+			bufferU[j++]=0xF0;
+			bufferU[j++]=SIX;				//MOV W0,TABLPAG
+			bufferU[j++]=0x88;
+			bufferU[j++]=0x01;
+			bufferU[j++]=0x90;
+			bufferU[j++]=FLUSH;
+			for(;j<DIMBUF;j++) bufferU[j]=0x0;
+			write();
+			msDelay(1);
 			read();
 			j=1;
 			if(saveLog)WriteLogIO();

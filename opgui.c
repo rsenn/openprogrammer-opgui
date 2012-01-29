@@ -78,7 +78,7 @@ int icdTimer=0;
 int currentSource=-1;
 int sourceHilight=0;
 char lastCmd[64]="";
-#ifdef DEBUG 
+#ifdef DEBUG
 	int addrDebug=0;
 	unsigned short dataDebug=0;
 	unsigned short statusDebug=0x3FFF;
@@ -139,8 +139,8 @@ GtkTextBuffer * statusBuf;
 GtkWidget * sourceTxt;
 GtkTextBuffer * sourceBuf;
 GtkWidget * icdVbox1;
-GtkWidget * icdMenuPC;	
-GtkWidget * icdMenuSTAT; 
+GtkWidget * icdMenuPC;
+GtkWidget * icdMenuSTAT;
 GtkWidget * icdMenuBank0;
 GtkWidget * icdMenuBank1;
 GtkWidget * icdMenuBank2;
@@ -418,7 +418,7 @@ void scrollToLine(int line)
 		gtk_text_iter_forward_char(&iter2);
 		gtk_text_iter_forward_to_line_end(&iter2);
 	}
-	else{ 
+	else{
 		gtk_text_buffer_get_selection_bounds(sourceBuf,&iter,&iter2);
 		iter2=iter;
 	}
@@ -433,7 +433,7 @@ void SourceHilightLine(int line)
 	GtkTextTag* tag;
 	if(line>0){
 		tag=gtk_text_tag_table_lookup(gtk_text_buffer_get_tag_table(sourceBuf),"break_text");
-		if(!tag) tag=gtk_text_buffer_create_tag(sourceBuf,"break_text","background","red", NULL);  
+		if(!tag) tag=gtk_text_buffer_create_tag(sourceBuf,"break_text","background","red", NULL);
 		gtk_text_buffer_get_end_iter(sourceBuf,&iter);
 		gtk_text_iter_set_line(&iter,line-1);
 		iter2=iter;
@@ -656,13 +656,12 @@ void ICDHelp(GtkWidget *widget,GtkWidget *window)
 	/* Destroy the dialog when the user responds to it (e.g. clicks a button) */
 	g_signal_connect_swapped (GTK_WINDOW(dialog), "response",G_CALLBACK (gtk_widget_destroy),dialog);
 	gtk_window_set_title(GTK_WINDOW(dialog),strings[I_ICD_HELP]);
-//	gtk_window_set_resizable(dialog,TRUE);
 	gtk_widget_show_all (dialog);
 }
 
 void icdCheck(GtkWidget *widget,GtkWidget *window)
 {
-#ifndef DEBUG 
+#ifndef DEBUG
 	if(DeviceDetected!=1) return;
 #endif
 	if(!isRunning()){
@@ -673,10 +672,11 @@ void icdCheck(GtkWidget *widget,GtkWidget *window)
 
 void icdRun(GtkWidget *widget,GtkWidget *window)
 {
-#ifndef DEBUG 
+#ifndef DEBUG
 	if(DeviceDetected!=1) return;
 #endif
 	if(!icdConnected){
+		saveLog = (int) gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(b_log));
 		if(saveLog){
 			OpenLogFile();	//"Log.txt"
 			fprintf(logfile,"ICD start\n");
@@ -685,35 +685,30 @@ void icdRun(GtkWidget *widget,GtkWidget *window)
 		run();			//remove reset
 		icdConnected=1;
 		icdTimer=gtk_timeout_add(20,(GtkFunction)icdCheck,NULL);
-		//PrintStatus("running",0,0);
 		PrintMessageICD("running");
 	}
 	else if(!running){
 		cont(break_addr,freeze);	//continue execution
 		icdTimer=gtk_timeout_add(20,(GtkFunction)icdCheck,NULL);
-//		PrintStatus("running",0,0);
 		PrintMessageICD("running");
-//		running=1;
 	}
 }
 
 void icdHalt(GtkWidget *widget,GtkWidget *window)
 {
-#ifndef DEBUG 
+#ifndef DEBUG
 	if(DeviceDetected!=1) return;
 #endif
 	if(running){
 		gtk_timeout_remove(icdTimer);
 		Halt();
-//		PrintStatus("halted",0,0);
-//		PrintMessageICD("halted");
 		ShowContext();
 	}
 }
 
 void icdStep(GtkWidget *widget,GtkWidget *window)
 {
-#ifndef DEBUG 
+#ifndef DEBUG
 	if(DeviceDetected!=1) return;
 #endif
 	if(running){
@@ -721,7 +716,7 @@ void icdStep(GtkWidget *widget,GtkWidget *window)
 		Halt();
 	}
 	step();
-#ifdef DEBUG 
+#ifdef DEBUG
 	addrDebug++;
 #endif
 	ShowContext();
@@ -729,7 +724,7 @@ void icdStep(GtkWidget *widget,GtkWidget *window)
 
 void icdStepOver(GtkWidget *widget,GtkWidget *window)
 {
-#ifndef DEBUG 
+#ifndef DEBUG
 	if(DeviceDetected!=1) return;
 #endif
 	int addr,data;
@@ -741,12 +736,11 @@ void icdStepOver(GtkWidget *widget,GtkWidget *window)
 	data=ReadProgMem(addr);
 	if((data>>11)==4){	//if call break at return address
 		cont(addr+1,freeze);
-//		running=1;
 		icdTimer=gtk_timeout_add(20,(GtkFunction)icdCheck,NULL);
 	}
 	else{		//normal step
 		step();
-		#ifdef DEBUG 
+		#ifdef DEBUG
 		addrDebug++;
 		#endif
 		ShowContext();
@@ -755,7 +749,7 @@ void icdStepOver(GtkWidget *widget,GtkWidget *window)
 
 void icdStop(GtkWidget *widget,GtkWidget *window)
 {
-#ifndef DEBUG 
+#ifndef DEBUG
 	if(DeviceDetected!=1) return;
 #endif
 	if(running){
@@ -776,14 +770,13 @@ void icdStop(GtkWidget *widget,GtkWidget *window)
 	read();
 	if(saveLog)WriteLogIO();
 	icdConnected=0;
-//	PrintStatus("stopped",0,0);
 	PrintMessageICD("stopped");
 	scrollToLine(source_info[0].src_line);
 }
 
 void icdRefresh(GtkWidget *widget,GtkWidget *window)
 {
-#ifndef DEBUG 
+#ifndef DEBUG
 	if(DeviceDetected!=1) return;
 #endif
 	if(!running){
@@ -813,25 +806,24 @@ void ShowBank(int bank,char* status){
 }
 
 // Main ICD show function:
-// prints status info according to selected options 
+// prints status info according to selected options
 // and the value of variables in the watch list
 void ShowContext(){
 	int i,addr,data,s;
 	char cmd[32]="";
 	char status[4096]="",temp[128];
 	addr=((ReadRegister(0x18E)&0x1F)<<8)+ReadRegister(0x18F);
-	data=ReadProgMem(addr);		
+	data=ReadProgMem(addr);
 	s=ReadRegister(status_temp);
 	s=(s>>4)+((s<<4)&0xF0);		//STATUS is swapped
 //	printf("addr %X, status %X, data %X\n",addr,s,data);
-#ifdef DEBUG 
+#ifdef DEBUG
 	addr=addrDebug;
-//	data=dataDebug;
 	s=statusDebug;
 	if(UseCoff) data=coff_data[addr];
 #endif
 	if(gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(icdMenuPC))){
-		sprintf(temp,"Next instruction: %s (0x%04X) \nPC=0x%04X\n",decodeCmd(data,cmd,(s&0x60)<<2),data,addr);
+		sprintf(temp,"%s: %s (0x%04X) \nPC=0x%04X\n",strings[S_NextIns],decodeCmd(data,cmd,(s&0x60)<<2),data,addr); //"Next instruction"
 		strcat(status,temp);
 	}
 	if(gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(icdMenuSTAT))){
@@ -853,7 +845,7 @@ void ShowContext(){
 		strcat(status,temp);
 		sprintf(temp,"%s)\n",s&0x1?"C":" ");
 		strcat(status,temp);
-		sprintf(temp,"W=0x%02X PCLATH=0x%02X FSR=0x%02X\n",ReadRegister(w_temp),ReadRegister(pclath_temp),ReadRegister(fsr_temp));		
+		sprintf(temp,"W=0x%02X PCLATH=0x%02X FSR=0x%02X\n",ReadRegister(w_temp),ReadRegister(pclath_temp),ReadRegister(fsr_temp));
 		strcat(status,temp);
 	}
 	if(gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(icdMenuBank0))) ShowBank(0,status);
@@ -867,7 +859,7 @@ void ShowContext(){
 			strcat(status,temp);
 			rawsource=1;
 		}
-#ifndef DEBUG 
+#ifndef DEBUG
 		else{
 #endif
 //			printf("addr %d, file %d, line %d, current %d, ptr %X\n",addr,source_info[addr].src_file,source_info[addr].src_line,currentSource,s_files[source_info[addr].src_file].ptr);
@@ -880,22 +872,23 @@ void ShowContext(){
 				else rawsource=1;
 			}
 			else rawsource=1;
-#ifndef DEBUG 
+#ifndef DEBUG
 		}
 #endif
 	}
 	if(!UseCoff || rawsource==1){	//show raw source if no source file is available
-		#define LINES_BEFORE 4 
-		#define LINES_AFTER 6 
+		#define LINES_BEFORE 5
+		#define LINES_AFTER 7
 		#define NLINES LINES_BEFORE + LINES_AFTER
-		int addr0,addr1,data,line_pc=0;
-		char tmp[32*NLINES],t2[32];
+		int addr0,addr1,line_pc=0;
+		char tmp[64*NLINES],t2[64];
 		tmp[0]=0;
+		int progmem[NLINES];
 		addr0=addr-LINES_BEFORE<0?0:addr-LINES_BEFORE;
 		addr1=addr+LINES_AFTER>0x1FFF?0x1FFF:addr+LINES_AFTER;
+		ReadProgMemN(addr0,addr1-addr0,progmem);
 		for(i=addr0;i<addr1;i++){
-			data=ReadProgMem(i);		
-			sprintf(t2,"0x%04X: %s (0x%04X)\n",i,decodeCmd(data,cmd,0x1000),data);
+			sprintf(t2,"0x%04X: %s (0x%04X)\n",i,decodeCmd(progmem[i-addr0],cmd,(s&0x60)<<2),progmem[i-addr0]);
 			strcat(tmp,t2);
 			if(i==addr) line_pc=i;
 		}
@@ -904,23 +897,25 @@ void ShowContext(){
 		scrollToLine(line_pc-addr0+1);
 	}
 	for(i=0;i<nwatch;i++){
-		sprintf(temp,"%s=%02X\n",watch[i].name,ReadRegister(watch[i].value));
+		sprintf(temp,"%s=0x%02X\n",watch[i].name,ReadRegister(watch[i].value));
 		strcat(status,temp);
 	}
 	PrintMessageICD(status);
 	if(gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(icdMenuEE))){
-		int data;
+		unsigned char data[256];
 		str[0]=0;
 		char s[64],t[9],*g;
 		t[8]=0;
+		ReadDataMemN(0,256,data);
 		strcat(str,"EEPROM:\n");
 		for(i=0;i<0x100;i++){
-			data=ReadDataMem(i);
-			if(i%8==0) sprintf(s,"\n0x%02X: ",i);
+			if(i%8==0){
+				sprintf(s,"\n0x%02X: ",i);
+				strcat(str,s);
+			}
+			sprintf(s,"%02X ",data[i]);
 			strcat(str,s);
-			sprintf(s,"%02X ",data);
-			strcat(str,s);
-			t[i&0x7]=isprint(data)?data:'.';
+			t[i&0x7]=isprint(data[i])?data[i]:'.';
 			if(i%8==7){
 				g=g_locale_to_utf8(t,-1,NULL,NULL,NULL);
 				if(g) strcat(str,g);
@@ -929,7 +924,7 @@ void ShowContext(){
 		}
 		AppendMessageICD(str);
 	}
-	
+
 }
 
 int addWatch(struct symbol s){
@@ -967,6 +962,10 @@ int executeCommand(char *command){
 			sourceHilight=source_info[break_addr].src_line;
 		}
 	}
+//******************* clear ********************************
+	if(strstr(command,"clear")){
+		PrintMessageICD("");
+	}
 //******************* freeze ********************************
 	else if(strstr(command,"freeze")){
 		char option[32];
@@ -987,13 +986,31 @@ int executeCommand(char *command){
 	else if(!strcmp(command,"help")){
 		ICDHelp(NULL,NULL);
 	}
+//******************* list ********************************
+	else if(strstr(command,"list ")){
+		#define LISTLINES 10
+		int addr,i;
+		char tmp[32*LISTLINES],t2[32],cmd[32]="";
+		tmp[0]=0;
+		int progmem[LISTLINES];
+		if(sscanf(command,"list %x",&addr)==1){
+			addr&=0x1FFF;
+			ReadProgMemN(addr,LISTLINES,progmem);
+			for(i=0;i<LISTLINES;i++){
+				sprintf(t2,"0x%04X: %s (0x%04X)\n",i+addr,decodeCmd(progmem[i],cmd,0),progmem[i]);
+				strcat(tmp,t2);
+			}
+			//printf(tmp);
+			AppendMessageICD(tmp);
+		}
+	}
 //******************* print ********************************
-	else if(strstr(command,"print")){
+	else if(strstr(command,"print ")||strstr(command,"p ")){
 		int bank,i,addr,data;
 		char var[128];
-		if(strstr(command,"print p")){	//program memory
+		if(strstr(command,"print p")||strstr(command,"p p")){	//program memory
 			int addr;
-			if(sscanf(command,"print p %x",&addr)==1){
+			if(sscanf(command,"print p %x",&addr)==1||sscanf(command,"p p %x",&addr)==1){
 				addr&=0x1FFF;
 				if(running) Halt();
 				data=ReadProgMem(addr);
@@ -1001,36 +1018,40 @@ int executeCommand(char *command){
 				AppendMessageICD(str);
 			}
 		}
-		else if(!strcmp(command,"print ee")){	//eeprom
-			int data;
+		else if(!strcmp(command,"print ee")||!strcmp(command,"p ee")){	//eeprom
+			unsigned char data[256];
 			str[0]=0;
 			char s[64],t[9],*g;
 			t[8]=0;
 			if(running) Halt();
-			strcat(str,"EEPROM:\n");
+			ReadDataMemN(0,256,data);
+			sprintf(str,"EEPROM:\n");
 			for(i=0;i<0x100;i++){
-				data=ReadDataMem(i);
-				if(i%8==0) sprintf(s,"\n0x%02X: ",i);
+				if(i%8==0){
+					sprintf(s,"\n0x%02X: ",i);
+					strcat(str,s);
+				}
+				sprintf(s,"%02X ",data[i]);
 				strcat(str,s);
-				sprintf(s,"%02X ",data);
-				strcat(str,s);
-				t[i&0x7]=isprint(data)?data:'.';
+				t[i&0x7]=isprint(data[i])?data[i]:'.';
 				if(i%8==7){
 					g=g_locale_to_utf8(t,-1,NULL,NULL,NULL);
 					if(g) strcat(str,g);
 					g_free(g);
 				}
 			}
+			strcat(str,"\n");
+			//printf("EEPROM:\n");fflush(stdout);
 			AppendMessageICD(str);
 		}
-		else if(sscanf(command,"print ee %x",&addr)==1){
+		else if(sscanf(command,"print ee %x",&addr)==1||sscanf(command,"p ee %x",&addr)==1){ //single EE address
 			addr&=0xFF;
 			if(running) Halt();
 			data=ReadDataMem(addr);
 			sprintf(str,"eeprom memory at 0x%02X=0x%02X (%c)\n",addr,data,isprint(data)?data:'.');
 			AppendMessageICD(str);
 		}
-		else if(sscanf(command,"print bank %x",&bank)==1){
+		else if(sscanf(command,"print bank %x",&bank)==1||sscanf(command,"p bank %x",&bank)==1){	//memory bank
 			str[0]=0;
 			bank&=0x1FF;
 			if(bank>3) bank/=0x80;
@@ -1038,13 +1059,13 @@ int executeCommand(char *command){
 			ShowBank(bank,str);
 			AppendMessageICD(str);
 		}
-		else if(sscanf(command,"print 0x%x",&print_addr)==1){
+		else if(sscanf(command,"print 0x%x",&print_addr)==1||sscanf(command,"p 0x%x",&print_addr)==1){ //mem address
 			print_addr&=0x1FF;
 			if(running) Halt();
 			sprintf(str,"[0x%03X]=0x%02X\n",print_addr,ReadRegister(print_addr));
 			AppendMessageICD(str);
 		}
-		else if(sscanf(command,"print %s",var)==1){
+		else if(sscanf(command,"print %s",var)==1||sscanf(command,"p %s",var)==1){ //var name
 			str[0]=0;
 			if(running) Halt();
 			if(!strcmp("W",var)||!strcmp("w",var)) sprintf(str,"W = 0x%02X\n",ReadRegister(w_temp));
@@ -1055,6 +1076,14 @@ int executeCommand(char *command){
 				for(i=0;i<nsym&&strcmp(var,sym[i].name);i++);
 				if(i<nsym){
 					sprintf(str,"0x%03X: %s = 0x%02X\n",sym[i].value,sym[i].name,ReadRegister(sym[i].value));
+				}
+				else{	//look in standard variables
+					for(i=0;i<0x200;i++){
+						if(variables[i].name&&!strcmp(var,variables[i].name)){
+							sprintf(str,"0x%03X: %s = 0x%02X\n",i,variables[i].name,ReadRegister(i));
+							i=0x200;
+						}
+					}
 				}
 			}
 			AppendMessageICD(str);
@@ -1069,7 +1098,7 @@ int executeCommand(char *command){
 		int i,n=1;
 		sscanf(command,"step %d",&n);
 		sscanf(command,"s %d",&n);
-#ifdef DEBUG 
+#ifdef DEBUG
 		addrDebug+=n;
 #endif
 		if(running) Halt();
@@ -1084,7 +1113,7 @@ int executeCommand(char *command){
 		int i,n=1;
 		sscanf(command,"step over %d",&n);
 		sscanf(command,"ss %d",&n);
-#ifdef DEBUG 
+#ifdef DEBUG
 		addrDebug+=n;
 #endif
 		for(i=0;i<n;i++) icdStepOver(NULL,NULL);
@@ -1094,18 +1123,38 @@ int executeCommand(char *command){
 //******************* version ********************************
 	else if(!strcmp(command,"ver")||!strcmp(command,"version")){
 		if(running) Halt();
-		sprintf(str,"debugger version: %d\n",version());
+		sprintf(str,"debugger version: %.1f\n",version()/10.0);
 		AppendMessageICD(str);
 	}
 //******************* watch ********************************
-	else if(!strcmp(command,"w")||!strcmp(command,"watch")||strstr(command,"watch ")||strstr(command,"w ")){
-		int i;
+	else if(strstr(command,"watch ")||strstr(command,"w ")){
+		int i,var_addr;
 		char var[64];
-		if(sscanf(command,"watch %s",var)||sscanf(command,"w %s",var)){
+		if(sscanf(command,"watch 0x%x",&var_addr)||sscanf(command,"w 0x%x",&var_addr)){
+			struct symbol s;
+			sprintf(var,"[0x%X]",var_addr);
+			s.name=strdup(var);
+			s.value=var_addr;
+			addWatch(s);
+			if(!running) ShowContext();
+		}
+		else if(sscanf(command,"watch %s",var)||sscanf(command,"w %s",var)){
 			for(i=0;i<nsym&&strcmp(var,sym[i].name);i++);
 			if(i<nsym){
 				addWatch(sym[i]);
 				if(!running) ShowContext();
+			}
+			else{	//look in standard variables
+				for(i=0;i<0x200;i++){
+					if(variables[i].name&&!strcmp(var,variables[i].name)){
+						struct symbol s;
+						s.name=variables[i].name;
+						s.value=i;
+						addWatch(s);
+						if(!running) ShowContext();
+						i=0x200;
+					}
+				}
 			}
 		}
 	}
@@ -1113,7 +1162,7 @@ int executeCommand(char *command){
 //to do: special addresses (PC, status ecc)
 	else{
 		char var[64],*p;
-		int data,i,addr;
+		int data,i,addr=-1;
 		if((p=strchr(command,'='))){
 			*p=0;
 			if(sscanf(command,"[%x]",&addr)&&sscanf(p+1,"%x",&data)){
@@ -1127,6 +1176,16 @@ int executeCommand(char *command){
 				for(i=0;i<nsym&&strcmp(var,sym[i].name);i++);
 				if(i<nsym&&sym[i].value<0x400){
 					addr=sym[i].value;
+				}
+				else{	//look in standard variables
+					for(i=0;i<0x200;i++){
+						if(variables[i].name&&!strcmp(var,variables[i].name)){
+							addr=i;
+							i=0x200;
+						}
+					}
+				}
+				if(addr!=-1){
 					if(running) Halt();
 					WriteRegister(addr,data);
 					ShowContext();
@@ -1183,6 +1242,7 @@ gint source_mouse_event(GtkWidget *widget, GdkEventButton *event, gpointer func_
 		else{	//set breakpoint
 			int line=gtk_text_iter_get_line(&iter)+1;
 			for(i=0;i<LMAX;i++) if(source_info[i].src_line==line){
+				//if(UseCoff && i>0 && (coff_data[i-1]>>11)!=4) i--; //if not a call break at previous address;
 				break_addr=i;
 				sprintf(str,"break at address 0x%x\n",i);
 				AppendMessageICD(str);
@@ -1241,6 +1301,7 @@ gint icdCommand_key_event(GtkWidget *widget, GdkEventButton *event, gpointer fun
 
 gint icd_key_event(GtkWidget *widget, GdkEventButton *event, gpointer func_data)
 {
+	while (gtk_events_pending ()) gtk_main_iteration();	//wait completion of other tasks
 	if(event->type==GDK_KEY_PRESS){
 		switch(((GdkEventKey*)event)->keyval){
 			case 0xFFBE:
@@ -1285,7 +1346,7 @@ int main( int argc, char *argv[])
 	homedir = (gchar *) g_get_home_dir ();
 	if(homedir){
 		config_dir=g_build_path(G_DIR_SEPARATOR_S,homedir,CONFIG_DIR, NULL);
-		if(!g_file_test(config_dir,G_FILE_TEST_IS_DIR)) 
+		if(!g_file_test(config_dir,G_FILE_TEST_IS_DIR))
 	#if defined _WIN32
 		mkdir(config_dir);
 	#else
@@ -1647,7 +1708,7 @@ int main( int argc, char *argv[])
 	gtk_widget_modify_font (statusTxt, font_desc);
 	pango_font_description_free (font_desc);
 	gtk_box_pack_start(GTK_BOX(icdVbox3),statusScroll,TRUE,TRUE,0);
-	
+
 //------status bar-------------
 	status_bar = gtk_statusbar_new();
 	gtk_box_pack_start(GTK_BOX(vbox),status_bar,FALSE,TRUE,0);
@@ -1692,12 +1753,6 @@ int main( int argc, char *argv[])
 //	gtk_combo_box_set_active(GTK_COMBO_BOX(devCombo),0);
 	gtk_combo_box_set_wrap_width(GTK_COMBO_BOX(devCombo),6);
 //	AddDevices();	//populate device list
-/*	gchar* str;
-	for(i=0;(str=gtk_combo_box_get_active_text(GTK_COMBO_BOX(devCombo)))&&strcmp(str,dev)&&i<1000;i++){
-		gtk_combo_box_set_active(GTK_COMBO_BOX(devCombo),i);
-	}
-	if(i==1000||!str)gtk_combo_box_set_active(GTK_COMBO_BOX(devCombo),0);
-	g_free(str);*/
 	DeviceDetected=FindDevice();	//connect to USB programmer
 	ProgID();		//get firmware version and reset
 	gtk_main();
@@ -2045,6 +2100,7 @@ int FindDevice(){
 		}
 		if(i==16){
 			PrintMessage(strings[S_noprog]);
+			path[0]=0;
 			return 0;
 		}
 	}

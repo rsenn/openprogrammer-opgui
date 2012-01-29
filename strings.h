@@ -1,4 +1,4 @@
-// Strings.h v0.7.8
+// Strings.h v0.7.10
 
 enum S {
 	S_noprog,
@@ -171,6 +171,7 @@ enum S {
 	S_NoConfigW4,
 	S_NoConfigW5,
 	S_Empty,
+	S_NextIns,
 // GUI strings
 	I_Fopen,
 	I_Fsave,
@@ -241,6 +242,6 @@ enum S {
 	L_DEV_RW,
 	DIM};
 
-char *strings_it[DIM];
-char *strings_en[DIM];
+extern char *strings_it[DIM];
+extern char *strings_en[DIM];
 void strinit();

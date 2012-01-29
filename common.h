@@ -43,7 +43,7 @@ typedef unsigned char BYTE;
 #define	PrintStatusClear() gtk_statusbar_push(GTK_STATUSBAR(status_bar),statusID,"");
 
 #define COL 16
-#define VERSION "0.7.9c"
+#define VERSION "0.7.10"
 #define G (12.0/34*1024/5)		//=72,2823529412
 #define LOCK	1
 #define FUSE	2
@@ -71,35 +71,35 @@ struct hiddev_usage_ref_multi ref_multi_i,ref_multi_u;
 						PrintMessage(strings[S_comTimeout]);	/*"comm timeout\r\n"*/\
 					}
 
-unsigned char bufferU[128],bufferI[128];
-DWORD NumberOfBytesRead,BytesWritten;
-ULONG Result;
-HANDLE WriteHandle,ReadHandle;
-OVERLAPPED HIDOverlapped;
-HANDLE hEventObject;
+extern unsigned char bufferU[128],bufferI[128];
+extern DWORD NumberOfBytesRead,BytesWritten;
+extern ULONG Result;
+extern HANDLE WriteHandle,ReadHandle;
+extern OVERLAPPED HIDOverlapped;
+extern HANDLE hEventObject;
 
 #endif
 
 int statusID;
 GtkWidget *status_bar;
 char str[4096];
-int saveLog;
-char** strings;
-int fd;
-int DIMBUF;
-int saveLog,programID,MinDly,load_osccal,load_BKosccal;
-int use_osccal,use_BKosccal;
-int load_calibword,max_err;
-int AVRlock,AVRfuse,AVRfuse_h,AVRfuse_x;
-int ICDenable,ICDaddr;
-int FWVersion,HwID;
-FILE* logfile;
-char LogFileName[512];
-char loadfile[512],savefile[512];
-WORD *memCODE_W;
-int size,sizeW,sizeEE,sizeCONFIG;
-unsigned char *memCODE,*memEE,memID[8],memCONFIG[48];
-double hvreg;
+extern int saveLog;
+extern char** strings;
+extern int fd;
+extern int DIMBUF;
+extern int saveLog,programID,MinDly,load_osccal,load_BKosccal;
+extern int use_osccal,use_BKosccal;
+extern int load_calibword,max_err;
+extern int AVRlock,AVRfuse,AVRfuse_h,AVRfuse_x;
+extern int ICDenable,ICDaddr;
+extern int FWVersion,HwID;
+extern FILE* logfile;
+extern char LogFileName[512];
+extern char loadfile[512],savefile[512];
+extern WORD *memCODE_W;
+extern int size,sizeW,sizeEE,sizeCONFIG;
+extern unsigned char *memCODE,*memEE,memID[8],memCONFIG[48];
+extern double hvreg;
 
 int StartHVReg(double V);
 void msDelay(double delay);
@@ -110,4 +110,3 @@ int CheckV33Regulator(void);
 void OpenLogFile(void);
 void WriteLogIO();
 void CloseLogFile();
-

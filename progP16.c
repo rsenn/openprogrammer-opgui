@@ -36,134 +36,151 @@ struct ID16{
 	char *device;
 	int revmask;
 } PIC16LIST[]={
-	{0x046>>1,"12F683 rev%d\r\n",0x1f},			//00 0100 011x xxxx
-	{0x04A>>1,"16F685 rev%d\r\n",0x1f},			//00 0100 101x xxxx
-	{0x04C>>1,"16F818 rev%d\r\n",0x1f},			//00 0100 110x xxxx
-	{0x04E>>1,"16F819 rev%d\r\n",0x1f},			//00 0100 111x xxxx
-	{0x056>>1,"16F84A rev%d\r\n",0x1f}, 		//00 0101 011x xxxx
-	{0x060>>1,"16F73 rev%d\r\n",0x1f},  		//00 0110 000x xxxx
-	{0x062>>1,"16F74 rev%d\r\n",0x1f}, 	 		//00 0110 001x xxxx
-	{0x064>>1,"16F76 rev%d\r\n",0x1f},			//00 0110 010x xxxx
-	{0x066>>1,"16F77 rev%d\r\n",0x1f},			//00 0110 011x xxxx
-	{0x072>>1,"16F87 rev%d\r\n",0x1f},			//00 0111 001x xxxx
-	{0x076>>1,"16F88 rev%d\r\n",0x1f},			//00 0111 011x xxxx
-	{0x07A>>1,"16F627 rev%d\r\n",0x1f},			//00 0111 101x xxxx
-	{0x07C>>1,"16F628 rev%d\r\n",0x1f},			//00 0111 110x xxxx
-	{0x08E>>1,"16F872 rev%d\r\n",0x1f},			//00 1000 111x xxxx
-	{0x092>>1,"16F874 rev%d\r\n",0x1f},			//00 1001 001x xxxx
-	{0x096>>1,"16F873 rev%d\r\n",0x1f},			//00 1001 011x xxxx
-	{0x09A>>1,"16F877 rev%d\r\n",0x1f},			//00 1001 101x xxxx
-	{0x09E>>1,"16F876 rev%d\r\n",0x1f},			//00 1001 111x xxxx
-	{0x0BA>>1,"16F737 rev%d\r\n",0x1f},			//00 1011 101x xxxx
-	{0x0BE>>1,"16F747 rev%d\r\n",0x1f},			//00 1011 111x xxxx
-	{0x0DE>>1,"16F777 rev%d\r\n",0x1f},			//00 1101 111x xxxx
-	{0x0E0>>1,"16F876A rev%d\r\n",0xf},			//00 1110 0000 xxxx
-	{0x0E2>>1,"16F877A rev%d\r\n",0xf},			//00 1110 0010 xxxx
-	{0x0E4>>1,"16F873A rev%d\r\n",0xf},			//00 1110 0100 xxxx
-	{0x0E6>>1,"16F874A rev%d\r\n",0xf},			//00 1110 0110 xxxx
-	{0x0EA>>1,"16F767 rev%d\r\n",0x1f},			//00 1110 101x xxxx
-	{0x0F8>>1,"12F629 rev%d\r\n",0x1f},			//00 1111 100x xxxx
-	{0x0FA>>1,"12F635 rev%d\r\n",0x1f},			//00 1111 101x xxxx
-	{0x0FC>>1,"12F675 rev%d\r\n",0x1f},			//00 1111 110x xxxx
-	{0x104>>1,"16F627A rev%d\r\n",0x1f},		//01 0000 010x xxxx
-	{0x106>>1,"16F628A rev%d\r\n",0x1f},		//01 0000 011x xxxx
-	{0x108>>1,"16F684 rev%d\r\n",0x1f},			//01 0000 100x xxxx
-	{0x110>>1,"16F648A rev%d\r\n",0x1f},		//01 0001 000x xxxx
+	{0x00A>>1,"16F72 rev%d\r\n",0x1F},			//00 0000 101x xxxx
+	{0x046>>1,"12F683 rev%d\r\n",0x1F},			//00 0100 011x xxxx
+	{0x04A>>1,"16F685 rev%d\r\n",0x1F},			//00 0100 101x xxxx
+	{0x04C>>1,"16F818 rev%d\r\n",0x1F},			//00 0100 110x xxxx
+	{0x04E>>1,"16F819 rev%d\r\n",0x1F},			//00 0100 111x xxxx
+	{0x056>>1,"16F84A rev%d\r\n",0x1F}, 		//00 0101 011x xxxx
+	{0x060>>1,"16F73 rev%d\r\n",0x1F},  		//00 0110 000x xxxx
+	{0x062>>1,"16F74 rev%d\r\n",0x1F}, 	 		//00 0110 001x xxxx
+	{0x064>>1,"16F76 rev%d\r\n",0x1F},			//00 0110 010x xxxx
+	{0x066>>1,"16F77 rev%d\r\n",0x1F},			//00 0110 011x xxxx
+	{0x072>>1,"16F87 rev%d\r\n",0x1F},			//00 0111 001x xxxx
+	{0x076>>1,"16F88 rev%d\r\n",0x1F},			//00 0111 011x xxxx
+	{0x07A>>1,"16F627 rev%d\r\n",0x1F},			//00 0111 101x xxxx
+	{0x07C>>1,"16F628 rev%d\r\n",0x1F},			//00 0111 110x xxxx
+	{0x08E>>1,"16F872 rev%d\r\n",0x1F},			//00 1000 111x xxxx
+	{0x092>>1,"16F874 rev%d\r\n",0x1F},			//00 1001 001x xxxx
+	{0x096>>1,"16F873 rev%d\r\n",0x1F},			//00 1001 011x xxxx
+	{0x09A>>1,"16F877 rev%d\r\n",0x1F},			//00 1001 101x xxxx
+	{0x09E>>1,"16F876 rev%d\r\n",0x1F},			//00 1001 111x xxxx
+	{0x0BA>>1,"16F737 rev%d\r\n",0x1F},			//00 1011 101x xxxx
+	{0x0BE>>1,"16F747 rev%d\r\n",0x1F},			//00 1011 111x xxxx
+	{0x0D0>>1,"16F870 rev%d\r\n",0x1F},			//00 1101 000x xxxx
+	{0x0D2>>1,"16F871 rev%d\r\n",0x1F},			//00 1101 001x xxxx
+	{0x0DE>>1,"16F777 rev%d\r\n",0x1F},			//00 1101 111x xxxx
+	{0x0E0>>1,"16F876A rev%d\r\n",0xF},			//00 1110 0000 xxxx
+	{0x0E2>>1,"16F877A rev%d\r\n",0xF},			//00 1110 0010 xxxx
+	{0x0E4>>1,"16F873A rev%d\r\n",0xF},			//00 1110 0100 xxxx
+	{0x0E6>>1,"16F874A rev%d\r\n",0xF},			//00 1110 0110 xxxx
+	{0x0EA>>1,"16F767 rev%d\r\n",0x1F},			//00 1110 101x xxxx
+	{0x0F8>>1,"12F629 rev%d\r\n",0x1F},			//00 1111 100x xxxx
+	{0x0FA>>1,"12F635 rev%d\r\n",0x1F},			//00 1111 101x xxxx
+	{0x0FC>>1,"12F675 rev%d\r\n",0x1F},			//00 1111 110x xxxx
+	{0x104>>1,"16F627A rev%d\r\n",0x1F},		//01 0000 010x xxxx
+	{0x106>>1,"16F628A rev%d\r\n",0x1F},		//01 0000 011x xxxx
+	{0x108>>1,"16F684 rev%d\r\n",0x1F},			//01 0000 100x xxxx
+	{0x110>>1,"16F648A rev%d\r\n",0x1F},		//01 0001 000x xxxx
 	{0x10A>>1,"16F636-639 rev%d\r\n",0x1F},		//01 0000 101x xxxx
-	{0x10C>>1,"16F630 rev%d\r\n",0x1f},			//01 0000 110x xxxx
-	{0x10E>>1,"16F676 rev%d\r\n",0x1f},			//01 0000 111x xxxx
-	{0x114>>1,"16F716 rev%d\r\n",0x1f},			//01 0001 010x xxxx
-	{0x118>>1,"16F688 rev%d\r\n",0x1f},			//01 0001 100x xxxx
-	{0x120>>1,"16F785 rev%d\r\n",0x1f},			//01 0010 000x xxxx
-	{0x122>>1,"16HV785 rev%d\r\n",0x1f},		//01 0010 001x xxxx
-	{0x124>>1,"16F616 rev%d\r\n",0x1f},			//01 0010 010x xxxx
-	{0x126>>1,"16HV616 rev%d\r\n",0x1f},		//01 0010 011x xxxx
-	{0x132>>1,"16F687 rev%d\r\n",0x1f},			//01 0011 001x xxxx
-	{0x134>>1,"16F689 rev%d\r\n",0x1f},			//01 0011 010x xxxx
-	{0x138>>1,"16F917 rev%d\r\n",0xf},			//01 0011 1000 xxxx
-	{0x13A>>1,"16F916 rev%d\r\n",0xf},			//01 0011 1010 xxxx
-	{0x13C>>1,"16F914 rev%d\r\n",0xf},			//01 0011 1100 xxxx
-	{0x13E>>1,"16F913 rev%d\r\n",0xf},			//01 0011 1110 xxxx
-	{0x140>>1,"16F690 rev%d\r\n",0x1f},			//01 0100 000x xxxx
-	{0x142>>1,"16F631 rev%d\r\n",0x1f},			//01 0100 001x xxxx
-	{0x144>>1,"16F677 rev%d\r\n",0x1f},			//01 0100 010x xxxx
-	{0x146>>1,"16F946 rev%d\r\n",0xf},			//01 0100 0110 xxxx
-	{0x148>>1,"16F1847 rev%d\r\n",0x1f},		//01 0100 100x xxxx
-	{0x14A>>1,"16LF1847 rev%d\r\n",0x1f},		//01 0100 101x xxxx
-	{0x158>>1,"16F1526 rev%d\r\n",0x1f},		//01 0101 100x xxxx
-	{0x15A>>1,"16F1527 rev%d\r\n",0x1f},		//01 0101 101x xxxx
-	{0x15C>>1,"16LF1526 rev%d\r\n",0x1f},		//01 0101 110x xxxx
-	{0x15E>>1,"16LF1527 rev%d\r\n",0x1f},		//01 0101 111x xxxx
-	{0x168>>1,"16F1516 rev%d\r\n",0x1f},		//01 0110 100x xxxx
-	{0x16A>>1,"16F1517 rev%d\r\n",0x1f},		//01 0110 101x xxxx
-	{0x16C>>1,"16F1518 rev%d\r\n",0x1f},		//01 0110 110x xxxx
-	{0x16E>>1,"16F1519 rev%d\r\n",0x1f},		//01 0110 111x xxxx
-	{0x178>>1,"16LF1516 rev%d\r\n",0x1f},		//01 0111 100x xxxx
-	{0x17A>>1,"16LF1517 rev%d\r\n",0x1f},		//01 0111 101x xxxx
-	{0x17C>>1,"16LF1518 rev%d\r\n",0x1f},		//01 0111 110x xxxx
-	{0x17E>>1,"16LF1519 rev%d\r\n",0x1f},		//01 0111 111x xxxx
-	{0x180>>1,"16F727 rev%d\r\n",0x1f},			//01 1000 000x xxxx
-	{0x182>>1,"16F726 rev%d\r\n",0x1f},			//01 1000 001x xxxx
-	{0x184>>1,"16F724 rev%d\r\n",0x1f},			//01 1000 010x xxxx
-	{0x186>>1,"16F723 rev%d\r\n",0x1f},			//01 1000 011x xxxx
-	{0x188>>1,"16F722 rev%d\r\n",0x1f},			//01 1000 100x xxxx
-	{0x190>>1,"16LF727 rev%d\r\n",0x1f},		//01 1001 000x xxxx
-	{0x192>>1,"16LF726 rev%d\r\n",0x1f},		//01 1001 001x xxxx
-	{0x194>>1,"16LF724 rev%d\r\n",0x1f},		//01 1001 010x xxxx
-	{0x196>>1,"16LF723 rev%d\r\n",0x1f},		//01 1001 011x xxxx
-	{0x198>>1,"16LF722 rev%d\r\n",0x1f},		//01 1001 100x xxxx
-	{0x1B0>>1,"16F723A rev%d\r\n",0x1f},		//01 1011 000x xxxx
-	{0x1B2>>1,"16F722A rev%d\r\n",0x1f},		//01 1011 001x xxxx
-	{0x1B4>>1,"16LF723A rev%d\r\n",0x1f},		//01 1011 010x xxxx
-	{0x1B6>>1,"16LF722A rev%d\r\n",0x1f},		//01 1011 011x xxxx
-	{0x1B8>>1,"12F1840 rev%d\r\n",0x1f},		//01 1011 100x xxxx
-	{0x1BA>>1,"12LF1840 rev%d\r\n",0x1f},		//01 1011 101x xxxx
-	{0x1D0>>1,"16F870 rev%d\r\n",0x1f},			//10 1101 000x xxxx
-	{0x1D2>>1,"16F871 rev%d\r\n",0x1f},			//10 1101 001x xxxx
-	{0x200>>1,"16F882 rev%d\r\n",0x1f},			//10 0000 000x xxxx
-	{0x202>>1,"16F883 rev%d\r\n",0x1f},			//10 0000 001x xxxx
-	{0x204>>1,"16F884 rev%d\r\n",0x1f},			//10 0000 010x xxxx
-	{0x206>>1,"16F886 rev%d\r\n",0x1f},			//10 0000 011x xxxx
-	{0x208>>1,"16F887 rev%d\r\n",0x1f},			//10 0000 100x xxxx
-	{0x218>>1,"12F615 rev%d\r\n",0x1f},			//10 0001 100x xxxx
-	{0x21A>>1,"12HV615 rev%d\r\n",0x1f},		//10 0001 101x xxxx
-	{0x224>>1,"12F609 rev%d\r\n",0x1f},			//10 0010 010x xxxx
-	{0x226>>1,"16F610 rev%d\r\n",0x1f},			//10 0010 011x xxxx
-	{0x228>>1,"12HV609 rev%d\r\n",0x1f},		//10 0010 100x xxxx
-	{0x22A>>1,"16HV610 rev%d\r\n",0x1f},		//10 0010 101x xxxx
-	{0x232>>1,"16F1933 rev%d\r\n",0x1f},		//10 0011 001x xxxx
-	{0x234>>1,"16F1934 rev%d\r\n",0x1f},		//10 0011 010x xxxx
-	{0x236>>1,"16F1936 rev%d\r\n",0x1f},		//10 0011 011x xxxx
-	{0x238>>1,"16F1937 rev%d\r\n",0x1f},		//10 0011 100x xxxx
-	{0x23A>>1,"16F1938 rev%d\r\n",0x1f},		//10 0011 101x xxxx
-	{0x23C>>1,"16F1939 rev%d\r\n",0x1f},		//10 0011 110x xxxx
-	{0x242>>1,"16LF1933 rev%d\r\n",0x1f},		//10 0100 001x xxxx
-	{0x244>>1,"16LF1934 rev%d\r\n",0x1f},		//10 0100 010x xxxx
-	{0x246>>1,"16LF1936 rev%d\r\n",0x1f},		//10 0100 011x xxxx
-	{0x248>>1,"16LF1937 rev%d\r\n",0x1f},		//10 0100 100x xxxx
-	{0x24A>>1,"16LF1938 rev%d\r\n",0x1f},		//10 0100 101x xxxx
-	{0x24C>>1,"16LF1939 rev%d\r\n",0x1f},		//10 0100 110x xxxx
-	{0x250>>1,"16F1946 rev%d\r\n",0x1f},		//10 0101 000x xxxx
-	{0x252>>1,"16F1947 rev%d\r\n",0x1f},		//10 0101 001x xxxx
-	{0x258>>1,"16LF1946 rev%d\r\n",0x1f},		//10 0101 100x xxxx
-	{0x25A>>1,"16LF1947 rev%d\r\n",0x1f},		//10 0101 101x xxxx
-	{0x270>>1,"16F1822 rev%d\r\n",0x1f},		//10 0111 000x xxxx
-	{0x272>>1,"16F1823 rev%d\r\n",0x1f},		//10 0111 001x xxxx
-	{0x274>>1,"16F1824 rev%d\r\n",0x1f},		//10 0111 010x xxxx
-	{0x276>>1,"16F1825 rev%d\r\n",0x1f},		//10 0111 011x xxxx
-	{0x278>>1,"16F1826 rev%d\r\n",0x1f},		//10 0111 100x xxxx
-	{0x27A>>1,"16F1827 rev%d\r\n",0x1f},		//10 0111 101x xxxx
-	{0x280>>1,"16LF1822 rev%d\r\n",0x1f},		//10 1000 000x xxxx
-	{0x282>>1,"16LF1823 rev%d\r\n",0x1f},		//10 1000 001x xxxx
-	{0x284>>1,"16LF1824 rev%d\r\n",0x1f},		//10 1000 010x xxxx
-	{0x286>>1,"16LF1825 rev%d\r\n",0x1f},		//10 1000 011x xxxx
-	{0x288>>1,"16LF1826 rev%d\r\n",0x1f},		//10 1000 100x xxxx
-	{0x28A>>1,"16LF1827 rev%d\r\n",0x1f},		//10 1000 101x xxxx
-	{0x2C0>>1,"16LF1903 rev%d\r\n",0x1f},		//10 1100 000x xxxx
-	{0x2C2>>1,"16LF1902 rev%d\r\n",0x1f},		//10 1100 001x xxxx
-	{0x2C4>>1,"16LF1907 rev%d\r\n",0x1f},		//10 1100 010x xxxx
-	{0x2C6>>1,"16LF1906 rev%d\r\n",0x1f},		//10 1100 011x xxxx
-	{0x2C8>>1,"16LF1904 rev%d\r\n",0x1f},		//10 1100 100x xxxx
+	{0x10C>>1,"16F630 rev%d\r\n",0x1F},			//01 0000 110x xxxx
+	{0x10E>>1,"16F676 rev%d\r\n",0x1F},			//01 0000 111x xxxx
+	{0x114>>1,"16F716 rev%d\r\n",0x1F},			//01 0001 010x xxxx
+	{0x118>>1,"16F688 rev%d\r\n",0x1F},			//01 0001 100x xxxx
+	{0x120>>1,"16F785 rev%d\r\n",0x1F},			//01 0010 000x xxxx
+	{0x122>>1,"16HV785 rev%d\r\n",0x1F},		//01 0010 001x xxxx
+	{0x124>>1,"16F616 rev%d\r\n",0x1F},			//01 0010 010x xxxx
+	{0x126>>1,"16HV616 rev%d\r\n",0x1F},		//01 0010 011x xxxx
+	{0x132>>1,"16F687 rev%d\r\n",0x1F},			//01 0011 001x xxxx
+	{0x134>>1,"16F689 rev%d\r\n",0x1F},			//01 0011 010x xxxx
+	{0x138>>1,"16F917 rev%d\r\n",0xF},			//01 0011 1000 xxxx
+	{0x13A>>1,"16F916 rev%d\r\n",0xF},			//01 0011 1010 xxxx
+	{0x13C>>1,"16F914 rev%d\r\n",0xF},			//01 0011 1100 xxxx
+	{0x13E>>1,"16F913 rev%d\r\n",0xF},			//01 0011 1110 xxxx
+	{0x140>>1,"16F690 rev%d\r\n",0x1F},			//01 0100 000x xxxx
+	{0x142>>1,"16F631 rev%d\r\n",0x1F},			//01 0100 001x xxxx
+	{0x144>>1,"16F677 rev%d\r\n",0x1F},			//01 0100 010x xxxx
+	{0x146>>1,"16F946 rev%d\r\n",0xF},			//01 0100 0110 xxxx
+	{0x148>>1,"16F1847 rev%d\r\n",0x1F},		//01 0100 100x xxxx
+	{0x14A>>1,"16LF1847 rev%d\r\n",0x1F},		//01 0100 101x xxxx
+	{0x158>>1,"16F1526 rev%d\r\n",0x1F},		//01 0101 100x xxxx
+	{0x15A>>1,"16F1527 rev%d\r\n",0x1F},		//01 0101 101x xxxx
+	{0x15C>>1,"16LF1526 rev%d\r\n",0x1F},		//01 0101 110x xxxx
+	{0x15E>>1,"16LF1527 rev%d\r\n",0x1F},		//01 0101 111x xxxx
+	{0x168>>1,"16F1516 rev%d\r\n",0x1F},		//01 0110 100x xxxx
+	{0x16A>>1,"16F1517 rev%d\r\n",0x1F},		//01 0110 101x xxxx
+	{0x16C>>1,"16F1518 rev%d\r\n",0x1F},		//01 0110 110x xxxx
+	{0x16E>>1,"16F1519 rev%d\r\n",0x1F},		//01 0110 111x xxxx
+	{0x178>>1,"16LF1516 rev%d\r\n",0x1F},		//01 0111 100x xxxx
+	{0x17A>>1,"16LF1517 rev%d\r\n",0x1F},		//01 0111 101x xxxx
+	{0x17C>>1,"16LF1518 rev%d\r\n",0x1F},		//01 0111 110x xxxx
+	{0x17E>>1,"16LF1519 rev%d\r\n",0x1F},		//01 0111 111x xxxx
+	{0x180>>1,"16F727 rev%d\r\n",0x1F},			//01 1000 000x xxxx
+	{0x182>>1,"16F726 rev%d\r\n",0x1F},			//01 1000 001x xxxx
+	{0x184>>1,"16F724 rev%d\r\n",0x1F},			//01 1000 010x xxxx
+	{0x186>>1,"16F723 rev%d\r\n",0x1F},			//01 1000 011x xxxx
+	{0x188>>1,"16F722 rev%d\r\n",0x1F},			//01 1000 100x xxxx
+	{0x190>>1,"16LF727 rev%d\r\n",0x1F},		//01 1001 000x xxxx
+	{0x192>>1,"16LF726 rev%d\r\n",0x1F},		//01 1001 001x xxxx
+	{0x194>>1,"16LF724 rev%d\r\n",0x1F},		//01 1001 010x xxxx
+	{0x196>>1,"16LF723 rev%d\r\n",0x1F},		//01 1001 011x xxxx
+	{0x198>>1,"16LF722 rev%d\r\n",0x1F},		//01 1001 100x xxxx
+	{0x1AC>>1,"16F707 rev%d\r\n",0x1F},			//01 1010 110x xxxx
+	{0x1AE>>1,"16LF707 rev%d\r\n",0x1F},		//01 1010 111x xxxx
+	{0x1B0>>1,"16F723A rev%d\r\n",0x1F},		//01 1011 000x xxxx
+	{0x1B2>>1,"16F722A rev%d\r\n",0x1F},		//01 1011 001x xxxx
+	{0x1B4>>1,"16LF723A rev%d\r\n",0x1F},		//01 1011 010x xxxx
+	{0x1B6>>1,"16LF722A rev%d\r\n",0x1F},		//01 1011 011x xxxx
+	{0x1B8>>1,"12F1840 rev%d\r\n",0x1F},		//01 1011 100x xxxx
+	{0x1BA>>1,"12LF1840 rev%d\r\n",0x1F},		//01 1011 101x xxxx
+	{0x1C0>>1,"16F720 rev%d\r\n",0x1F},			//01 1100 000x xxxx
+	{0x1C2>>1,"16F721 rev%d\r\n",0x1F},			//01 1100 001x xxxx
+	{0x1C4>>1,"16LF720 rev%d\r\n",0x1F},		//01 1100 010x xxxx
+	{0x1C6>>1,"16LF721 rev%d\r\n",0x1F},		//01 1100 011x xxxx
+	{0x200>>1,"16F882 rev%d\r\n",0x1F},			//10 0000 000x xxxx
+	{0x202>>1,"16F883 rev%d\r\n",0x1F},			//10 0000 001x xxxx
+	{0x204>>1,"16F884 rev%d\r\n",0x1F},			//10 0000 010x xxxx
+	{0x206>>1,"16F886 rev%d\r\n",0x1F},			//10 0000 011x xxxx
+	{0x208>>1,"16F887 rev%d\r\n",0x1F},			//10 0000 100x xxxx
+	{0x218>>1,"12F615 rev%d\r\n",0x1F},			//10 0001 100x xxxx
+	{0x21A>>1,"12HV615 rev%d\r\n",0x1F},		//10 0001 101x xxxx
+	{0x224>>1,"12F609 rev%d\r\n",0x1F},			//10 0010 010x xxxx
+	{0x226>>1,"16F610 rev%d\r\n",0x1F},			//10 0010 011x xxxx
+	{0x228>>1,"12HV609 rev%d\r\n",0x1F},		//10 0010 100x xxxx
+	{0x22A>>1,"16HV610 rev%d\r\n",0x1F},		//10 0010 101x xxxx
+	{0x232>>1,"16F1933 rev%d\r\n",0x1F},		//10 0011 001x xxxx
+	{0x234>>1,"16F1934 rev%d\r\n",0x1F},		//10 0011 010x xxxx
+	{0x236>>1,"16F1936 rev%d\r\n",0x1F},		//10 0011 011x xxxx
+	{0x238>>1,"16F1937 rev%d\r\n",0x1F},		//10 0011 100x xxxx
+	{0x23A>>1,"16F1938 rev%d\r\n",0x1F},		//10 0011 101x xxxx
+	{0x23C>>1,"16F1939 rev%d\r\n",0x1F},		//10 0011 110x xxxx
+	{0x242>>1,"16LF1933 rev%d\r\n",0x1F},		//10 0100 001x xxxx
+	{0x244>>1,"16LF1934 rev%d\r\n",0x1F},		//10 0100 010x xxxx
+	{0x246>>1,"16LF1936 rev%d\r\n",0x1F},		//10 0100 011x xxxx
+	{0x248>>1,"16LF1937 rev%d\r\n",0x1F},		//10 0100 100x xxxx
+	{0x24A>>1,"16LF1938 rev%d\r\n",0x1F},		//10 0100 101x xxxx
+	{0x24C>>1,"16LF1939 rev%d\r\n",0x1F},		//10 0100 110x xxxx
+	{0x250>>1,"16F1946 rev%d\r\n",0x1F},		//10 0101 000x xxxx
+	{0x252>>1,"16F1947 rev%d\r\n",0x1F},		//10 0101 001x xxxx
+	{0x258>>1,"16LF1946 rev%d\r\n",0x1F},		//10 0101 100x xxxx
+	{0x25A>>1,"16LF1947 rev%d\r\n",0x1F},		//10 0101 101x xxxx
+	{0x270>>1,"16F1822 rev%d\r\n",0x1F},		//10 0111 000x xxxx
+	{0x272>>1,"16F1823 rev%d\r\n",0x1F},		//10 0111 001x xxxx
+	{0x274>>1,"16F1824 rev%d\r\n",0x1F},		//10 0111 010x xxxx
+	{0x276>>1,"16F1825 rev%d\r\n",0x1F},		//10 0111 011x xxxx
+	{0x278>>1,"16F1826 rev%d\r\n",0x1F},		//10 0111 100x xxxx
+	{0x27A>>1,"16F1827 rev%d\r\n",0x1F},		//10 0111 101x xxxx
+	{0x280>>1,"16LF1822 rev%d\r\n",0x1F},		//10 1000 000x xxxx
+	{0x282>>1,"16LF1823 rev%d\r\n",0x1F},		//10 1000 001x xxxx
+	{0x284>>1,"16LF1824 rev%d\r\n",0x1F},		//10 1000 010x xxxx
+	{0x286>>1,"16LF1825 rev%d\r\n",0x1F},		//10 1000 011x xxxx
+	{0x288>>1,"16LF1826 rev%d\r\n",0x1F},		//10 1000 100x xxxx
+	{0x28A>>1,"16LF1827 rev%d\r\n",0x1F},		//10 1000 101x xxxx
+	{0x2C0>>1,"16LF1903 rev%d\r\n",0x1F},		//10 1100 000x xxxx
+	{0x2C2>>1,"16LF1902 rev%d\r\n",0x1F},		//10 1100 001x xxxx
+	{0x2C4>>1,"16LF1907 rev%d\r\n",0x1F},		//10 1100 010x xxxx
+	{0x2C6>>1,"16LF1906 rev%d\r\n",0x1F},		//10 1100 011x xxxx
+	{0x2C8>>1,"16LF1904 rev%d\r\n",0x1F},		//10 1100 100x xxxx
+	{0x2CC>>1,"12F1501 rev%d\r\n",0x1F},		//10 1100 110x xxxx
+	{0x2CE>>1,"16F1503 rev%d\r\n",0x1F},		//10 1100 111x xxxx
+	{0x2D0>>1,"16F1507 rev%d\r\n",0x1F},		//10 1101 000x xxxx
+	{0x2D2>>1,"16F1508 rev%d\r\n",0x1F},		//10 1101 001x xxxx
+	{0x2D4>>1,"16F1509 rev%d\r\n",0x1F},		//10 1101 010x xxxx
+	{0x2D8>>1,"12LF1501 rev%d\r\n",0x1F},		//10 1101 100x xxxx
+	{0x2DA>>1,"16LF1503 rev%d\r\n",0x1F},		//10 1101 101x xxxx
+	{0x2DC>>1,"16LF1507 rev%d\r\n",0x1F},		//10 1101 110x xxxx
+	{0x2DE>>1,"16LF1508 rev%d\r\n",0x1F},		//10 1101 111x xxxx
+	{0x2E0>>1,"16LF1509 rev%d\r\n",0x1F},		//10 1110 000x xxxx
 };
 
 #ifdef _MSC_VER
@@ -4172,6 +4189,29 @@ void Write16F7x(int dim,int vdd)
 	bufferU[j++]=WAIT_T3;			// delay T3=10ms
 	bufferU[j++]=WAIT_T3;			// delay T3=10ms
 	bufferU[j++]=WAIT_T3;			// delay T3=10ms
+	bufferU[j++]=EN_VPP_VCC;
+	bufferU[j++]=0x0;
+	bufferU[j++]=FLUSH;
+	for(;j<DIMBUF;j++) bufferU[j]=0x0;
+	write();
+	msDelay(50);
+	if(vdd==0) msDelay(50);
+	read();
+	if(saveLog)WriteLogIO();
+	PrintMessage(strings[S_Compl]);	//"completed\r\n"
+	j=1;
+	//enter program mode
+	bufferU[j++]=EN_VPP_VCC;		//VDD
+	bufferU[j++]=0x1;
+	if(vdd==0){
+		bufferU[j++]=WAIT_T3;			//delay between vdd and vpp
+		bufferU[j++]=WAIT_T3;			//delay between vdd and vpp
+		bufferU[j++]=WAIT_T3;			//delay between vdd and vpp
+		bufferU[j++]=WAIT_T3;			//delay between vdd and vpp
+		bufferU[j++]=WAIT_T3;			//delay between vdd and vpp
+	}
+	bufferU[j++]=EN_VPP_VCC;		//VDD+VPP
+	bufferU[j++]=0x5;
 	bufferU[j++]=SET_PARAMETER;
 	bufferU[j++]=SET_T3;
 	bufferU[j++]=1000>>8;
@@ -4179,10 +4219,10 @@ void Write16F7x(int dim,int vdd)
 	bufferU[j++]=FLUSH;
 	for(;j<DIMBUF;j++) bufferU[j]=0x0;
 	write();
-	msDelay(90);
+	msDelay(2);
+	if(vdd==0) msDelay(50);
 	read();
 	if(saveLog)WriteLogIO();
-	PrintMessage(strings[S_Compl]);	//"completed\r\n"
 //****************** write code ********************
 	PrintMessage(strings[S_StartCodeProg]);	//"Write code ... "
 	PrintStatusSetup();
@@ -4264,6 +4304,7 @@ void Write16F7x(int dim,int vdd)
 	bufferU[j++]=BEGIN_PROG;			//externally timed, T=1ms min
 	bufferU[j++]=WAIT_T3;				//Tprogram 1ms
 	bufferU[j++]=END_PROG2;
+	bufferU[j++]=WAIT_T3;				//Tprogram 1ms
 	bufferU[j++]=READ_DATA_PROG;
 	bufferU[j++]=INC_ADDR;
 	if(sizeW>0x2008&&memCODE_W[0x2008]<0x3fff){
@@ -4273,6 +4314,7 @@ void Write16F7x(int dim,int vdd)
 		bufferU[j++]=BEGIN_PROG;			//externally timed, T=1ms min
 		bufferU[j++]=WAIT_T3;				//Tprogram 1ms
 		bufferU[j++]=END_PROG2;
+		bufferU[j++]=WAIT_T3;				//Tprogram 1ms
 		bufferU[j++]=READ_DATA_PROG;
 	}
 	bufferU[j++]=FLUSH;
@@ -4885,7 +4927,7 @@ void COpenProgDlg::Write16F1xxx(int dim,int dim2,int options)
 void Write16F1xxx(int dim,int dim2,int options)
 #endif
 // write 14 bit enhanced PIC
-// dim=program size 	dim2=eeprom size   dim3=config size
+// dim=program size 	dim2=eeprom size
 // options:
 //		bit0=0 -> vpp before vdd
 //		bit0=1 -> vdd before vpp
