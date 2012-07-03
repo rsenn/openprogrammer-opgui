@@ -242,19 +242,19 @@ void getOptions()
 	if(str) strncpy(dev,str,sizeof(dev)-1);
 	g_free(str);
 	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(AVR_FuseLowWrite))){
-		sscanf(gtk_entry_get_text(GTK_ENTRY(AVR_FuseLow)),"%x",&AVRfuse);
+		i=sscanf(gtk_entry_get_text(GTK_ENTRY(AVR_FuseLow)),"%x",&AVRfuse);
 		if(i!=1||AVRfuse<0||AVRfuse>0xFF) AVRfuse=0x100;
 	}
 	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(AVR_FuseHighWrite))){
-		sscanf(gtk_entry_get_text(GTK_ENTRY(AVR_FuseHigh)),"%x",&AVRfuse_h);
+		i=sscanf(gtk_entry_get_text(GTK_ENTRY(AVR_FuseHigh)),"%x",&AVRfuse_h);
 		if(i!=1||AVRfuse_h<0||AVRfuse_h>0xFF) AVRfuse_h=0x100;
 	}
 	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(AVR_FuseExtWrite))){
-		sscanf(gtk_entry_get_text(GTK_ENTRY(AVR_FuseExt)),"%x",&AVRfuse_x);
+		i=sscanf(gtk_entry_get_text(GTK_ENTRY(AVR_FuseExt)),"%x",&AVRfuse_x);
 		if(i!=1||AVRfuse_x<0||AVRfuse_x>0xFF) AVRfuse_x=0x100;
 	}
 	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(AVR_LockWrite))){
-		sscanf(gtk_entry_get_text(GTK_ENTRY(AVR_Lock)),"%x",&AVRlock);
+		i=sscanf(gtk_entry_get_text(GTK_ENTRY(AVR_Lock)),"%x",&AVRlock);
 		if(i!=1||AVRlock<0||AVRlock>0xFF) AVRlock=0x100;
 	}
 }
@@ -393,9 +393,10 @@ void FilterDevType(GtkWidget *widget,GtkWidget *window)
 		case 6:		//ATMEL
 			for(i=0;i<Ndevices;i++) if(!strncmp(devices[i],"AT",2)) gtk_combo_box_append_text(GTK_COMBO_BOX(devCombo),devices[i]);
 		break;
-		case 7:		//24 25 93
+		case 7:		//24 25 93 DS 11
 			for(i=0;i<Ndevices;i++) if( (strncmp(devices[i],"24F",3)&&strncmp(devices[i],"24H",3))&&\
-				(!strncmp(devices[i],"24",2)||!strncmp(devices[i],"25",2)||!strncmp(devices[i],"93",2))) \
+				(!strncmp(devices[i],"24",2)||!strncmp(devices[i],"25",2)||!strncmp(devices[i],"93",2)|| \
+				 !strncmp(devices[i],"11",2)||!strncmp(devices[i],"DS",2))) \
 				gtk_combo_box_append_text(GTK_COMBO_BOX(devCombo),devices[i]);
 		break;
 		default:	//*
@@ -1748,7 +1749,7 @@ int main( int argc, char *argv[])
 	gtk_combo_box_append_text(GTK_COMBO_BOX(devTypeCombo),"PIC24");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(devTypeCombo),"PIC30/33");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(devTypeCombo),"ATMEL AVR");
-	gtk_combo_box_append_text(GTK_COMBO_BOX(devTypeCombo),"EEPROM");
+	gtk_combo_box_append_text(GTK_COMBO_BOX(devTypeCombo),"EEPROM/FLASH");
 	gtk_combo_box_set_active(GTK_COMBO_BOX(devTypeCombo),0);
 //	gtk_combo_box_set_active(GTK_COMBO_BOX(devCombo),0);
 	gtk_combo_box_set_wrap_width(GTK_COMBO_BOX(devCombo),6);
