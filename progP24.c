@@ -1,6 +1,6 @@
 /*
  * progP24F.c - algorithms to program the PIC24 family of microcontrollers
- * Copyright (C) 2009-2010 Alberto Maccioni
+ * Copyright (C) 2009-2013 Alberto Maccioni
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -242,6 +242,18 @@ struct ID24{
 	{0x4005,"33FJ64GS608\r\n"},
 	{0x4008,"33FJ32GS610\r\n"},
 	{0x4009,"33FJ64GS610\r\n"},
+	{0x4100, "24FJ128GB206\r\n"},
+	{0x4102, "24FJ128GB210\r\n"},
+	{0x4104, "24FJ256GB206\r\n"},
+	{0x4106, "24FJ256GB210\r\n"},
+	{0x4108, "24FJ128DA206\r\n"},
+	{0x4109, "24FJ128DA106\r\n"},
+	{0x410A, "24FJ128DA210\r\n"},
+	{0x410B, "24FJ128DA110\r\n"},
+	{0x410C, "24FJ256DA206\r\n"},
+	{0x410D, "24FJ256DA106\r\n"},
+	{0x410E, "24FJ256DA210\r\n"},
+	{0x410F, "24FJ256DA110\r\n"},
 	{0x4202,"24FJ32GA102\r\n"},
 	{0x4203,"24FJ32GB002\r\n"},
 	{0x4206,"24FJ64GA102\r\n"},
@@ -250,6 +262,18 @@ struct ID24{
 	{0x420B,"24FJ32GB004\r\n"},
 	{0x420E,"24FJ64GA104\r\n"},
 	{0x420F,"24FJ64GB004\r\n"},
+	{0x46C0, "24FJ64GA306\r\n"},
+	{0x46C2, "24FJ128GA306\r\n"},
+	{0x46C4, "24FJ64GA308\r\n"},
+	{0x46C6, "24FJ128GA308\r\n"},
+	{0x46C8, "24FJ64GA310\r\n"},
+	{0x46CA, "24FJ128GA310\r\n"},
+	{0x4884, "24FJ64GC010\r\n"},
+	{0x4885, "24FJ128GC010\r\n"},
+	{0x4888, "24FJ64GC006\r\n"},
+	{0x4889, "24FJ128GC006\r\n"},
+	{0x488A, "24FJ64GC008\r\n"},
+	{0x488B, "24FJ128GC008\r\n"},
 };
 
 #ifdef _MSC_VER
@@ -395,7 +419,7 @@ void Read24Fx(int dim,int dim2,int options,int appIDaddr,int executiveArea){
 		fprintf(logfile,"Read24Fx(%d,%d,%d,%d,%d)    (0x%X,0x%X,0x%X,0x%X,0x%X)\n",dim,dim2,options,appIDaddr,executiveArea,dim,dim2,options,appIDaddr,executiveArea);
 	}
 	dim*=2;		//from words to bytes
-	if(dim>0x40000||dim<0){
+	if(dim>0x80000||dim<0){
 		PrintMessage(strings[S_CodeLim]);	//"Code size out of limits\r\n"
 		return;
 	}
@@ -1114,16 +1138,16 @@ void Read24Fx(int dim,int dim2,int options,int appIDaddr,int executiveArea){
 		}
 	}
 	else{
-		//last 2 program words
-		PrintMessage2("CONFIG1: 0x%04X\r\nCONFIG2: 0x%04X\r\n",(memCODE[dim-3]<<8)+memCODE[dim-4]\
-			,(memCODE[dim-7]<<8)+memCODE[dim-8]);
-		if(config==1){			//last 3 program words
-			PrintMessage1("CONFIG3: 0x%04X\r\n",(memCODE[dim-11]<<8)+memCODE[dim-12]);
+			//last 2 program words
+			PrintMessage2("CONFIG1: 0x%04X\r\nCONFIG2: 0x%04X\r\n",(memCODE[dim-3]<<8)+memCODE[dim-4]\
+				,(memCODE[dim-7]<<8)+memCODE[dim-8]);
+			if(config==1){			//last 3 program words
+				PrintMessage1("CONFIG3: 0x%04X\r\n",(memCODE[dim-11]<<8)+memCODE[dim-12]);
+			}
+			if(config==2){			//last 4 program words
+				PrintMessage1("CONFIG4: 0x%04X\r\n",(memCODE[dim-15]<<8)+memCODE[dim-16]);
+			}
 		}
-		if(config==2){			//last 4 program words
-			PrintMessage1("CONFIG4: 0x%04X\r\n",(memCODE[dim-15]<<8)+memCODE[dim-16]);
-		}
-	}
 	PrintMessage(strings[S_CodeMem]);	//"\r\nCode memory:\r\n"
 	DisplayCODE24F(dim);
 	if(dim2){
@@ -1220,7 +1244,7 @@ void Write24Fx(int dim,int dim2,int options,int appIDaddr,int rowSize, double wa
 			,dim,dim2,options,appIDaddr,rowSize,wait,dim,dim2,options,appIDaddr,rowSize,wait);
 	}
 	dim*=2;		//from words to bytes
-	if(dim>0x40000||dim<0){
+	if(dim>0x80000||dim<0){
 		PrintMessage(strings[S_CodeLim]);	//"Code size out of limits\r\n"
 		return;
 	}
@@ -1281,16 +1305,16 @@ void Write24Fx(int dim,int dim2,int options,int appIDaddr,int rowSize, double wa
 		}
 	}
 	else{
-		//last 2 program words
-		PrintMessage2("CONFIG1: 0x%04X\r\nCONFIG2: 0x%04X\r\n",(memCODE[dim-3]<<8)+memCODE[dim-4]\
-			,(memCODE[dim-7]<<8)+memCODE[dim-8]);
-		if(config==1){			//last 3 program words
-			PrintMessage1("CONFIG3: 0x%04X\r\n",(memCODE[dim-11]<<8)+memCODE[dim-12]);
+			//last 2 program words
+			PrintMessage2("CONFIG1: 0x%04X\r\nCONFIG2: 0x%04X\r\n",(memCODE[dim-3]<<8)+memCODE[dim-4]\
+				,(memCODE[dim-7]<<8)+memCODE[dim-8]);
+			if(config==1){			//last 3 program words
+				PrintMessage1("CONFIG3: 0x%04X\r\n",(memCODE[dim-11]<<8)+memCODE[dim-12]);
+			}
+			if(config==2){			//last 4 program words
+				PrintMessage1("CONFIG4: 0x%04X\r\n",(memCODE[dim-15]<<8)+memCODE[dim-16]);
+			}
 		}
-		if(config==2){			//last 4 program words
-			PrintMessage1("CONFIG4: 0x%04X\r\n",(memCODE[dim-15]<<8)+memCODE[dim-16]);
-		}
-	}
 	unsigned int start=GetTickCount();
 	bufferU[0]=0;
 	j=1;
@@ -1508,10 +1532,10 @@ void Write24Fx(int dim,int dim2,int options,int appIDaddr,int rowSize, double wa
 		bufferU[j++]=0x88;				//MOV W8,NVMKEY
 		bufferU[j++]=0x3B;
 		bufferU[j++]=0x38;
-	bufferU[j++]=SIX_LONG;				//BSET NVMCON,#WR
-	bufferU[j++]=0xA8;
-	bufferU[j++]=0xE7;
-	bufferU[j++]=0x61;
+		bufferU[j++]=SIX_LONG;				//BSET NVMCON,#WR
+		bufferU[j++]=0xA8;
+		bufferU[j++]=0xE7;
+		bufferU[j++]=0x61;
 		bufferU[j++]=WAIT_T3;
 		if(erase==3){				//200 ms timing
 			bufferU[j++]=FLUSH;
@@ -1562,18 +1586,18 @@ void Write24Fx(int dim,int dim2,int options,int appIDaddr,int rowSize, double wa
 	w0=bufferI[z+1]&0x80;
 	//Wait for erase completion (max 1s)
 	for(i=0;erase<2&&i<100&&w0;i++){
-		bufferU[j++]=SIX;				//MOV NVMCON,W2
-		bufferU[j++]=0x80;
-		bufferU[j++]=0x3B;
-		bufferU[j++]=0x02;
-		bufferU[j++]=ICSP_NOP;
-		bufferU[j++]=SIX;				//MOV W2,VISI
-		bufferU[j++]=0x88;
-		bufferU[j++]=0x3C;
-		bufferU[j++]=0x22;
-		bufferU[j++]=REGOUT;
-		bufferU[j++]=FLUSH;
-		for(;j<DIMBUF;j++) bufferU[j]=0x0;
+	bufferU[j++]=SIX;				//MOV NVMCON,W2
+	bufferU[j++]=0x80;
+	bufferU[j++]=0x3B;
+	bufferU[j++]=0x02;
+	bufferU[j++]=ICSP_NOP;
+	bufferU[j++]=SIX;				//MOV W2,VISI
+	bufferU[j++]=0x88;
+	bufferU[j++]=0x3C;
+	bufferU[j++]=0x22;
+	bufferU[j++]=REGOUT;
+	bufferU[j++]=FLUSH;
+	for(;j<DIMBUF;j++) bufferU[j]=0x0;
 		write();
 		msDelay(10);
 		read();
@@ -1592,8 +1616,8 @@ void Write24Fx(int dim,int dim2,int options,int appIDaddr,int rowSize, double wa
 	bufferU[j++]=0x3B;
 	bufferU[j++]=0x0A;
 	bufferU[j++]=0x20;				//MOV XXXX,W0
-	bufferU[j++]=0x00;
-	bufferU[j++]=0x00;
+		bufferU[j++]=0x00;
+		bufferU[j++]=0x00;
 	bufferU[j++]=0x88;				//MOV W0,TABLPAG
 	bufferU[j++]=0x01;
 	bufferU[j++]=0x90;
@@ -1616,165 +1640,165 @@ void Write24Fx(int dim,int dim2,int options,int appIDaddr,int rowSize, double wa
 //	instruction words are stored in code memory array as follows:
 //	L0 M0 H0 FF L1 M1 H1 FF
 	int valid,High=0;
-	for(i=0,k=0;i<dim;i+=4*4){		//write 4 instruction words
-		if(k==0){				//skip row if empty
-			for(valid=0;!valid&&i<dim;i+=valid?0:rowSize*4){
-				for(k2=0;k2<rowSize*4&&!valid;k2++) if(memCODE[i+k2]<0xFF) valid=1;
+		for(i=0,k=0;i<dim;i+=4*4){		//write 4 instruction words
+			if(k==0){				//skip row if empty
+				for(valid=0;!valid&&i<dim;i+=valid?0:rowSize*4){
+					for(k2=0;k2<rowSize*4&&!valid;k2++) if(memCODE[i+k2]<0xFF) valid=1;
+				}
+				if(i>=dim) break;
 			}
-			if(i>=dim) break;
-		}
-		if((i>>17)!=High){	//advance page
-			bufferU[j++]=SIX;				//MOV XXXX,W0
-			bufferU[j++]=0x20;
-			bufferU[j++]=(i>>21)&0xFF;
-			bufferU[j++]=(i>>13)&0xF0;
-			bufferU[j++]=SIX;				//MOV W0,TABLPAG
-			bufferU[j++]=0x88;
-			bufferU[j++]=0x01;
-			bufferU[j++]=0x90;
-			bufferU[j++]=SIX;				//GOTO 0x200
-			bufferU[j++]=0x04;
-			bufferU[j++]=0x02;
-			bufferU[j++]=0x00;
-			bufferU[j++]=ICSP_NOP;
-			bufferU[j++]=FLUSH;
-			for(;j<DIMBUF;j++) bufferU[j]=0x0;
-			write();
-			msDelay(2);
-			read();
-			j=1;
-			if(saveLog)WriteLogIO();
-			High=i>>17;
-		}
-		bufferU[j++]=SIX_N;
-		bufferU[j++]=8;
-		bufferU[j++]=0x20+((i>>13)&0xF);						//MOV i/2,W7
-		bufferU[j++]=(i>>5)&0xFF;
-		bufferU[j++]=((i<<3)&0xF0)+7;
-		bufferU[j++]=0x20+((memCODE[i+1]>>4)&0xF);				//MOV LSW0,W0
-		bufferU[j++]=((memCODE[i+1]<<4)&0xF0)+((memCODE[i]>>4)&0xF);
-		bufferU[j++]=(memCODE[i]<<4)&0xF0;
-		bufferU[j++]=0x20+((memCODE[i+6]>>4)&0xF);				//MOV MSB1:MSB0,W1
-		bufferU[j++]=((memCODE[i+6]<<4)&0xF0)+((memCODE[i+2]>>4)&0xF);
-		bufferU[j++]=((memCODE[i+2]<<4)&0xF0)+1;
-		bufferU[j++]=0x20+((memCODE[i+5]>>4)&0xF);				//MOV LSW1,W2
-		bufferU[j++]=((memCODE[i+5]<<4)&0xF0)+((memCODE[i+4]>>4)&0xF);
-		bufferU[j++]=((memCODE[i+4]<<4)&0xF0)+2;
-		bufferU[j++]=0x20+((memCODE[i+9]>>4)&0xF);				//MOV LSW2,W3
-		bufferU[j++]=((memCODE[i+9]<<4)&0xF0)+((memCODE[i+8]>>4)&0xF);
-		bufferU[j++]=((memCODE[i+8]<<4)&0xF0)+3;
-		bufferU[j++]=0x20+((memCODE[i+14]>>4)&0xF);				//MOV MSB3:MSB2,W4
-		bufferU[j++]=((memCODE[i+14]<<4)&0xF0)+((memCODE[i+10]>>4)&0xF);
-		bufferU[j++]=((memCODE[i+10]<<4)&0xF0)+4;
-		bufferU[j++]=0x20+((memCODE[i+13]>>4)&0xF);				//MOV LSW3,W5
-		bufferU[j++]=((memCODE[i+13]<<4)&0xF0)+((memCODE[i+12]>>4)&0xF);
-		bufferU[j++]=((memCODE[i+12]<<4)&0xF0)+5;
-		bufferU[j++]=0xEB;				//CLR W6
-		bufferU[j++]=0x03;
-		bufferU[j++]=0x00;
-		bufferU[j++]=ICSP_NOP;
-		bufferU[j++]=SIX_N;
-		bufferU[j++]=0x88;				//Append 2 NOP
-		bufferU[j++]=0xBB;				//TBLWTL [W6++],[W7]
-		bufferU[j++]=0x0B;
-		bufferU[j++]=0xB6;
-		bufferU[j++]=0xBB;				//TBLWTH.B [W6++],[W7++]
-		bufferU[j++]=0xDB;
-		bufferU[j++]=0xB6;
-		bufferU[j++]=0xBB;				//TBLWTH.B [W6++],[++W7]
-		bufferU[j++]=0xEB;
-		bufferU[j++]=0xB6;
-		bufferU[j++]=0xBB;				//TBLWTL [W6++],[W7++]
-		bufferU[j++]=0x1B;
-		bufferU[j++]=0xB6;
-		bufferU[j++]=0xBB;				//TBLWTL [W6++],[W7]
-		bufferU[j++]=0x0B;
-		bufferU[j++]=0xB6;
-		bufferU[j++]=0xBB;				//TBLWTH.B [W6++],[W7++]
-		bufferU[j++]=0xDB;
-		bufferU[j++]=0xB6;
-		bufferU[j++]=0xBB;				//TBLWTH.B [W6++],[++W7]
-		bufferU[j++]=0xEB;
-		bufferU[j++]=0xB6;
-		bufferU[j++]=0xBB;				//TBLWTL [W6++],[W7++]
-		bufferU[j++]=0x1B;
-		bufferU[j++]=0xB6;
-		k++;
-		if(k==rowSize/4){	//Write row
-			if(erase>1){				//30Fx, unlock and external timing
+			if((i>>17)!=High){	//advance page
+				bufferU[j++]=SIX;				//MOV XXXX,W0
+				bufferU[j++]=0x20;
+				bufferU[j++]=(i>>21)&0xFF;
+				bufferU[j++]=(i>>13)&0xF0;
+				bufferU[j++]=SIX;				//MOV W0,TABLPAG
+				bufferU[j++]=0x88;
+				bufferU[j++]=0x01;
+				bufferU[j++]=0x90;
+				bufferU[j++]=SIX;				//GOTO 0x200
+				bufferU[j++]=0x04;
+				bufferU[j++]=0x02;
+				bufferU[j++]=0x00;
+				bufferU[j++]=ICSP_NOP;
 				bufferU[j++]=FLUSH;
 				for(;j<DIMBUF;j++) bufferU[j]=0x0;
 				write();
-				msDelay(3);
+				msDelay(2);
 				read();
 				j=1;
-				if(saveLog){
-					fprintf(logfile,strings[S_Log7],i,i,k,k);	//"i=%d, k=%d 0=%d\n"
-					WriteLogIO();
+				if(saveLog)WriteLogIO();
+				High=i>>17;
+			}
+			bufferU[j++]=SIX_N;
+			bufferU[j++]=8;
+			bufferU[j++]=0x20+((i>>13)&0xF);						//MOV i/2,W7
+			bufferU[j++]=(i>>5)&0xFF;
+			bufferU[j++]=((i<<3)&0xF0)+7;
+			bufferU[j++]=0x20+((memCODE[i+1]>>4)&0xF);				//MOV LSW0,W0
+			bufferU[j++]=((memCODE[i+1]<<4)&0xF0)+((memCODE[i]>>4)&0xF);
+			bufferU[j++]=(memCODE[i]<<4)&0xF0;
+			bufferU[j++]=0x20+((memCODE[i+6]>>4)&0xF);				//MOV MSB1:MSB0,W1
+			bufferU[j++]=((memCODE[i+6]<<4)&0xF0)+((memCODE[i+2]>>4)&0xF);
+			bufferU[j++]=((memCODE[i+2]<<4)&0xF0)+1;
+			bufferU[j++]=0x20+((memCODE[i+5]>>4)&0xF);				//MOV LSW1,W2
+			bufferU[j++]=((memCODE[i+5]<<4)&0xF0)+((memCODE[i+4]>>4)&0xF);
+			bufferU[j++]=((memCODE[i+4]<<4)&0xF0)+2;
+			bufferU[j++]=0x20+((memCODE[i+9]>>4)&0xF);				//MOV LSW2,W3
+			bufferU[j++]=((memCODE[i+9]<<4)&0xF0)+((memCODE[i+8]>>4)&0xF);
+			bufferU[j++]=((memCODE[i+8]<<4)&0xF0)+3;
+			bufferU[j++]=0x20+((memCODE[i+14]>>4)&0xF);				//MOV MSB3:MSB2,W4
+			bufferU[j++]=((memCODE[i+14]<<4)&0xF0)+((memCODE[i+10]>>4)&0xF);
+			bufferU[j++]=((memCODE[i+10]<<4)&0xF0)+4;
+			bufferU[j++]=0x20+((memCODE[i+13]>>4)&0xF);				//MOV LSW3,W5
+			bufferU[j++]=((memCODE[i+13]<<4)&0xF0)+((memCODE[i+12]>>4)&0xF);
+			bufferU[j++]=((memCODE[i+12]<<4)&0xF0)+5;
+			bufferU[j++]=0xEB;				//CLR W6
+			bufferU[j++]=0x03;
+			bufferU[j++]=0x00;
+			bufferU[j++]=ICSP_NOP;
+			bufferU[j++]=SIX_N;
+			bufferU[j++]=0x88;				//Append 2 NOP
+			bufferU[j++]=0xBB;				//TBLWTL [W6++],[W7]
+			bufferU[j++]=0x0B;
+			bufferU[j++]=0xB6;
+			bufferU[j++]=0xBB;				//TBLWTH.B [W6++],[W7++]
+			bufferU[j++]=0xDB;
+			bufferU[j++]=0xB6;
+			bufferU[j++]=0xBB;				//TBLWTH.B [W6++],[++W7]
+			bufferU[j++]=0xEB;
+			bufferU[j++]=0xB6;
+			bufferU[j++]=0xBB;				//TBLWTL [W6++],[W7++]
+			bufferU[j++]=0x1B;
+			bufferU[j++]=0xB6;
+			bufferU[j++]=0xBB;				//TBLWTL [W6++],[W7]
+			bufferU[j++]=0x0B;
+			bufferU[j++]=0xB6;
+			bufferU[j++]=0xBB;				//TBLWTH.B [W6++],[W7++]
+			bufferU[j++]=0xDB;
+			bufferU[j++]=0xB6;
+			bufferU[j++]=0xBB;				//TBLWTH.B [W6++],[++W7]
+			bufferU[j++]=0xEB;
+			bufferU[j++]=0xB6;
+			bufferU[j++]=0xBB;				//TBLWTL [W6++],[W7++]
+			bufferU[j++]=0x1B;
+			bufferU[j++]=0xB6;
+			k++;
+			if(k==rowSize/4){	//Write row
+				if(erase>1){				//30Fx, unlock and external timing
+					bufferU[j++]=FLUSH;
+					for(;j<DIMBUF;j++) bufferU[j]=0x0;
+					write();
+					msDelay(3);
+					read();
+					j=1;
+					if(saveLog){
+						fprintf(logfile,strings[S_Log7],i,i,k,k);	//"i=%d, k=%d 0=%d\n"
+						WriteLogIO();
+					}
+					bufferU[j++]=SIX_N;
+					bufferU[j++]=6;
+					bufferU[j++]=0x24;				//MOV XXXX,W10
+					bufferU[j++]=0x00;
+					bufferU[j++]=erase>0?0x1A:0x4A;	//0x4001/0x4004
+					bufferU[j++]=0x88;				//MOV W10,NVMCON
+					bufferU[j++]=0x3B;
+					bufferU[j++]=0x0A;
+					bufferU[j++]=0x20;				//MOV 0x55,W8
+					bufferU[j++]=0x05;
+					bufferU[j++]=0x58;
+					bufferU[j++]=0x88;				//MOV W8,NVMKEY
+					bufferU[j++]=0x3B;
+					bufferU[j++]=0x38;
+					bufferU[j++]=0x20;				//MOV 0xAA,W8
+					bufferU[j++]=0x0A;
+					bufferU[j++]=0xA8;
+					bufferU[j++]=0x88;				//MOV W8,NVMKEY
+					bufferU[j++]=0x3B;
+					bufferU[j++]=0x38;
+					bufferU[j++]=SIX_LONG;				//BSET NVMCON,#WR
+					bufferU[j++]=0xA8;
+					bufferU[j++]=0xE7;
+					bufferU[j++]=0x61;
+					bufferU[j++]=ICSP_NOP;
+					bufferU[j++]=ICSP_NOP;
+					bufferU[j++]=WAIT_T3;
+					bufferU[j++]=WAIT_T3;
+					bufferU[j++]=ICSP_NOP;
+					bufferU[j++]=ICSP_NOP;
+					bufferU[j++]=SIX_LONG;				//BCLR NVMCON,#WR
+					bufferU[j++]=0xA9;
+					bufferU[j++]=0xE7;
+					bufferU[j++]=0x61;
+					bufferU[j++]=SIX_LONG;				//GOTO 0x200
+					bufferU[j++]=0x04;
+					bufferU[j++]=0x02;
+					bufferU[j++]=0x00;
 				}
-				bufferU[j++]=SIX_N;
-				bufferU[j++]=6;
-				bufferU[j++]=0x24;				//MOV XXXX,W10
-				bufferU[j++]=0x00;
-				bufferU[j++]=erase>0?0x1A:0x4A;	//0x4001/0x4004
-				bufferU[j++]=0x88;				//MOV W10,NVMCON
-				bufferU[j++]=0x3B;
-				bufferU[j++]=0x0A;
-				bufferU[j++]=0x20;				//MOV 0x55,W8
-				bufferU[j++]=0x05;
-				bufferU[j++]=0x58;
-				bufferU[j++]=0x88;				//MOV W8,NVMKEY
-				bufferU[j++]=0x3B;
-				bufferU[j++]=0x38;
-				bufferU[j++]=0x20;				//MOV 0xAA,W8
-				bufferU[j++]=0x0A;
-				bufferU[j++]=0xA8;
-				bufferU[j++]=0x88;				//MOV W8,NVMKEY
-				bufferU[j++]=0x3B;
-				bufferU[j++]=0x38;
-				bufferU[j++]=SIX_LONG;				//BSET NVMCON,#WR
-				bufferU[j++]=0xA8;
-				bufferU[j++]=0xE7;
-				bufferU[j++]=0x61;
-				bufferU[j++]=ICSP_NOP;
-				bufferU[j++]=ICSP_NOP;
-				bufferU[j++]=WAIT_T3;
-				bufferU[j++]=WAIT_T3;
-				bufferU[j++]=ICSP_NOP;
-				bufferU[j++]=ICSP_NOP;
-				bufferU[j++]=SIX_LONG;				//BCLR NVMCON,#WR
-				bufferU[j++]=0xA9;
-				bufferU[j++]=0xE7;
-				bufferU[j++]=0x61;
+				else{		//internal timing
 				bufferU[j++]=SIX_LONG;				//GOTO 0x200
 				bufferU[j++]=0x04;
 				bufferU[j++]=0x02;
 				bufferU[j++]=0x00;
+				bufferU[j++]=SIX_LONG;				//BSET NVMCON,#WR
+				bufferU[j++]=0xA8;
+				bufferU[j++]=0xE7;
+				bufferU[j++]=0x61;
+				}
+				k=0;
 			}
-			else{		//internal timing
-			bufferU[j++]=SIX_LONG;				//GOTO 0x200
-			bufferU[j++]=0x04;
-			bufferU[j++]=0x02;
-			bufferU[j++]=0x00;
-			bufferU[j++]=SIX_LONG;				//BSET NVMCON,#WR
-			bufferU[j++]=0xA8;
-			bufferU[j++]=0xE7;
-			bufferU[j++]=0x61;
+			bufferU[j++]=FLUSH;
+			for(;j<DIMBUF;j++) bufferU[j]=0x0;
+			write();
+			msDelay(3);
+			read();
+			j=1;
+			PrintStatus(strings[S_CodeWriting2],i*100/(dim+dim2),i/2);	//"Write: %d%%,addr. %04X"
+			if(saveLog){
+				fprintf(logfile,strings[S_Log7],i/2,i/2,k,k);	//"i=%d, k=%d 0=%d\n"
+				WriteLogIO();
 			}
-			k=0;
 		}
-		bufferU[j++]=FLUSH;
-		for(;j<DIMBUF;j++) bufferU[j]=0x0;
-		write();
-		msDelay(3);
-		read();
-		j=1;
-		PrintStatus(strings[S_CodeWriting2],i*100/(dim+dim2),i/2);	//"Write: %d%%,addr. %04X"
-		if(saveLog){
-			fprintf(logfile,strings[S_Log7],i/2,i/2,k,k);	//"i=%d, k=%d 0=%d\n"
-			WriteLogIO();
-		}
-	}
 	PrintStatusEnd();
 	PrintMessage(strings[S_Compl]);	//"completed\r\n"
 //****************** verify code ********************
