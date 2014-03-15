@@ -288,6 +288,7 @@ void getOptions()
 	char *str=gtk_combo_box_get_active_text(GTK_COMBO_BOX(devCombo));
 	if(str) strncpy(dev,str,sizeof(dev)-1);
 	g_free(str);
+	AVRfuse=AVRfuse_h=AVRfuse_x=AVRlock=0x100;
 	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(AVR_FuseLowWrite))){
 		i=sscanf(gtk_entry_get_text(GTK_ENTRY(AVR_FuseLow)),"%x",&AVRfuse);
 		if(i!=1||AVRfuse<0||AVRfuse>0xFF) AVRfuse=0x100;
@@ -517,7 +518,8 @@ void FilterDevType(GtkWidget *widget,GtkWidget *window)
 			for(i=0;i<Ndevices;i++) if(!strncmp(devices[i],"18F",3)) gtk_combo_box_append_text(GTK_COMBO_BOX(devCombo),devices[i]);
 		break;
 		case 4:		//24F
-			for(i=0;i<Ndevices;i++) if(!strncmp(devices[i],"24F",3)||!strncmp(devices[i],"24E",3)) gtk_combo_box_append_text(GTK_COMBO_BOX(devCombo),devices[i]);
+			for(i=0;i<Ndevices;i++) if(!strncmp(devices[i],"24F",3)||!strncmp(devices[i],"24H",3)||!strncmp(devices[i],"24E",3)) \
+				gtk_combo_box_append_text(GTK_COMBO_BOX(devCombo),devices[i]);
 		break;
 		case 5:		//30F 33F
 			for(i=0;i<Ndevices;i++) if(!strncmp(devices[i],"30F",3)||!strncmp(devices[i],"33F",3)||!strncmp(devices[i],"33E",3)) \
@@ -539,7 +541,7 @@ void FilterDevType(GtkWidget *widget,GtkWidget *window)
 	for(i=0;(str=gtk_combo_box_get_active_text(GTK_COMBO_BOX(devCombo)))&&strcmp(str,dev)&&i<1000;i++){
 		gtk_combo_box_set_active(GTK_COMBO_BOX(devCombo),i);
 	}
-	if(i==1000||!str)gtk_combo_box_set_active(GTK_COMBO_BOX(devCombo),0);
+	if(i>=1000||!str)gtk_combo_box_set_active(GTK_COMBO_BOX(devCombo),0);
 }
 
 ///
@@ -550,8 +552,8 @@ void DeviceChanged(GtkWidget *widget,GtkWidget *window)
 	if(str==NULL) return;
 	//10F 12F 16F 18F 24F 30F 33F
 	if(!strncmp(str,"10F",3)||!strncmp(str,"12F",3)||!strncmp(str,"12C",3)||!strncmp(str,"16F",3)|| \
-						!strncmp(str,"18F",3)||!strncmp(str,"24F",3)|| \
-						!strncmp(str,"30F",3)||!strncmp(str,"33F",3)){
+						!strncmp(str,"18F",3)||!strncmp(str,"24F",3)||!strncmp(str,"24E",3)||!strncmp(str,"24H",3)|| \
+						!strncmp(str,"30F",3)||!strncmp(str,"33F",3)||!strncmp(str,"33E",3)){
 		gtk_widget_set_sensitive(GTK_WIDGET(devFramePIC),TRUE);
 		gtk_widget_set_sensitive(GTK_WIDGET(devFrameAVR),FALSE);
 		}
@@ -1827,6 +1829,8 @@ int CheckS1()
 ///
 ///Close program
 void Xclose(){
+	char *str=gtk_combo_box_get_active_text(GTK_COMBO_BOX(devCombo));
+	if(str) strncpy(dev,str,sizeof(dev)-1);
 	gtk_main_quit();
 }
 
@@ -2472,11 +2476,10 @@ int main( int argc, char *argv[])
 	gtk_entry_set_text(GTK_ENTRY(PID_entry),text);
 	sprintf(text,"%d",max_err);
 	gtk_entry_set_text(GTK_ENTRY(Errors_entry),text);
-	sizeW=0x2400;
+	sizeW=0x8400;
 	memCODE_W=malloc(sizeW*sizeof(WORD));
 	initVar();
-//	int i;
-	for(i=0;i<0x2400;i++) memCODE_W[i]=0x3fff;
+	for(i=0;i<0x8400;i++) memCODE_W[i]=0x3fff;
 	strncpy(LogFileName,strings[S_LogFile],sizeof(LogFileName));
 	gtk_combo_box_append_text(GTK_COMBO_BOX(devTypeCombo),"*");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(devTypeCombo),"PIC10/12");
@@ -2486,9 +2489,19 @@ int main( int argc, char *argv[])
 	gtk_combo_box_append_text(GTK_COMBO_BOX(devTypeCombo),"PIC30/33");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(devTypeCombo),"ATMEL AVR");
 	gtk_combo_box_append_text(GTK_COMBO_BOX(devTypeCombo),"EEPROM");
-	gtk_combo_box_set_active(GTK_COMBO_BOX(devTypeCombo),0);
-//	gtk_combo_box_set_active(GTK_COMBO_BOX(devCombo),0);
 	gtk_combo_box_set_wrap_width(GTK_COMBO_BOX(devCombo),6);
+	int tt=0;
+	if(!strncmp(dev,"10F",3)||!strncmp(dev,"12F",3)) tt=1;	//10F 12F
+	else if(!strncmp(dev,"16F",3)) tt=2;	//16F
+	else if(!strncmp(dev,"18F",3)) tt=3;	//18F
+	else if(!strncmp(dev,"24F",3)||!strncmp(dev,"24H",3)||!strncmp(dev,"24E",3)) tt=4;	//24F
+	else if(!strncmp(dev,"30F",3)||!strncmp(dev,"33F",3)||!strncmp(dev,"33E",3)) tt=5;	//30/33
+	else if(!strncmp(dev,"AT",2)) tt=6;	//AVR
+	else if((strncmp(dev,"24F",3)&&strncmp(dev,"24H",3)&&strncmp(dev,"24E",3))&&\
+				(!strncmp(dev,"24",2)||!strncmp(dev,"25",2)||!strncmp(dev,"93",2)|| \
+				 !strncmp(dev,"95",2)||!strncmp(dev,"11",2)||!strncmp(dev,"DS",2))) \
+				tt=7;	//EEPROM
+	gtk_combo_box_set_active(GTK_COMBO_BOX(devTypeCombo),tt);
 //	AddDevices();	//populate device list
 	DeviceDetected=FindDevice();	//connect to USB programmer
 	ProgID();		//get firmware version and reset
@@ -2676,7 +2689,7 @@ int StartHVReg(double V){
 	read();
 	for(z=1;z<DIMBUF-2&&bufferI[z]!=READ_ADC;z++);
 	int v=(bufferI[z+1]<<8)+bufferI[z+2];
-//	printf("v=%d=%fV\n",v,v/G);
+//	PrintMessage2("v=%d=%fV\n",v,v/G);
 	if(v==0){
 		PrintMessage(strings[S_lowUsbV]);	//"Tensione USB troppo bassa (VUSB<4.5V)\r\n"
 		return 0;
@@ -2693,13 +2706,13 @@ int StartHVReg(double V){
 		for(z=1;z<DIMBUF-2&&bufferI[z]!=READ_ADC;z++);
 		v=(bufferI[z+1]<<8)+bufferI[z+2];
 		if(HwID==3) v>>=2;		//if 12 bit ADC
-//		printf("v=%d=%fV\n",v,v/G);
+//		PrintMessage2("v=%d=%fV\n",v,v/G);
 	}
-	if(v>(vreg/10.0+0.7)*G){
+	if(v>(vreg/10.0+1)*G){
 		PrintMessage(strings[S_HiVPP]);	//"Attenzione: tensione regolatore troppo alta\r\n\r\n"
 		return 0;
 	}
-	else if(v<(vreg/10.0-0.7)*G){
+	else if(v<(vreg/10.0-1)*G){
 		PrintMessage(strings[S_LowVPP]);	//"Attenzione: tensione regolatore troppo bassa\r\n\r\n"
 		return 0;
 	}

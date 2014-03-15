@@ -17,11 +17,18 @@ OBJECTS = opgui.o \
 	strings.o \
 	icons.o
 GTKFLAGS = `pkg-config --libs --cflags gtk+-2.0`
+UNAME := $(shell uname)
+ifneq (, $(findstring _NT-, $(UNAME)))
+	OPFLAG = -mwindows
+else
+	OPFLAG = 
+endif
+	
 
 all: opgui
 
 opgui : $(OBJECTS)
-	$(CC) $(CFLAGS) $(OBJECTS) $(GTKFLAGS) -o opgui -mwindows
+	$(CC) $(CFLAGS) $(OBJECTS) $(GTKFLAGS) -o opgui $(OPFLAG)
 
 %.o : %.c
 	$(CC) $(CFLAGS) $(GTKFLAGS) -c $<

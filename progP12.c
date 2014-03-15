@@ -489,9 +489,9 @@ void Write12F5xx(int dim,int OscAddr)
 }
 
 #ifdef _MSC_VER
-void COpenProgDlg::Write12C5xx(int dim)
+void COpenProgDlg::Write12C5xx(int dim,int dummy)
 #else
-void Write12C5xx(int dim)
+void Write12C5xx(int dim,int dummy)
 #endif
 {
 // write 12 bit PIC with OTP
@@ -588,7 +588,7 @@ void Write12C5xx(int dim)
 	if(saveLog)WriteLogIO();
 //****************** write code ********************
 	PrintMessage(strings[S_StartCodeProg]);	//"Write code ... "
-	PrintStatusSetup(); 
+	PrintStatusSetup();
 	int N,Nt=0,Nmin=255,Nmax=0,xN=0;
 	int dim1=dim;
 	if(programID) dim1=dim+5;
