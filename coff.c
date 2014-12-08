@@ -14,7 +14,7 @@
 #include <string.h>
 #include "coff.h"
 
-// Analyze COFF file named filename, extract code labels in label[address], undefined labels in ulabel[address], 
+// Analyze COFF file named filename, extract code labels in label[address], undefined labels in ulabel[address],
 // info about each symbol (name, source line, source file index) in source_info,
 // list of source files (index, name, file pointer) in s_files, raw data in data[0x2200]
 int analyzeCOFF(char *filename,char* label[LMAX],char* ulabel[ULMAX],struct src_i source_info[LMAX],struct srcfile **s_files_p,unsigned short data[0x2200],struct symbol **sym_p, int* nsym)
@@ -49,8 +49,8 @@ int analyzeCOFF(char *filename,char* label[LMAX],char* ulabel[ULMAX],struct src_
 	strings=malloc(strN*sizeof(char*));
 	if(strN) strings[0]=&strtable[4];
 	j=1;
-	for(i=4;i<strsize&&j<strN;i++){ 
-		if(strtable[i]==0){ 
+	for(i=4;i<strsize&&j<strN;i++){
+		if(strtable[i]==0){
 			strings[j]=&strtable[i+1];
 			j++;
 		}
@@ -151,7 +151,7 @@ int analyzeCOFF(char *filename,char* label[LMAX],char* ulabel[ULMAX],struct src_
 			if(line.l_paddr<DATA_MAX){
 				source_info[line.l_paddr].label=0;
 				for(k=0;k<filemax;k++){
-					if((*s_files_p)[k].l_srcndx==line.l_srcndx){ 
+					if((*s_files_p)[k].l_srcndx==line.l_srcndx){
 						source_info[line.l_paddr].src_file=k;
 						if((*s_files_p)[k].ptr==0){
 							//printf("file %s (%X), nlines %d, k=%d, a=%X\n",(*s_files_p)[k].name,(*s_files_p)[k].name,(*s_files_p)[k].nlines,k,s_files_p[k]);
@@ -174,12 +174,13 @@ int analyzeCOFF(char *filename,char* label[LMAX],char* ulabel[ULMAX],struct src_
 			raw=malloc(sections[i].s_size);
 			fread(raw,sections[i].s_size,1,f);
 			if((sections[i].s_paddr+sections[i].s_size/2)<0x2200)memcpy(&data[sections[i].s_paddr],raw,sections[i].s_size);
+			free(raw);
 		}
 	}
 	free(strtable);
 	free(strings);
 	return 1;
-}	
+}
 
 //open a source file and store a pointer for each line
 FILE* scanSourceFile(struct srcfile *s_files_p){
