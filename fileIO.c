@@ -1,6 +1,6 @@
 /*
  * fileIO.c - file read and write
- * Copyright (C) 2010 Alberto Maccioni
+ * Copyright (C) 2010-2016 Alberto Maccioni
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -832,7 +832,7 @@ void OpenLogFile()
 {
 	logfile=fopen(LogFileName,"w");
 	if(!logfile) return;
-	fprintf(logfile,_APPNAME " version %s\n",VERSION);
+	fprintf(logfile,_APPNAME " version %s (%s)\n",VERSION,SYSNAME);
 	fprintf(logfile,"Firmware version %d.%d.%d\n",FWVersion>>16,(FWVersion>>8)&0xFF,FWVersion&0xFF);
 	struct tm * timeinfo;
 	time_t rawtime;
@@ -858,16 +858,18 @@ void WriteLogIO()
 #endif
 {
 	int i;
-	fprintf(logfile,"bufferU=[%02X\n",bufferU[0]);
-	for(i=1;i<DIMBUF;i++){
-		fprintf(logfile,"%02X ",bufferU[i]);
+	//fprintf(logfile,"bufferU=[%02X\n",bufferU[0]);
+	fprintf(logfile,"bufferU=[");
+	for(i=0;i<DIMBUF;i++){
 		if(i%32==0) fprintf(logfile,"\n");
+		fprintf(logfile,"%02X ",bufferU[i]);
 	}
 	fprintf(logfile,"]\n");
-	fprintf(logfile,"bufferI=[%02X\n",bufferI[0]);
-	for(i=1;i<DIMBUF;i++){
-		fprintf(logfile,"%02X ",bufferI[i]);
+	//fprintf(logfile,"bufferI=[%02X\n",bufferI[0]);
+	fprintf(logfile,"bufferI=[");
+		for(i=0;i<DIMBUF;i++){
 		if(i%32==0) fprintf(logfile,"\n");
+		fprintf(logfile,"%02X ",bufferI[i]);
 	}
 	fprintf(logfile,"]\n");
 }

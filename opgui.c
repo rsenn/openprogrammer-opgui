@@ -2,7 +2,7 @@
  * \file opgui.c
  * main control program for the open programmer
  *
- * Copyright (C) 2009-2011 Alberto Maccioni
+ * Copyright (C) 2009-2016 Alberto Maccioni
  * for detailed info see:
  * http://openprog.altervista.org/
  *
@@ -41,7 +41,7 @@ void I2cspiS();
 void ProgID();
 void PrintMessageI2C(const char *msg);
 void ShowContext();
-int FindDevice();
+int FindDevice(int vid,int pid);
 void TestHw();
 int CheckS1();
 
@@ -58,7 +58,9 @@ char LogFileName[512]="";
 char loadfile[512]="",savefile[512]="";
 char loadfileEE[512]="",savefileEE[512]="";
 char CoffFileName[512]="";
-int vid=0x04D8,pid=0x0100;
+int vid=0x1209,pid=0x5432;
+int new_vid=0x1209,new_pid=0x5432;
+int old_vid=0x04D8,old_pid=0x0100;
 WORD *memCODE_W=0;
 int size=0,sizeW=0,sizeEE=0,sizeCONFIG=0,sizeUSERID=0;
 unsigned char *memCODE=0,*memEE=0,memID[8],memCONFIG[48],memUSERID[8];
@@ -218,8 +220,10 @@ char* cur_pathEE=0;
 	struct hiddev_report_info rep_info_i,rep_info_u;
 	struct hiddev_usage_ref_multi ref_multi_i,ref_multi_u;
 	char path[512]="";
-#else	//Windows
 	unsigned char bufferU[128],bufferI[128];
+#else	//Windows
+	unsigned char bufferU0[128],bufferI0[128];
+	unsigned char *bufferU,*bufferI;
 	DWORD NumberOfBytesRead,BytesWritten;
 	ULONG Result;
 	HANDLE WriteHandle,ReadHandle;
@@ -1205,8 +1209,8 @@ void icdStop(GtkWidget *widget,GtkWidget *window)
 		gtk_timeout_remove(icdTimer);
 		Halt();
 	}
-	bufferU[0]=0;
-	int j=1;
+//	bufferU[0]=0;
+	int j=0;
 	bufferU[j++]=EN_VPP_VCC;		// reset target
 	bufferU[j++]=0x0;
 	bufferU[j++]=WAIT_T3;
@@ -1214,9 +1218,7 @@ void icdStop(GtkWidget *widget,GtkWidget *window)
 	bufferU[j++]=0x2;				//set D as input
 	bufferU[j++]=FLUSH;
 	for(;j<DIMBUF;j++) bufferU[j]=0x0;
-	write();
-	msDelay(3);
-	read();
+	PacketIO(3);
 	if(saveLog)WriteLogIO();
 	icdConnected=0;
 	PrintMessageICD("stopped");
@@ -1833,7 +1835,6 @@ void IOchanged(GtkWidget *widget,GtkWidget *window)
 	//sprintf(s2," trisb=%02X latb=%02X trisc=%02X trisa=%02X latac=%02X",trisb,latb,trisc,trisa,latac);
 	//strcat(str,s2);
 	//gtk_statusbar_push(GTK_STATUSBAR(status_bar),statusID,str);
-	bufferU[j++]=0;
 	bufferU[j++]=READ_RAM;
 	bufferU[j++]=0x0F;
 	bufferU[j++]=0x80;	//PORTA
@@ -1860,10 +1861,8 @@ void IOchanged(GtkWidget *widget,GtkWidget *window)
 	bufferU[j++]=latac;
 	bufferU[j++]=FLUSH;
 	for(;j<DIMBUF;j++) bufferU[j]=0x0;
-	write();
-	msDelay(2);
-	read();
-	for(z=1;z<DIMBUF-3&&bufferI[z]!=READ_RAM;z++);
+	PacketIO(2);
+	for(z=0;z<DIMBUF-3&&bufferI[z]!=READ_RAM;z++);
 	port=bufferI[z+3];	//PORTA
 	//sprintf(s2," porta=%02X",port);
 	//strcat(str,s2);
@@ -1915,14 +1914,11 @@ void VPPVDDactive(GtkWidget *widget,GtkWidget *window)
 		strcat(str,"VDD ");
 	}
 	gtk_statusbar_push(GTK_STATUSBAR(status_bar),statusID,str);
-	bufferU[j++]=0;
 	bufferU[j++]=EN_VPP_VCC;		//VDD+VPP
 	bufferU[j++]=vdd_vpp;
 	bufferU[j++]=FLUSH;
 	for(;j<DIMBUF;j++) bufferU[j]=0x0;
-	write();
-	msDelay(2);
-	read();
+	PacketIO(2);
 }
 
 ///
@@ -1939,25 +1935,19 @@ void DCDCactive(GtkWidget *widget,GtkWidget *window)
 		vreg=voltage*10.0;
 		sprintf(str,"DCDC %.1fV",voltage);
 		gtk_statusbar_push(GTK_STATUSBAR(status_bar),statusID,str);
-		bufferU[j++]=0;
 		bufferU[j++]=VREG_EN;			//enable HV regulator
 		bufferU[j++]=SET_VPP;
 		bufferU[j++]=vreg;
 		bufferU[j++]=FLUSH;
 		for(;j<DIMBUF;j++) bufferU[j]=0x0;
-		write();
-		msDelay(2);
-		read();
+		PacketIO(2);
 	}
 	else{
 		int j=0;
-		bufferU[j++]=0;
 		bufferU[j++]=VREG_DIS;			//disable HV regulator
 		bufferU[j++]=FLUSH;
 		for(;j<DIMBUF;j++) bufferU[j]=0x0;
-		write();
-		msDelay(2);
-		read();
+		PacketIO(2);
 	}
 }
 
@@ -2031,7 +2021,8 @@ void DataToHexConvert(GtkWidget *widget,GtkWidget *window)
 		sprintf(s2,"%02X",i/2);
 		str[1]=s2[0];
 		str[2]=s2[1];
-		sum+=i/2+(address&0xff)+((address>>2)&0xff);
+		x=sum;
+		sum+=i/2+(address&0xff)+((address>>8)&0xff);
 		sprintf(s2,"%02X",(-sum)&0xFF);
 		strcat(str,s2);
 		gtk_entry_set_text(GTK_ENTRY(Hex_data2),str);
@@ -2106,7 +2097,7 @@ int main( int argc, char *argv[])
 	#if defined _WIN32
 		mkdir(config_dir);
 	#else
-		mkdir(config_dir, 0x0755);
+		mkdir(config_dir,0755);
 	#endif
 		fname = g_build_path(G_DIR_SEPARATOR_S,config_dir,CONFIG_FILE, NULL);
 		f=fopen(fname,"r");
@@ -2128,6 +2119,12 @@ int main( int argc, char *argv[])
 	vid_ini=vid;
 	pid_ini=pid;
 	max_err_ini=max_err;
+#if defined _WIN32 || defined __CYGWIN__	//Windows
+	bufferI=bufferI0+1;
+	bufferU=bufferU0+1;
+	bufferI0[0]=0;
+	bufferU0[0]=0;
+#endif
 
 	gtk_init(&argc, &argv);
 
@@ -2200,13 +2197,19 @@ int main( int argc, char *argv[])
 	}
 	if(command){
 		cmdline=1;
-		DeviceDetected=FindDevice();	//connect to USB programmer
+		DeviceDetected=FindDevice(vid,pid);	//connect to USB programmer
+		if(!DeviceDetected){
+			DeviceDetected=FindDevice(new_vid,new_pid);	//try default
+			if(DeviceDetected){
+				vid=new_vid;
+				pid=new_pid;
+			}
+		}
+		if(!DeviceDetected) DeviceDetected=FindDevice(old_vid,old_pid); //try old one
 		if(DeviceDetected){
 			bufferU[0]=0;
 			for(i=1;i<DIMBUF;i++) bufferU[i]=(char) tmpbuf[i-1];
-			write();
-			msDelay(100);
-			read();
+			PacketIO(100);
 			printf("> ");
 			for(i=1;i<DIMBUF;i++) printf("%02X ",bufferU[i]);
 			printf("\n< ");
@@ -2780,14 +2783,21 @@ int main( int argc, char *argv[])
 				tt=7;	//EEPROM
 	gtk_combo_box_set_active(GTK_COMBO_BOX(devTypeCombo),tt);
 //	AddDevices();	//populate device list
-	DeviceDetected=FindDevice();	//connect to USB programmer
+	DeviceDetected=FindDevice(vid,pid);	//connect to USB programmer
+	if(!DeviceDetected){
+		DeviceDetected=FindDevice(new_vid,new_pid);	//try default
+		if(DeviceDetected){
+			vid=new_vid;
+			pid=new_pid;
+		}
+	}
+	if(!DeviceDetected) DeviceDetected=FindDevice(old_vid,old_pid); //try old one
 	ProgID();		//get firmware version and reset
 	gtk_main();
 //	printf(ListDevices());
 //******Save ini file******
 // only if parameters are changed
 	if(strcmp(dev_ini,dev)||vid_ini!=vid||pid_ini!=pid||max_err_ini!=max_err){
-		printf(homedir);
 		if(homedir){
 			f=fopen(fname,"w");
 			if(f){
@@ -2821,7 +2831,15 @@ void MsgBox(const char* msg)
 void Connect(GtkWidget *widget,GtkWidget *window){
 	vid=htoi(gtk_entry_get_text(GTK_ENTRY(VID_entry)),4);
 	pid=htoi(gtk_entry_get_text(GTK_ENTRY(PID_entry)),4);
-	DeviceDetected=FindDevice();
+	DeviceDetected=FindDevice(vid,pid);	//connect to USB programmer
+	if(!DeviceDetected){
+		DeviceDetected=FindDevice(new_vid,new_pid);	//try default
+		if(DeviceDetected){
+			vid=new_vid;
+			pid=new_pid;
+		}
+	}
+	if(!DeviceDetected) DeviceDetected=FindDevice(old_vid,old_pid); //try old one
 	hvreg=0;
 	ProgID();
 }
@@ -2936,16 +2954,15 @@ void DisplayEE(){
 ///
 ///Start HV regulator
 int StartHVReg(double V){
-	int j=1,z;
+	int j=0,z;
 	int vreg=(int)(V*10.0);
-	bufferU[0]=0;
+	if(saveLog&&logfile) fprintf(logfile,"StartHVReg(%.2f)\n",V);
 	DWORD t0,t;
 	if(V==-1){
 		bufferU[j++]=VREG_DIS;			//disable HV regulator
 		bufferU[j++]=FLUSH;
-		write();
+		PacketIO(5);
 		msDelay(40);
-		read();
 		return -1;
 	}
 	t=t0=GetTickCount();
@@ -2960,26 +2977,24 @@ int StartHVReg(double V){
 	bufferU[j++]=READ_ADC;
 	bufferU[j++]=FLUSH;
 	for(;j<DIMBUF;j++) bufferU[j]=0x0;
-	write();
+	PacketIO(5);
 	msDelay(20);
-	read();
-	for(z=1;z<DIMBUF-2&&bufferI[z]!=READ_ADC;z++);
+	for(z=0;z<DIMBUF-2&&bufferI[z]!=READ_ADC;z++);
 	int v=(bufferI[z+1]<<8)+bufferI[z+2];
 //	PrintMessage2("v=%d=%fV\n",v,v/G);
 	if(v==0){
 		PrintMessage(strings[S_lowUsbV]);	//"Tensione USB troppo bassa (VUSB<4.5V)\r\n"
 		return 0;
 	}
-		j=1;
+		j=0;
 		bufferU[j++]=WAIT_T3;
 		bufferU[j++]=READ_ADC;
 		bufferU[j++]=FLUSH;
 		for(;j<DIMBUF;j++) bufferU[j]=0x0;
 	for(;(v<(vreg/10.0-1)*G||v>(vreg/10.0+1)*G)&&t<t0+1500;t=GetTickCount()){
-		write();
+		PacketIO(5);
 		msDelay(20);
-		read();
-		for(z=1;z<DIMBUF-2&&bufferI[z]!=READ_ADC;z++);
+		for(z=0;z<DIMBUF-2&&bufferI[z]!=READ_ADC;z++);
 		v=(bufferI[z+1]<<8)+bufferI[z+2];
 		if(HwID==3) v>>=2;		//if 12 bit ADC
 //		PrintMessage2("v=%d=%fV\n",v,v/G);
@@ -2998,6 +3013,7 @@ int StartHVReg(double V){
 	}
 	else{
 		PrintMessage2(strings[S_reg],t-t0,v/G);	//"Regolatore avviato e funzionante dopo T=%d ms VPP=%.1f\r\n\r\n"
+		if(saveLog&&logfile) fprintf(logfile,strings[S_reg],t-t0,v/G);
 		return vreg;
 	}
 }
@@ -3007,18 +3023,16 @@ int StartHVReg(double V){
 void ProgID()
 {
 	if(DeviceDetected!=1) return;
-	int j=1;
-	bufferU[0]=0;
+	int j=0;
 	bufferU[j++]=PROG_RST;
 	bufferU[j++]=FLUSH;
 	for(;j<DIMBUF;j++) bufferU[j]=0x0;
-	write();
-	msDelay(2);
-	read();
-	PrintMessage3(strings[S_progver],bufferI[2],bufferI[3],bufferI[4]); //"FW versione %d.%d.%d\r\n"
-	FWVersion=(bufferI[2]<<16)+(bufferI[3]<<8)+bufferI[4];
-	PrintMessage3(strings[S_progid],bufferI[5],bufferI[6],bufferI[7]);	//"ID Hw: %d.%d.%d"
-	HwID=bufferI[7];
+	PacketIO(2);
+	for(j=0;j<DIMBUF-7&&bufferI[j]!=PROG_RST;j++);
+	PrintMessage3(strings[S_progver],bufferI[j+1],bufferI[j+2],bufferI[j+3]); //"FW versione %d.%d.%d\r\n"
+	FWVersion=(bufferI[j+1]<<16)+(bufferI[j+2]<<8)+bufferI[j+3];
+	PrintMessage3(strings[S_progid],bufferI[j+4],bufferI[j+5],bufferI[j+6]);	//"ID Hw: %d.%d.%d"
+	HwID=bufferI[j+6];
 	if(HwID==1) PrintMessage(" (18F2550)\r\n\r\n");
 	else if(HwID==2) PrintMessage(" (18F2450)\r\n\r\n");
 	else if(HwID==3) PrintMessage(" (18F2458/2553)\r\n\r\n");
@@ -3029,7 +3043,7 @@ void ProgID()
 ///Check if a 3.3V regulator is present
 int CheckV33Regulator()
 {
-	int i,j=1;
+	int i,j=0;
 	if(skipV33check) return 1;
 /*	bufferU[j++]=WRITE_RAM;
 	bufferU[j++]=0x0F;
@@ -3061,7 +3075,7 @@ int CheckV33Regulator()
 	write();
 	msDelay(5);
 	read();
-	for(j=1;j<DIMBUF-3&&bufferI[j]!=READ_RAM;j++);
+	for(j=0;j<DIMBUF-3&&bufferI[j]!=READ_RAM;j++);
 	i=~(bufferI[j+3]&0x42);		//B1 or B7 should be high
 	PrintMessage1("i1=%X",i);
 	for(j+=3;j<DIMBUF-3&&bufferI[j]!=READ_RAM;j++);
@@ -3096,10 +3110,8 @@ int CheckV33Regulator()
 	bufferU[j++]=0xFF;	//BX = input
 	bufferU[j++]=FLUSH;
 	for(;j<DIMBUF;j++) bufferU[j]=0x0;
-	write();
-	msDelay(2);
-	read();
-	for(j=1;j<DIMBUF-3&&bufferI[j]!=READ_RAM;j++);
+	PacketIO(5);
+	for(j=0;j<DIMBUF-3&&bufferI[j]!=READ_RAM;j++);
 	i=bufferI[j+3]&0x2;		//B1 should be high
 	for(j+=3;j<DIMBUF-3&&bufferI[j]!=READ_RAM;j++);
 	return (i+(bufferI[j+3]&0x2))==2?1:0;
@@ -3109,16 +3121,14 @@ int CheckV33Regulator()
 ///Check if S1 is pressed
 int CheckS1()
 {
-	int i,j=1;
+	int i,j=0;
 	bufferU[j++]=READ_RAM;
 	bufferU[j++]=0x0F;
 	bufferU[j++]=0x84;	//READ PORTE
 	bufferU[j++]=FLUSH;
 	for(;j<DIMBUF;j++) bufferU[j]=0x0;
-	write();
-	msDelay(2);
-	read();
-	for(j=1;j<DIMBUF-3&&bufferI[j]!=READ_RAM;j++);
+	PacketIO(5);
+	for(j=0;j<DIMBUF-3&&bufferI[j]!=READ_RAM;j++);
 	i=bufferI[j+3]&0x8;		//i=E3
 	return i?0:1;			//S1 open -> E3=1
 }
@@ -3132,8 +3142,7 @@ void TestHw(GtkWidget *widget,GtkWindow* parent)
 #endif
 	char str[256];
 	StartHVReg(13);
-	int j=1;
-	bufferU[0]=0;
+	int j=0;
 	MsgBox(strings[I_TestHW]);		//"Test hardware ..."
 	bufferU[j++]=SET_CK_D;
 	bufferU[j++]=0x0;
@@ -3141,69 +3150,58 @@ void TestHw(GtkWidget *widget,GtkWindow* parent)
 	bufferU[j++]=0x5;
 	bufferU[j++]=FLUSH;
 	for(;j<DIMBUF;j++) bufferU[j]=0x0;
-	write();
-	msDelay(2);
-	read();
+	PacketIO(5);
 	strcpy(str,strings[I_TestMSG]);
 	strcat(str,"\n VDD=5V\n VPP=13V\n PGD(RB5)=0V\n PGC(RB6)=0V\n PGM(RB7)=0V");
 	MsgBox(str);
-	j=1;
+	j=0;
 	bufferU[j++]=SET_CK_D;
 	bufferU[j++]=0x15;
 	bufferU[j++]=EN_VPP_VCC;
 	bufferU[j++]=0x1;			//VDD
 	bufferU[j++]=FLUSH;
 	for(;j<DIMBUF;j++) bufferU[j]=0x0;
-	write();
-	msDelay(2);
-	read();
+	PacketIO(5);
 	strcpy(str,strings[I_TestMSG]);
 	strcat(str,"\n VDD=5V\n VPP=0V\n PGD(RB5)=5V\n PGC(RB6)=5V\n PGM(RB7)=5V");
 	MsgBox(str);
-	j=1;
+	j=0;
 	bufferU[j++]=SET_CK_D;
 	bufferU[j++]=0x1;
 	bufferU[j++]=EN_VPP_VCC;
 	bufferU[j++]=0x4;			//VPP
 	bufferU[j++]=FLUSH;
 	for(;j<DIMBUF;j++) bufferU[j]=0x0;
-	write();
-	msDelay(2);
-	read();
+	PacketIO(5);
 	strcpy(str,strings[I_TestMSG]);
 	strcat(str,"\n VDD=0V\n VPP=13V\n PGD(RB5)=5V\n PGC(RB6)=0V\n PGM(RB7)=0V");
 	MsgBox(str);
-	j=1;
+	j=0;
 	bufferU[j++]=SET_CK_D;
 	bufferU[j++]=0x4;
 	bufferU[j++]=EN_VPP_VCC;
 	bufferU[j++]=0x0;
 	bufferU[j++]=FLUSH;
 	for(;j<DIMBUF;j++) bufferU[j]=0x0;
-	write();
-	msDelay(2);
-	read();
+	PacketIO(5);
 	strcpy(str,strings[I_TestMSG]);
 	strcat(str,"\n VDD=0V\n VPP=0V\n PGD(RB5)=0V\n PGC(RB6)=5V\n PGM(RB7)=0V");
 	MsgBox(str);
-	j=1;
+	j=0;
 	bufferU[j++]=SET_CK_D;
 	bufferU[j++]=0x0;
 	bufferU[j++]=EN_VPP_VCC;
 	bufferU[j++]=0x0;
 	bufferU[j++]=FLUSH;
 	for(;j<DIMBUF;j++) bufferU[j]=0x0;
-	write();
-	msDelay(2);
-	read();
+	PacketIO(5);
 	if(FWVersion>=0x900){	//IO test
-		int j=1,i,x,r;
+		int j=0,i,x,r;
 		strcpy(str,"0000000000000");
-		bufferU[0]=0;
 		PrintMessage("IO test\nRC|RA|--RB--|\n");
 		for(i=0;i<13;i++){
 			x=1<<i;
-			j=1;
+			j=0;
 			bufferU[j++]=EN_VPP_VCC;
 			bufferU[j++]=0x0;
 			bufferU[j++]=SET_PORT_DIR;
@@ -3216,10 +3214,8 @@ void TestHw(GtkWidget *widget,GtkWindow* parent)
 			bufferU[j++]=READ_AC;
 			bufferU[j++]=FLUSH;
 			for(;j<DIMBUF;j++) bufferU[j]=0x0;
-			write();
-			msDelay(2);
-			read();
-			for(j=1;j<DIMBUF-1&&bufferI[j]!=READ_B;j++);
+			PacketIO(5);
+			for(j=0;j<DIMBUF-1&&bufferI[j]!=READ_B;j++);
 			r=bufferI[j+1];
 			for(j+=2;j<DIMBUF-1&&bufferI[j]!=READ_AC;j++);
 			r+=(bufferI[j+1]&0xF8)<<5;
@@ -3255,7 +3251,7 @@ DWORD GetTickCount(){
 ///Clean read buffer
 void CleanIO(){
 #if !defined _WIN32 && !defined __CYGWIN__	//Linux
-#undef read()
+//#undef read()
 	fd_set set;
 	struct timeval timeout;
 	struct hiddev_event ev[80];
@@ -3276,7 +3272,8 @@ void CleanIO(){
 ///Write data packet, wait for X milliseconds, read response
 void PacketIO(double delay){
 	#define TIMEOUT 50
-	if(saveLog) fprintf(logfile,"PacketIO(%.2f)\n",delay);
+	if(saveLog&&logfile) fprintf(logfile,"PacketIO(%.2f)\n",delay);
+	int delay0=delay;
 #if !defined _WIN32 && !defined __CYGWIN__	//Linux
 	fd_set set;
 	struct hiddev_event ev[80];
@@ -3284,44 +3281,47 @@ void PacketIO(double delay){
 	int rv,i,n=DIMBUF;
     struct timespec ts;
     uint64_t start,stop;
+	for(i=0;i<DIMBUF;i++) ref_multi_u.values[i]=bufferU[i];
 	FD_ZERO(&set); /* clear the set */
 	FD_SET(fd, &set); /* add our file descriptor to the set */
 	timeout.tv_sec = 0;
 	timeout.tv_usec = TIMEOUT*1000;
     clock_gettime( CLOCK_REALTIME, &ts );
     start  = ts.tv_nsec / 1000 ;//+ ts.tv_sec * 1000000;
-	//unsigned int start=GetTickCount();
 	//write
 	ioctl(fd, HIDIOCSUSAGES, &ref_multi_u);
 	ioctl(fd,HIDIOCSREPORT, &rep_info_u);
-	//delay(delay)
 	delay-=TIMEOUT-10;	//shorter delays are covered by 50ms timeout
 	if(delay<0) delay=0;
 	long x=(int)(delay*1000.0);
 	usleep(x>MinDly?x:MinDly);
 	//read
-	rv = select(fd + 1, &set, NULL, NULL, &timeout);
+	rv = select(fd + 1, &set, NULL, NULL, &timeout); //wait for event
 	if(rv == -1){
 		PrintMessage(strings[S_ErrSing]);	/*error*/
-		if(saveLog) fprintf(logfile,strings[S_ErrSing]);
+		if(saveLog&&logfile) fprintf(logfile,strings[S_ErrSing]);
 	}
 	else if(rv == 0){
 		PrintMessage(strings[S_comTimeout]);	/*"comm timeout\r\n"*/
-		if(saveLog) fprintf(logfile,strings[S_comTimeout]);
+		if(saveLog&&logfile) fprintf(logfile,strings[S_comTimeout]);
 	}
 	else{
 //		ioctl(fd, HIDIOCGUSAGES, &ref_multi_i);
 //		ioctl(fd,HIDIOCGREPORT, &rep_info_i);
 #undef read()
 		rv=read(fd, ev,sizeof(struct hiddev_event) *n);
-		for(i=0;i<n;i++) bufferI[i]=ev[i].value;
-
+		for(i=0;(ev[0].value!=bufferU[0])&&i<40;i++){		//read too early; try again after 5ms
+			msDelay(5);
+			rv=read(fd, ev,sizeof(struct hiddev_event) *n);
+			if(saveLog&&logfile) fprintf(logfile,"Packet not ready, wait extra time\n");
+		}
+		if(i==40) fprintf(logfile,"Cannot read correct packet!!\n");
+		for(i=0;i<n;i++) bufferI[i]=ev[i].value&0xFF;
 	}
-	if(saveLog) WriteLogIO();
-	//	unsigned int stop=GetTickCount();
+	if(saveLog&&logfile) WriteLogIO();
     clock_gettime( CLOCK_REALTIME, &ts );
     stop  = ts.tv_nsec / 1000 ;//+ ts.tv_sec * 1000000;
-	if(saveLog) fprintf(logfile,"T=%.2f ms\n",(stop-start)/1000.0);
+	if(saveLog&&logfile) fprintf(logfile,"T=%.2f ms (%+.2f ms)\n",(stop-start)/1000.0,(stop-start)/1000.0-delay0);
 #else	//Windows
 	__int64 start,stop,freq;
 	QueryPerformanceCounter((LARGE_INTEGER *)&start);
@@ -3329,28 +3329,58 @@ void PacketIO(double delay){
 	delay-=TIMEOUT-10;	//shorter delays are covered by 50ms timeout
 	if(delay<0) delay=0;
 	//write
-	Result = WriteFile(WriteHandle,bufferU,DIMBUF,&BytesWritten,NULL);
-	//delay(delay)
+	Result = WriteFile(WriteHandle,bufferU0,DIMBUF+1,&BytesWritten,NULL);
 	Sleep((long)ceil(delay)>MinDly?(long)ceil(delay):MinDly);
 	//read
-	Result = ReadFile(ReadHandle,bufferI,DIMBUF,&NumberOfBytesRead,(LPOVERLAPPED) &HIDOverlapped);
+	Result = ReadFile(ReadHandle,bufferI0,DIMBUF+1,&NumberOfBytesRead,(LPOVERLAPPED) &HIDOverlapped);
 	Result = WaitForSingleObject(hEventObject,50);
-	if(saveLog) WriteLogIO();
+	if(saveLog&&logfile) WriteLogIO();
 	ResetEvent(hEventObject);
 	if(Result!=WAIT_OBJECT_0){
 		PrintMessage(strings[S_comTimeout]);	/*"comm timeout\r\n"*/
-		if(saveLog) fprintf(logfile,strings[S_comTimeout]);
+		if(saveLog&&logfile) fprintf(logfile,strings[S_comTimeout]);
 	}
 	QueryPerformanceCounter((LARGE_INTEGER *)&stop);
-	if(saveLog) fprintf(logfile,"T=%.2f ms\n",(stop-start)*1000.0/freq);
+	if(saveLog&&logfile) fprintf(logfile,"T=%.2f ms (%+.2f ms)\n",(stop-start)*1000.0/freq,(stop-start)*1000.0/freq-delay0);
+#endif
+}
+
+///
+///Write data packet
+void writeP(){
+#if !defined _WIN32 && !defined __CYGWIN__		//Linux
+	int i;
+	for(i=0;i<DIMBUF;i++) ref_multi_u.values[i]=bufferU[i];
+	ioctl(fd, HIDIOCSUSAGES, &ref_multi_u); ioctl(fd,HIDIOCSREPORT, &rep_info_u);
+#else	//Windows
+	Result = WriteFile(WriteHandle,bufferU0,DIMBUF+1,&BytesWritten,NULL);
 #endif
 }
 
 
 ///
+///read data packet
+void readP(){
+#if !defined _WIN32 && !defined __CYGWIN__		//Linux
+	int i;
+	ioctl(fd, HIDIOCGUSAGES, &ref_multi_i); ioctl(fd,HIDIOCGREPORT, &rep_info_i);
+	for(i=0;i<DIMBUF;i++) bufferI[i]=ref_multi_i.values[i];
+#else	//Windows
+	Result = ReadFile(ReadHandle,bufferI0,DIMBUF+1,&NumberOfBytesRead,(LPOVERLAPPED) &HIDOverlapped);
+	Result = WaitForSingleObject(hEventObject,10);
+	ResetEvent(hEventObject);
+	if(Result!=WAIT_OBJECT_0){
+		PrintMessage(strings[S_comTimeout]);	/*"comm timeout\r\n"*/
+	}
+#endif
+}
+
+
+
+///
 ///Find the USB peripheral with proper vid&pid code
 /// return 0 if not found
-int FindDevice(){
+int FindDevice(int vid,int pid){
 	int MyDeviceDetected = FALSE;
 #if !defined _WIN32 && !defined __CYGWIN__
 	struct hiddev_devinfo device_info;
@@ -3662,6 +3692,7 @@ int FindDevice(){
 	}
 	else{
 		PrintMessage(strings[S_prog]);	//"Programmer detected\r\n");
+		PrintMessage2("VID=0x%04X PID=0x%04X\r\n",vid,pid);
 		//gtk_statusbar_push(status_bar,statusID,strings[S_prog]);
 	}
 	return MyDeviceDetected;

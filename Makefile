@@ -1,7 +1,11 @@
+VERSION = 0.10.0
 CC = gcc
-CFLAGS = -Wall -Os -s #size
-#CFLAGS = -w -O3 -s
-#CFLAGS = -w -g		#debug
+PREFIX = /usr/local
+CFLAGS =  '-DVERSION="$(VERSION)"' -w `pkg-config --libs --cflags gtk+-2.0` 
+CFLAGS += -Os -s #size
+#CFLAGS += -O3 -s #speed
+#CFLAGS += -g #debug
+
 OBJECTS = opgui.o \
 	deviceRW.o \
 	progP12.o \
@@ -16,22 +20,24 @@ OBJECTS = opgui.o \
 	icd.o \
 	strings.o \
 	icons.o
-GTKFLAGS = `pkg-config --libs --cflags gtk+-2.0`
+
+# Check if we are running on windows
 UNAME := $(shell uname)
 ifneq (, $(findstring _NT-, $(UNAME)))
-	OPFLAG = -mwindows
+	CFLAGS += -mwindows
 else
-	OPFLAG = 
+	CFLAGS += -lrt
 endif
 	
 
+# Targets
 all: opgui
 
 opgui : $(OBJECTS)
-	$(CC) $(CFLAGS) $(OBJECTS) $(GTKFLAGS) -o opgui $(OPFLAG)
+	$(CC) -o $@ $(OBJECTS) $(CFLAGS)
 
 %.o : %.c
-	$(CC) $(CFLAGS) $(GTKFLAGS) -c $<
+	$(CC) $(CFLAGS) -c $<
 
 icons.c : write.png read.png sys.png
 	echo "#include <gtk/gtk.h>" > icons.c
@@ -40,19 +46,20 @@ icons.c : write.png read.png sys.png
 	stepover_icon stepover.png stop_icon stop.png >> icons.c
 
 clean:
-	rm -f $(OBJECTS) icons.c
+	rm -f opgui $(OBJECTS) icons.c
 	
-.PHONY: clean
-
-prefix	:= /usr/local
-
 install: all
-	test -d $(prefix) || mkdir $(prefix)
-	test -d $(prefix)/bin || mkdir $(prefix)/bin
-	install -m 0755 opgui $(prefix)/bin;
-
-.PHONY: install
+	#test -d $(prefix) || mkdir $(prefix)
+	#test -d $(prefix)/bin || mkdir $(prefix)/bin
+	@echo "Installing opgui"
+	mkdir -p $(PREFIX)/bin
+	install -m 0755 opgui $(PREFIX)/bin;
 
 package:
-	tar -cvzf opgui.tar.gz ../opgui/*.c ../opgui/*.h ../opgui/gpl-2.0.txt ../opgui/Makefile ../opgui/readme ../opgui/*.png
+	@echo "Creating opgui-$(VERSION).tar.gz"
+	@mkdir opgui-$(VERSION)
+	@cp *.c *.h *.png gpl-2.0.txt Makefile readme opgui-$(VERSION)
+	@tar -czf opgui-$(VERSION).tar.gz opgui-$(VERSION)
+	@rm -rf opgui-$(VERSION)
 
+.PHONY: all clean install package

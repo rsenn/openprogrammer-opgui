@@ -31,8 +31,7 @@ struct var{	char* name;	int display;} variables[0x200];
 //MCLR is low so the target is reset even if power is not supplied by the programmer.
 //Set communication speed at 1/(2*Tck us)
 void startICD(int Tck){
-	bufferU[0]=0;
-	int j=1;
+	int j=0;
 	bufferU[j++]=PROG_RST;
 	bufferU[j++]=SET_PARAMETER;
 	bufferU[j++]=SET_T1T2;
@@ -52,19 +51,16 @@ void startICD(int Tck){
 	bufferU[j++]=0x1;
 	bufferU[j++]=FLUSH;
 	for(;j<DIMBUF;j++) bufferU[j]=0x0;
-	write();
-	msDelay(3);
-	read();
+	PacketIO(3);
 	if(saveLog){
 		fprintf(logfile,"startICD()\n");
-		WriteLogIO();
 	}
 }
 
 //Check whether the target is running or is executing the debug routine.
 //This is signaled by RB7 (Data): D=1 -> debugger monitor running
 int isRunning(){
-	int z,j=1;
+	int z,j=0;
 	bufferU[j++]=SET_CK_D;
 	bufferU[j++]=0x0;		//D=0
 	bufferU[j++]=SET_CK_D;
@@ -72,12 +68,9 @@ int isRunning(){
 	bufferU[j++]=READ_PINS;
 	bufferU[j++]=FLUSH;
 	for(;j<DIMBUF;j++) bufferU[j]=0x0;
-	write();
-	msDelay(2);
-	read();
+	PacketIO(2);
 	if(saveLog){
 		fprintf(logfile,"isRunning()\n");
-		WriteLogIO();
 	}
 	for(z=0;z<DIMBUF-1&&bufferI[z]!=READ_PINS;z++);
 	if(bufferI[z+1]&1) running=0;
@@ -90,7 +83,7 @@ int isRunning(){
 //This is necessary because at every break 
 //the ICD register is loaded with the last address.
 void cont(int break_addr, int freeze){
-	int j=1;
+	int j=0;
 	//set breakpoint and freeze
 	break_addr&=0x1FFF;
 	bufferU[j++]=TX16;
@@ -113,19 +106,16 @@ void cont(int break_addr, int freeze){
 	bufferU[j++]=0x2;		//set D as input
 	bufferU[j++]=FLUSH;
 	for(;j<DIMBUF;j++) bufferU[j]=0x0;
-	write();
-	msDelay(1+5*Tcom);
-	read();
+	PacketIO(1+5*Tcom);
 	if(saveLog){
 		fprintf(logfile,"continue()\n");
-		WriteLogIO();
 	}
 	running=1;
 }
 
 //Execute a single step
 void step(){
-	int j=1;
+	int j=0;
 	bufferU[j++]=TX16;
 	bufferU[j++]=0x1;
 	bufferU[j++]=STEP;		//single step
@@ -134,37 +124,31 @@ void step(){
 	bufferU[j++]=0x2;		//set D as input
 	bufferU[j++]=FLUSH;
 	for(;j<DIMBUF;j++) bufferU[j]=0x0;
-	write();
-	msDelay(1+Tcom);
-	read();
+	PacketIO(1+Tcom);
 	if(saveLog){
 		fprintf(logfile,"step()\n");
-		WriteLogIO();
 	}
 }
 
 //Remove reset so that the target can start executing its code.
 void run(){
-	int j=1;
+	int j=0;
 	bufferU[j++]=SET_CK_D;
 	bufferU[j++]=0x2;
 	bufferU[j++]=EN_VPP_VCC;		//MCLR=H
 	bufferU[j++]=0x5;
 	bufferU[j++]=FLUSH;
 	for(;j<DIMBUF;j++) bufferU[j]=0x0;
-	write();
-	msDelay(1);
-	read();
+	PacketIO(2);
 	if(saveLog){
 		fprintf(logfile,"run()\n");
-		WriteLogIO();
 	}
 	running=1;
 }
 
 //Get the debugger monitor version
 int version(){
-	int j=1,z;
+	int j=0,z;
 	bufferU[j++]=TX16;
 	bufferU[j++]=0x1;
 	bufferU[j++]=VER;		//version
@@ -173,12 +157,9 @@ int version(){
 	bufferU[j++]=0x1;
 	bufferU[j++]=FLUSH;
 	for(;j<DIMBUF;j++) bufferU[j]=0x0;
-	write();
-	msDelay(1+2*Tcom);
-	read();
+	PacketIO(1+2*Tcom);
 	if(saveLog){
 		fprintf(logfile,"version()\n");
-		WriteLogIO();
 	}
 	for(z=0;z<DIMBUF-2&&bufferI[z]!=RX16;z++);
 	return bufferI[z+3];
@@ -186,19 +167,16 @@ int version(){
 
 //Halt execution by setting RB6 (Clock) low
 void Halt(){
-	int j=1;
+	int j=0;
 	bufferU[j++]=SET_CK_D;
 	bufferU[j++]=0x6;
 	bufferU[j++]=SET_CK_D;
 	bufferU[j++]=0x2;		//set D as input
 	bufferU[j++]=FLUSH;
 	for(;j<DIMBUF;j++) bufferU[j]=0x0;
-	write();
-	msDelay(2);
-	read();
+	PacketIO(2);
 	if(saveLog){
 		fprintf(logfile,"halt()\n");
-		WriteLogIO();
 	}
 	running=0;
 	//printf("halted\n");
@@ -206,7 +184,7 @@ void Halt(){
 
 //Read register at address addr
 int ReadRegister(int addr){
-	int j=1,z;
+	int j=0,z;
 	bufferU[j++]=TX16;
 	bufferU[j++]=0x2;
 	bufferU[j++]=RREG;		//Read register
@@ -219,12 +197,9 @@ int ReadRegister(int addr){
 	bufferU[j++]=0x2;		//set D as input
 	bufferU[j++]=FLUSH;
 	for(;j<DIMBUF;j++) bufferU[j]=0x0;
-	write();
-	msDelay(1+3*Tcom);
-	read();
+	PacketIO(1+3*Tcom);
 	if(saveLog){
 		fprintf(logfile,"ReadRegister(0x%X)\n",addr);
-		WriteLogIO();
 	}
 	for(z=0;z<DIMBUF-2&&bufferI[z]!=RX16;z++);
 	return bufferI[z+3];	
@@ -232,7 +207,7 @@ int ReadRegister(int addr){
 
 //Read n registers starting at address addr
 int ReadRegisterN(int addr,int n,int* buf){
-	int i,j=1,z,w;
+	int i,j=0,z,w;
 	for(i=0;i<n;i+=w){
 		w=i+(DIMBUF-9)/2<n?(DIMBUF-9)/2:n-i;
 		bufferU[j++]=TX16;
@@ -245,30 +220,25 @@ int ReadRegisterN(int addr,int n,int* buf){
 		bufferU[j++]=w;
 		bufferU[j++]=FLUSH;
 		for(;j<DIMBUF;j++) bufferU[j]=0x0;
-		write();
-		msDelay(1+(w+2)*Tcom);
-		read();
+		PacketIO(1+(w+2)*Tcom);
 		if(saveLog){
 			fprintf(logfile,"ReadRegisterN(0x%X,%d)\n",addr,n);
-			WriteLogIO();
 		}
 		for(z=0;z<DIMBUF-2&&bufferI[z]!=RX16;z++);
 		for(j=0;j<w;j++) buf[i+j]=bufferI[z+3+j*2];
-		j=1;
+		j=0;
 	}
 	bufferU[j++]=SET_CK_D;
 	bufferU[j++]=0x2;		//set D as input
 	bufferU[j++]=FLUSH;
 	for(;j<DIMBUF;j++) bufferU[j]=0x0;
-	write();
-	msDelay(1);
-	read();
+	PacketIO(2);
 	return i==n?0:-1;
 }
 
 //Write data at address addr
 void WriteRegister(int addr,int data){
-	int j=1;
+	int j=0;
 	bufferU[j++]=TX16;
 	bufferU[j++]=0x2;
 	bufferU[j++]=WREG;		//write register
@@ -279,12 +249,9 @@ void WriteRegister(int addr,int data){
 	bufferU[j++]=0x2;		//set D as input
 	bufferU[j++]=FLUSH;
 	for(;j<DIMBUF;j++) bufferU[j]=0x0;
-	write();
-	msDelay(1+2*Tcom);
-	read();	
+	PacketIO(1+2*Tcom);
 	if(saveLog){
 		fprintf(logfile,"WriteRegister(0x%X,0x%X)\n",addr,data);
-		WriteLogIO();
 	}
 }
 
@@ -311,7 +278,7 @@ int ReadProgMem(int addr){
 int ReadProgMemN(int addr,int n,int* buf){
 	int addr_temp, data_temp, eecon_temp;
 	if(saveLog) fprintf(logfile,"ReadProgMemN(0x%X,%d)\n",addr,n);
-	int i,j=1,z,w,k;
+	int i,j=0,z,w,k;
 	bufferU[j++]=TX16;
 	bufferU[j++]=2;
 	bufferU[j++]=RREG;		//Read register
@@ -336,11 +303,8 @@ int ReadProgMemN(int addr,int n,int* buf){
 	bufferU[j++]=EECON1&0xFF;
 	bufferU[j++]=FLUSH;
 	for(;j<DIMBUF;j++) bufferU[j]=0x0;
-	write();
-	msDelay(1+13*Tcom);
-	read();
-	j=1;
-	if(saveLog)	WriteLogIO();
+	PacketIO(1+13*Tcom);
+	j=0;
 	for(z=0;z<DIMBUF-5&&bufferI[z]!=RX16;z++);
 	data_temp=bufferI[z+3]+(bufferI[z+7]<<8);
 	addr_temp=bufferI[z+5]+(bufferI[z+9]<<8);
@@ -372,12 +336,9 @@ int ReadProgMemN(int addr,int n,int* buf){
 		if(j>DIMBUF-21||i==n-1){
 			bufferU[j++]=FLUSH;
 			for(;j<DIMBUF;j++) bufferU[j]=0x0;
-			write();
-			msDelay(2+13*Tcom*w);
-			read();
-			j=1;
+			PacketIO(2+13*Tcom*w);
+			j=0;
 			w=0;
-			if(saveLog)	WriteLogIO();
 			for(z=0;z<DIMBUF-5;z++){
 				if(bufferI[z]==RX16){
 					buf[k++]=bufferI[z+3]+(bufferI[z+7]<<8);
@@ -412,10 +373,7 @@ int ReadProgMemN(int addr,int n,int* buf){
 	bufferU[j++]=0x2;		//set D as input
 	bufferU[j++]=FLUSH;
 	for(;j<DIMBUF;j++) bufferU[j]=0x0;
-	write();
-	msDelay(1+10*Tcom);
-	read();
-	if(saveLog)	WriteLogIO();
+	PacketIO(1+10*Tcom);
 	return i;
 }
 
@@ -439,7 +397,7 @@ int ReadDataMem(int addr){
 int ReadDataMemN(int addr,int n,unsigned char* buf){
 	int addr_temp, data_temp, eecon_temp;
 	if(saveLog) fprintf(logfile,"ReadDataMemN(0x%X,%d)\n",addr,n);
-	int i,j=1,z,w,k;
+	int i,j=0,z,w,k;
 	bufferU[j++]=TX16;
 	bufferU[j++]=2;
 	bufferU[j++]=RREG;		//Read register
@@ -464,11 +422,8 @@ int ReadDataMemN(int addr,int n,unsigned char* buf){
 	bufferU[j++]=EECON1&0xFF;
 	bufferU[j++]=FLUSH;
 	for(;j<DIMBUF;j++) bufferU[j]=0x0;
-	write();
-	msDelay(1+13*Tcom);
-	read();
-	j=1;
-	if(saveLog)	WriteLogIO();
+	PacketIO(1+13*Tcom);
+	j=0;
 	for(z=0;z<DIMBUF-5&&bufferI[z]!=RX16;z++);
 	data_temp=bufferI[z+3];
 	addr_temp=bufferI[z+5];
@@ -496,12 +451,9 @@ int ReadDataMemN(int addr,int n,unsigned char* buf){
 		if(j>DIMBUF-17||i==n-1){
 			bufferU[j++]=FLUSH;
 			for(;j<DIMBUF;j++) bufferU[j]=0x0;
-			write();
-			msDelay(2+10*Tcom*w);
-			read();
-			j=1;
+			PacketIO(2+10*Tcom*w);
+			j=0;
 			w=0;
-			if(saveLog)	WriteLogIO();
 			for(z=0;z<DIMBUF-5;z++){
 				if(bufferI[z]==RX16){
 					buf[k++]=bufferI[z+3];
@@ -528,10 +480,7 @@ int ReadDataMemN(int addr,int n,unsigned char* buf){
 	bufferU[j++]=0x2;		//set D as input
 	bufferU[j++]=FLUSH;
 	for(;j<DIMBUF;j++) bufferU[j]=0x0;
-	write();
-	msDelay(1+10*Tcom);
-	read();
-	if(saveLog)	WriteLogIO();
+	PacketIO(1+10*Tcom);
 	return i;
 }
 
