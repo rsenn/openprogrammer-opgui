@@ -19,24 +19,9 @@
  * or see <http://www.gnu.org/licenses/>
  */
 
-//This cannot be executed conditionally on MSVC
-//#include "stdafx.h"
-
-
-//configure for GUI or command-line
-#ifdef _MSC_VER
-	#define _GUI
-	#include "msvc_common.h"
-#else
-	#define _CMD
 #include "common.h"
-#endif
 
-#ifdef _MSC_VER
-void COpenProgDlg::ReadI2C(int dim,int addr=0)
-#else
 void ReadI2C(int dim,int addr)
-#endif
 // read I2C memories
 // dim=size in bytes
 // addr:
@@ -131,11 +116,7 @@ void ReadI2C(int dim,int addr)
 	}
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::WriteI2C(int dim,int addr,int page)
-#else
 void WriteI2C(int dim,int addr,int page)
-#endif
 // write I2C memories
 // dim=size in bytes
 // addr:
@@ -217,7 +198,7 @@ void WriteI2C(int dim,int addr,int page)
 		for(j=0;ack==0xFD&&j<20;j++){	//ACK polling until write complete
 			PacketIO(2);
 			for(j=0;j<DIMBUF-1&&bufferI[j]!=I2C_WRITE;j++);
-			if(bufferI[j]!=I2C_WRITE||bufferI[j+1]>=0xFA) ack==0xFD;
+			if(bufferI[j]!=I2C_WRITE||bufferI[j+1]>=0xFA) ack=0xFD;
 			else ack=bufferI[j+1];
 		}
 		j=0;
@@ -293,11 +274,7 @@ void WriteI2C(int dim,int addr,int page)
 #define W 0x20		//RB5
 #define ORG 0x20	//RB5
 
-#ifdef _MSC_VER
-void COpenProgDlg::Read93x(int dim,int na=8,int options=0)
-#else
 void Read93x(int dim,int na,int options)
-#endif
 // read 93Sx6 uW memories
 // dim=size in bytes
 // na=address bits
@@ -402,11 +379,7 @@ void Read93x(int dim,int na,int options)
 	}
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::Write93Sx(int dim,int na,int page)
-#else
 void Write93Sx(int dim,int na,int page)
-#endif
 // write 93Sx6 uW memories
 // dim=size in bytes
 // na=address bits
@@ -626,11 +599,7 @@ void Write93Sx(int dim,int na,int page)
 	}
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::Write93Cx(int dim,int na=8,int options=0)
-#else
 void Write93Cx(int dim,int na, int options)
-#endif
 // write 93Cx6 uW memories
 // dim=size in bytes
 // na=address bits
@@ -869,11 +838,7 @@ void Write93Cx(int dim,int na, int options)
 #define HLD 16		//Hold
 #define WP 0x40		//Write protect
 
-#ifdef _MSC_VER
-void COpenProgDlg::Read25xx(int dim)
-#else
 void Read25xx(int dim)
-#endif
 // read 25xx SPI memories
 // dim=size in bytes
 {
@@ -993,11 +958,7 @@ void Read25xx(int dim)
 	}
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::Write25xx(int dim,int options)
-#else
 void Write25xx(int dim,int options)
-#endif
 // write SPI memories
 // dim=size in bytes
 // options:
@@ -1426,11 +1387,7 @@ struct ID_OW{
 	{0x43,"DS28EC20\r\n"},
 };
 
-#ifdef _MSC_VER
-	void COpenProgDlg::OW_ID(int id)
-#else
-	void OW_ID(int id)
-#endif
+void OW_ID(int id)
 {
 	char s[64];
 	int i;
@@ -1458,11 +1415,7 @@ struct ID_OW{
 #define READ_APP_REGISTER 0xC3
 #define COPY_LOCK_APP_REGISTER 0x5A
 
-#ifdef _MSC_VER
-void COpenProgDlg::ReadOneWireMem(int dim,int options)
-#else
 void ReadOneWireMem(int dim,int options)
-#endif
 // read OneWire memories
 // dim=size in bytes
 // options:
@@ -1640,11 +1593,7 @@ void ReadOneWireMem(int dim,int options)
 	}
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::WriteOneWireMem(int dim,int options)
-#else
 void WriteOneWireMem(int dim,int options)
-#endif
 // write OneWire memories
 // dim=size in bytes
 // options:
@@ -1827,11 +1776,7 @@ void WriteOneWireMem(int dim,int options)
 #define RECALL_EE 0xB8
 #define READ_PWSUP 0xB4
 
-#ifdef _MSC_VER
-void COpenProgDlg::ReadDS1820()
-#else
 void ReadDS1820()
-#endif
 // read DS1820 one-wire digital thermometer
 {
 	int z=0,j;
@@ -1938,11 +1883,7 @@ void ReadDS1820()
 #define UNIO_ERAL 0x6D
 #define UNIO_SETAL 0x67
 
-#ifdef _MSC_VER
-void COpenProgDlg::Read11xx(int dim)
-#else
 void Read11xx(int dim)
-#endif
 // read 11xx UNIO memories
 // dim=size in bytes
 {
@@ -2029,11 +1970,7 @@ void Read11xx(int dim)
 	}
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::Write11xx(int dim,int page)
-#else
 void Write11xx(int dim,int page)
-#endif
 // write 11xx UNIO memories
 // dim=size in bytes
 // page=page size

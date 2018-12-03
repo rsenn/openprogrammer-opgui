@@ -21,12 +21,7 @@
 //This cannot be executed conditionally on MSVC
 //#include "stdafx.h"
 
-#ifdef _MSC_VER
-	#define _GUI
-	#include "msvc_common.h"
-#else
-	#include "common.h"
-#endif
+#include "common.h"
 
 struct ID18{
 	int id;
@@ -267,11 +262,7 @@ struct ID18{
 	{0x6260,"18LF25K80 rev%d\r\n",0x1F},
 };
 
-#ifdef _MSC_VER
-	void COpenProgDlg::PIC18_ID(int id)
-#else
 void PIC18_ID(int id)
-#endif
 {
 	char s[64];
 	int i;
@@ -286,11 +277,7 @@ void PIC18_ID(int id)
 	PrintMessage(s);
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::DisplayCODE18F(int dim){
-#else
 void DisplayCODE18F(int dim){
-#endif
 // display  PIC18F CODE memory
 	char s[256]="",t[256]="";
 	char* aux=(char*)malloc((dim/COL+1)*(16+COL*6));
@@ -321,11 +308,7 @@ void DisplayCODE18F(int dim){
 	free(aux);
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::Read18Fx(int dim,int dim2,int options){
-#else
 void Read18Fx(int dim,int dim2,int options){
-#endif
 // read 16 bit PIC 18Fxxxx
 // dim=program size 	dim2=eeprom size
 // options:
@@ -611,11 +594,7 @@ void Read18Fx(int dim,int dim2,int options){
 	}
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::Write18Fx(int dim,int dim2,int wbuf=8,int eraseW1=0x10000,int eraseW2=0x10000,int options=0)
-#else
 void Write18Fx(int dim,int dim2,int wbuf,int eraseW1,int eraseW2,int options)
-#endif
 // write 16 bit PIC 18Fxxxx
 // dim=program size 	dim2=eeprom size	wbuf=write buffer size {<=64}
 // eraseW1=erase word @3C0005	(not used if >= 0x10000)
@@ -1448,7 +1427,7 @@ void Write18Fx(int dim,int dim2,int wbuf,int eraseW1,int eraseW2,int options)
 		}
 	}
 //****************** write CONFIG ********************
-	if(err<max_err&&optWrite==0){
+	if(err<max_err&&(optWrite==0||optWrite==3)){
 		PrintMessage(strings[S_ConfigW]);	//"Write CONFIG ..."
 		if(saveLog)	fprintf(logfile,"Write CONFIG\n");
 		bufferU[j++]=CORE_INS;

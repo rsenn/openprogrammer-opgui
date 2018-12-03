@@ -1,4 +1,4 @@
-VERSION = 0.10.0
+VERSION = 0.10.1
 CC = gcc
 PREFIX = /usr/local
 CFLAGS =  '-DVERSION="$(VERSION)"' -w `pkg-config --libs --cflags gtk+-2.0` 
@@ -12,6 +12,7 @@ OBJECTS = opgui.o \
 	progP16.o \
 	progP18.o \
 	progP24.o \
+	progP32.o \
 	progEEPROM.o \
 	progAVR.o \
 	fileIO.o \

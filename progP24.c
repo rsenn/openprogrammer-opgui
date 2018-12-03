@@ -34,24 +34,9 @@ xDA/GB2/GA3/GC   "     22-87                   "            "                 "
 
 */
 
-//This cannot be executed conditionally on MSVC
-//#include "stdafx.h"
+#include "common.h"
 
-
-//configure for GUI or command-line
-#ifdef _MSC_VER
-	#define _GUI
-	#include "msvc_common.h"
-#else
-	#define _CMD
-	#include "common.h"
-#endif
-
-#ifdef _MSC_VER
-void COpenProgDlg::CheckData(int a,int b,int addr,int *err)
-#else
 void CheckData(int a,int b,int addr,int *err)
-#endif
 {
 	if(a!=b){
 #ifdef _MSC_VER
@@ -361,11 +346,7 @@ struct ID24{
 	{0x488B,"24FJ128GC008"},
 };
 
-#ifdef _MSC_VER
-void COpenProgDlg::PIC24_ID(int id)
-#else
 void PIC24_ID(int id)
-#endif
 {
 	char s[64];
 	int i;
@@ -380,11 +361,7 @@ void PIC24_ID(int id)
 	PrintMessage(strings[S_nodev]); //"Unknown device\r\n");
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::DisplayCODE24F(int dim){
-#else
 void DisplayCODE24F(int dim){
-#endif
 // display 16 bit PIC CODE memory
 	char s[256]="",t[256]="";
 	char* aux=(char*)malloc((dim/COL+1)*2*(16+COL*9));
@@ -416,11 +393,7 @@ void DisplayCODE24F(int dim){
 	free(aux);
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::DisplayEE24F(){
-#else
 void DisplayEE24F(){
-#endif
 // display EE memory with address offset by 0x7FF000
 	char s[256],t[256],v[256],*aux;
 	int valid=0,empty=1;
@@ -469,11 +442,7 @@ void DisplayEE24F(){
 	free(aux);
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::Read24Fx(int dim,int dim2,int options,int appIDaddr,int executiveArea){
-#else
 void Read24Fx(int dim,int dim2,int options,int appIDaddr,int executiveArea){
-#endif
 // read 16 bit PIC 24Fxxxx
 // deviceID @ 0xFF0000
 // dim=program size (16 bit words)
@@ -1294,11 +1263,7 @@ void Read24Fx(int dim,int dim2,int options,int appIDaddr,int executiveArea){
 	}
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::Read24Ex(int dim,int dim2,int options,int appIDaddr,int executiveArea){
-#else
 void Read24Ex(int dim,int dim2,int options,int appIDaddr,int executiveArea){
-#endif
 // read 16 bit PIC 24Exxxx
 // deviceID @ 0xFF0000
 // dim=program size (16 bit words)
@@ -1934,11 +1899,7 @@ void Read24Ex(int dim,int dim2,int options,int appIDaddr,int executiveArea){
 }
 
 
-#ifdef _MSC_VER
-void COpenProgDlg::Write24Fx(int dim,int dim2,int options,int appIDaddr,int rowSize, double wait){
-#else
 void Write24Fx(int dim,int dim2,int options,int appIDaddr,int rowSize, double wait){
-#endif
 // write 16 bit PIC 24Fxxxx
 // deviceID @ 0xFF0000
 // dim=program size (16 bit words)
@@ -3387,11 +3348,7 @@ void Write24Fx(int dim,int dim2,int options,int appIDaddr,int rowSize, double wa
 	PrintStatusClear();			//clear status report
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::Write24Ex(int dim,int dim2,int options,int appIDaddr,int rowSize, double wait){
-#else
 void Write24Ex(int dim,int dim2,int options,int appIDaddr,int rowSize, double wait){
-#endif
 // write 16 bit PIC 24Exxxx
 // deviceID @ 0xFF0000
 // dim = program size (16 bit words)

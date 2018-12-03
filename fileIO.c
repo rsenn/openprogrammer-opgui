@@ -18,28 +18,15 @@
  * or see <http://www.gnu.org/licenses/>
  */
 
-//This cannot be executed conditionally on MSVC
-//#include "stdafx.h"
-
-
 //configure for GUI or command-line
-#ifdef _MSC_VER
-	#define _GUI
-	#include "msvc_common.h"
-#else
-	#include "common.h"
-	#include "progP12.h"
-	#include "progP16.h"
-	#include "progP18.h"
-	#include "progP24.h"
-	#include "progAVR.h"
-#endif
+#include "common.h"
+#include "progP12.h"
+#include "progP16.h"
+#include "progP18.h"
+#include "progP24.h"
+#include "progAVR.h"
 
-#ifdef _MSC_VER
-	unsigned int COpenProgDlg::htoi(const char *hex, int length)
-#else
 unsigned int htoi(const char *hex, int length)
-#endif
 {
 	int i;
 	unsigned int v = 0;
@@ -53,11 +40,7 @@ unsigned int htoi(const char *hex, int length)
 	return v;
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::Save(char* dev,char* savefile)
-#else
 void Save(char* dev,char* savefile)
-#endif
 {
 	FILE* f=fopen(savefile,"w");
 	if(!f) return;
@@ -357,11 +340,7 @@ void Save(char* dev,char* savefile)
 	if(f) fclose(f);
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::SaveEE(char* dev,char* savefile){
-#else
 void SaveEE(char* dev,char* savefile){
-#endif
 	FILE* f=fopen(savefile,"w");
 	if(!f) return;
 //**************** ATMEL *******************************************
@@ -395,11 +374,7 @@ void SaveEE(char* dev,char* savefile){
 	if(f) fclose(f);
 }
 
-#ifdef _MSC_VER
-int COpenProgDlg::Load(char*dev,char*loadfile){
-#else
 int Load(char*dev,char*loadfile){
-#endif
 	int i,input_address=0,ext_addr=0,sum,valid;
 	char line[256];
 	FILE* f=fopen(loadfile,"r");
@@ -767,11 +742,7 @@ int Load(char*dev,char*loadfile){
 	return 0;
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::LoadEE(char*dev,char*loadfile){
-#else
 void LoadEE(char*dev,char*loadfile){
-#endif
 	FILE* f=fopen(loadfile,"r");
 	if(!f) return;
 	int i;
@@ -824,11 +795,7 @@ void LoadEE(char*dev,char*loadfile){
 	}
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::OpenLogFile()
-#else
 void OpenLogFile()
-#endif
 {
 	logfile=fopen(LogFileName,"w");
 	if(!logfile) return;
@@ -841,21 +808,13 @@ void OpenLogFile()
 	fprintf(logfile,"%s\n", asctime (timeinfo) );
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::CloseLogFile()
-#else
 void CloseLogFile()
-#endif
 {
 	if(logfile)fclose(logfile);
 	logfile=0;
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::WriteLogIO()
-#else
 void WriteLogIO()
-#endif
 {
 	int i;
 	//fprintf(logfile,"bufferU=[%02X\n",bufferU[0]);

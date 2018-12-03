@@ -18,21 +18,9 @@
  * or see <http://www.gnu.org/licenses/>
  */
 
-//This cannot be executed conditionally on MSVC
-//#include "stdafx.h"
+#include "common.h"
 
-
-#ifdef _MSC_VER
-	#include "msvc_common.h"
-#else
-	#include "common.h"
-#endif
-
-#ifdef _MSC_VER
-void COpenProgDlg::Read12F5xx(int dim, int dim2)
-#else
 void Read12F5xx(int dim,int dim2)
-#endif
 // read 12 bit PIC
 // dim=program size 	dim2=config size
 // vdd before vpp
@@ -204,11 +192,7 @@ void Read12F5xx(int dim,int dim2)
 	PrintStatusClear();			//clear status report
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::Write12F5xx(int dim,int OscAddr)
-#else
 void Write12F5xx(int dim,int OscAddr)
-#endif
 {
 // write 12 bit PIC
 // dim=program size     max~4300=10CC
@@ -469,11 +453,7 @@ void Write12F5xx(int dim,int OscAddr)
 	PrintStatusClear();			//clear status report
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::Write12C5xx(int dim,int dummy)
-#else
 void Write12C5xx(int dim,int dummy)
-#endif
 {
 // write 12 bit PIC with OTP
 // dim=program size     max~4300=10CC

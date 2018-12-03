@@ -1,6 +1,6 @@
 /**
  * \file progP16.c - algorithms to program the PIC16 (14 bit word) family of microcontrollers
- * Copyright (C) 2009-2016 Alberto Maccioni
+ * Copyright (C) 2009-2018 Alberto Maccioni
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,17 +18,7 @@
  * or see <http://www.gnu.org/licenses/>
  */
 
-//This cannot be executed conditionally on MSVC
-//#include "stdafx.h"
-
-
-//configure for GUI or command-line
-#ifdef _MSC_VER
-	#define _GUI
-	#include "msvc_common.h"
-#else
-	#include "common.h"
-#endif
+#include "common.h"
 
 struct ID16{
 	int id;
@@ -273,17 +263,31 @@ struct ID16{
 	{0x307D,"16F1619\r\n",0},
 	{0x307E,"16LF1615\r\n",0},
 	{0x307F,"16LF1619\r\n",0},
+	{0x3080,"16F1764\r\n",0},
+	{0x3081,"16F1765\r\n",0},
+	{0x3082,"16LF1764\r\n",0},
+	{0x3083,"16LF1765\r\n",0},
+	{0x3084,"16F1768\r\n",0},
+	{0x3085,"16F1769\r\n",0},
+	{0x3086,"16LF1768\r\n",0},
+	{0x3087,"16LF1769\r\n",0},
+	{0x308A,"16F1773\r\n",0},
+	{0x308B,"16F1776\r\n",0},
+	{0x308C,"16LF1773\r\n",0},
+	{0x308D,"16LF1776\r\n",0},
+	{0x308E,"16F1777\r\n",0},
+	{0x308F,"16F1778\r\n",0},
+	{0x3090,"16F1779\r\n",0},
+	{0x3091,"16LF1777\r\n",0},
+	{0x3092,"16LF1778\r\n",0},
+	{0x3093,"16LF1779\r\n",0},
 	{0x30A4,"16F18326\r\n",0},
 	{0x30A5,"16F18346\r\n",0},
 	{0x30A6,"16LF18326\r\n",0},
 	{0x30A7,"16LF18346\r\n",0},
 };
 
-#ifdef _MSC_VER
-	void COpenProgDlg::PIC16_ID(int id)
-#else
-	void PIC16_ID(int id)
-#endif
+void PIC16_ID(int id)
 {
 	char s[64];
 	int i;
@@ -303,11 +307,7 @@ struct ID16{
 	PrintMessage(s);
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::DisplayCODE16F(int size){
-#else
 void DisplayCODE16F(int size){
-#endif
 // display 14 bit PIC CODE memory
 	char s[256]="",t[256]="";
 	char* aux=(char*)malloc((size/COL+1)*(16+COL*5));
@@ -338,11 +338,7 @@ void DisplayCODE16F(int size){
 	free(aux);
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::DisplayEE16F(int size){
-#else
 void DisplayEE16F(int size){
-#endif
 // display 14 bit PIC EEPROM memory
 	int valid=0,empty=1,i,j;
 	char s[256]="",t[256]="",v[256]="";
@@ -381,11 +377,7 @@ void DisplayEE16F(int size){
 	free(aux);
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::Read16Fxxx(int dim,int dim2,int dim3,int vdd){
-#else
 void Read16Fxxx(int dim,int dim2,int dim3,int vdd){
-#endif
 // read 14 bit PIC
 // dim=program size 	dim2=eeprom size   dim3=config size
 // dim2<0 -> eeprom @ 0x2200
@@ -639,11 +631,7 @@ void Read16Fxxx(int dim,int dim2,int dim3,int vdd){
 	PrintStatusClear();			//clear status report
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::Read16F1xxx(int dim,int dim2,int dim3,int options){
-#else
 void Read16F1xxx(int dim,int dim2,int dim3,int options){
-#endif
 // read 14 bit enhanced PIC
 // dim=program size (up to 0x8000)
 // dim2=eeprom size (up to 0x400)
@@ -988,11 +976,7 @@ void Read16F1xxx(int dim,int dim2,int dim3,int options){
 	PrintStatusClear();			//clear status report
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::Write12F6xx(int dim,int dim2)
-#else
 void Write12F6xx(int dim,int dim2)
-#endif
 // write 14 bit PIC
 // dim=program size 	dim2=eeprom size
 // vpp before vdd
@@ -1377,11 +1361,7 @@ void Write12F6xx(int dim,int dim2)
 	PrintStatusClear();			//clear status report
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::Write16F8x (int dim,int dim2)
-#else
 void Write16F8x (int dim,int dim2)
-#endif
 // write 14 bit PIC
 // dim=program size 	dim2=eeprom size
 // vdd + 50ms + vdd&vpp
@@ -1757,11 +1737,7 @@ void Write16F8x (int dim,int dim2)
 	PrintStatusClear();			//clear status report
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::Write16F62x (int dim,int dim2)
-#else
 void Write16F62x (int dim,int dim2)
-#endif
 // write 14 bit PIC
 // dim=program size 	dim2=eeprom size
 // vpp before vdd
@@ -2090,11 +2066,7 @@ void Write16F62x (int dim,int dim2)
 	PrintStatusClear();			//clear status report
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::Write12F62x(int dim,int dim2)
-#else
 void Write12F62x(int dim,int dim2)
-#endif
 // write 14 bit PIC
 // dim=program size 	dim2=eeprom size
 // vpp before vdd
@@ -2406,11 +2378,7 @@ void Write12F62x(int dim,int dim2)
 	PrintStatusClear();			//clear status report
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::Write16F87x (int dim,int dim2)
-#else
 void Write16F87x (int dim,int dim2)
-#endif
 // write 14 bit PIC
 // dim=program size 	dim2=eeprom size
 // dim2<0 -> eeprom @ 0x2200
@@ -2798,11 +2766,7 @@ void Write16F87x (int dim,int dim2)
 	PrintStatusClear();			//clear status report
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::Write16F87xA (int dim,int dim2,int seq)
-#else
 void Write16F87xA (int dim,int dim2,int seq)
-#endif
 // write 14 bit PIC
 // dim=program size 	dim2=eeprom size
 // seq=0: vdd + (50ms) + vdd&vpp
@@ -3145,11 +3109,7 @@ void Write16F87xA (int dim,int dim2,int seq)
 	PrintStatusClear();			//clear status report
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::Write16F81x (int dim,int dim2)
-#else
 void Write16F81x (int dim,int dim2)
-#endif
 // write 14 bit PIC
 // dim=program size 	dim2=eeprom size
 // seq=0: vdd + (50ms) + vdd&vpp
@@ -3517,11 +3477,7 @@ void Write16F81x (int dim,int dim2)
 	PrintStatusClear();			//clear status report
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::Write12F61x(int dim, int d, int d2)
-#else
 void Write12F61x(int dim, int d, int d2)
-#endif
 // write 14 bit PIC
 // dim=program size
 // d not used
@@ -3803,11 +3759,7 @@ void Write12F61x(int dim, int d, int d2)
 	PrintStatusClear();			//clear status report
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::Write16F88x(int dim,int dim2)
-#else
 void Write16F88x(int dim,int dim2)
-#endif
 // write 14 bit PIC
 // dim=program size 	dim2=eeprom size
 // vpp before vdd
@@ -4173,11 +4125,7 @@ void Write16F88x(int dim,int dim2)
 	PrintStatusClear();			//clear status report
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::Write16F7x(int dim,int vdd)
-#else
 void Write16F7x(int dim,int vdd)
-#endif
 // dim=program size
 // write 14 bit PIC
 // vdd=0  vdd +50ms before vpp
@@ -4442,11 +4390,7 @@ void Write16F7x(int dim,int vdd)
 	PrintStatusClear();			//clear status report
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::Write16F71x(int dim,int vdd)
-#else
 void Write16F71x(int dim,int vdd)
-#endif
 // write 14 bit PIC
 // dim=program size
 // vdd=0  vdd +50ms before vpp
@@ -4715,11 +4659,7 @@ void Write16F71x(int dim,int vdd)
 	PrintStatusClear();			//clear status report
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::Write16F72x(int dim, int d, int d2)
-#else
 void Write16F72x(int dim, int d, int d2)
-#endif
 // write 14 bit PIC
 // dim=program size
 // d not used
@@ -4969,11 +4909,7 @@ void Write16F72x(int dim, int d, int d2)
 	PrintStatusClear();			//clear status report
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::Write16F1xxx(int dim,int dim2,int options)
-#else
 void Write16F1xxx(int dim,int dim2,int options)
-#endif
 // write 14 bit enhanced PIC
 // dim=program size
 // dim2=eeprom size

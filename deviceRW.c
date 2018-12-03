@@ -1,6 +1,6 @@
 /*
  * deviceRW.c - Read-write calls for various devices
- * Copyright (C) 2010-2016 Alberto Maccioni
+ * Copyright (C) 2010-2018 Alberto Maccioni
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,23 +18,16 @@
  * or see <http://www.gnu.org/licenses/>
  */
 
-//This cannot be executed conditionally on MSVC
-//#include "stdafx.h"
-
-
 //configure for GUI or command-line
-#ifdef _MSC_VER
-	#define _GUI
-	#include "msvc_common.h"
-#else
-	#include "common.h"
-	#include "progP12.h"
-	#include "progP16.h"
-	#include "progP18.h"
-	#include "progP24.h"
-	#include "progEEPROM.h"
-	#include "progAVR.h"
-#endif
+#include "common.h"
+#include "progP12.h"
+#include "progP16.h"
+#include "progP18.h"
+#include "progP24.h"
+#include "progEEPROM.h"
+#include "progAVR.h"
+#include "progP32.h"
+
 #ifdef __GTK_H__
 #define _GTKGUI
 #endif
@@ -65,6 +58,7 @@ char* devices[]={
 "16F1526","16F1527","16LF1554","16LF1559","16F1574","16F1575","16F1578","16F1579",
 "16F1613","16F1614","16F1615","16F1618","16F1619",
 "16F1703","16F1704","16F1705","16F1707","16F1708","16F1709","16F1713","16F1716","16F1717","16F1718","16F1719",
+"16F1764","16F1765","16F1768","16F1769","16F1773","16F1776","16F1777","16F17784","16F1779",
 "16F1782","16F1783","16F1784","16F1786","16F1787","16F1788","16F1789",
 "16F1823","16F1824","16F1825","16F1826","16F1827","16F1828","16F1829","16F1847",
 "16LF1902","16LF1903","16LF1904","16LF1906","16LF1907",
@@ -144,6 +138,7 @@ char* devices[]={
 "30F4011","30F4012","30F4013",
 "30F5011","30F5013","30F5015","30F5016",
 "30F6010","30F6011","30F6012","30F6013","30F6014","30F6015",
+//"32MX270F256",
 "33FJ06GS101","33FJ06GS102","33FJ06GS202",
 "33FJ12GP201","33FJ12GP202","33FJ12MC201","33FJ12MC202",
 "33FJ16GP304","33FJ16GS402","33FJ16GS404","33FJ16GS502","33FJ16GS504","33FJ16MC304",
@@ -311,7 +306,7 @@ struct DEVICES{
 	{"16F737,16F747",
 		PIC16,13.0,0,Read16Fxxx,{0x1000,0,9,2},9,Write16F7x,{0x1000,1,-10},0},				//4K, vdd short/no delay
 	{"16F721,16F723,16F723A,16F724",
-		PIC16,13.0,0,Read16Fxxx,{0x1000,0,11,0},0x100,Write16F72x,{0x1000,0,0},0},		//4K, vpp, config1-2 + cal1-2, 3.3V
+		PIC16,13.0,0,Read16Fxxx,{0x1000,0,11,0},0x100,Write16F72x,{0x1000,0,0},0},			//4K, vpp, config1-2 + cal1-2, 3.3V
 	{"16LF1903,16LF1904,16F1508,16F1513,16LF1554",
 		PIC16,8.5,1,Read16F1xxx,{0x1000,0,11,0},0x200,Write16F1xxx,{0x1000,0,0},0},			//4K, vpp, 3.3V
 	{"16F1574,16F1578",
@@ -322,6 +317,12 @@ struct DEVICES{
 		PIC16,8.5,1,Read16F1xxx,{0x1000,0,13,4},0x200,Write16F1xxx,{0x1000,0,4},0},			//4K, vpp, 3.3V
 	{"16F1713",
 		PIC16,8.5,1,Read16F1xxx,{0x1000,0,17,0},0x200,Write16F1xxx,{0x1000,0,0},0},			//4K, vpp, 3.3V
+	{"16F1783,16F1784",
+		PIC16,8.5,1,Read16F1xxx,{0x1000,0,19,0},0x200,Write16F1xxx,{0x1000,0,0},0},			//4K, vpp, 3.3V
+	{"16F1764,16F1768",
+		PIC16,8.5,1,Read16F1xxx,{0x1000,0,20,0},0x200,Write16F1xxx,{0x1000,0,0},0},			//4K, vpp, 3.3V
+	{"16F1773",
+		PIC16,8.5,1,Read16F1xxx,{0x1000,0,24,0},0x200,Write16F1xxx,{0x1000,0,0},0},			//4K, vpp, 3.3V
 	{"16F873A,16F874A",
 		PIC16,13.0,0,Read16Fxxx,{0x1000,0x80,8,1},0x100,Write16F87xA,{0x1000,0x80,1},0},	//4K, 128, vdd
 	{"16F873,16F874",
@@ -340,8 +341,6 @@ struct DEVICES{
 		PIC16,13.0,0,Read16Fxxx,{0x1000,0x100,10,0},0x40,Write12F6xx,{0x1000,0x100,-10},0},	//4K, 256, vpp, cal1 + cal2
 	{"16F1933,16F1934,16F1824,16F1827,16F1828,12F1840",
 		PIC16,8.5,1,Read16F1xxx,{0x1000,0x100,11,0},0x200,Write16F1xxx,{0x1000,0x100,0},0},	//4K, 256, vpp, 3.3V
-	{"16F1783,16F1784",
-		PIC16,8.5,1,Read16F1xxx,{0x1000,0x100,19,0},0x200,Write16F1xxx,{0x1000,0x100,0},0},	//4K, 256, vpp, 3.3V
 	{"16F18324,16F18344",
 		PIC16,8.5,1,Read16F1xxx,{0x1000,0x100,11,0x1C},0x20,Write16F1xxx,{0x1000,0x100,0x1C},0},	//4K, 256, vpp, 3.3V, new cmd
 	{"16F76,16F77",
@@ -360,6 +359,10 @@ struct DEVICES{
 		PIC16,8.5,1,Read16F1xxx,{0x2000,0,13,4},0x200,Write16F1xxx,{0x2000,0,4},0},			//8K, vpp, 3.3V
 	{"16F1716,16F1717",
 		PIC16,8.5,1,Read16F1xxx,{0x2000,0,17,0},0x200,Write16F1xxx,{0x2000,0,0},0},			//8K, vpp, 3.3V
+	{"16F1765,16F1769",
+		PIC16,8.5,1,Read16F1xxx,{0x2000,0,20,0},0x200,Write16F1xxx,{0x2000,0,0},0},			//8K, vpp, 3.3V
+	{"16F1776,16F1777",
+		PIC16,8.5,1,Read16F1xxx,{0x2000,0,24,0},0x200,Write16F1xxx,{0x2000,0,0},0},			//8K, vpp, 3.3V
 	{"16F876A,16F877A",
 		PIC16,13.0,0,Read16Fxxx,{0x2000,0x100,8,1},0x100,Write16F87xA,{0x2000,0x100,1},0},	//8K, 256, vdd
 	{"16F876,16F877",
@@ -378,6 +381,8 @@ struct DEVICES{
 		PIC16,8.5,1,Read16F1xxx,{0x4000,0,11,0},0x200,Write16F1xxx,{0x4000,0,0},0},			//16K, vpp, 3.3V
 	{"16F1718,16F1719",
 		PIC16,8.5,1,Read16F1xxx,{0x4000,0,17,0},0x200,Write16F1xxx,{0x4000,0,0},0},			//16K, vpp, 3.3V
+	{"16F1778,16F1779",
+		PIC16,8.5,1,Read16F1xxx,{0x4000,0,24,0},0x200,Write16F1xxx,{0x4000,0,0},0},			//16K, vpp, 3.3V
 	{"16F1938,16F1939,16F1947",
 		PIC16,8.5,1,Read16F1xxx,{0x4000,0x100,11,0},0x200,Write16F1xxx,{0x4000,0x100,0},0},	//16K, 256, vpp, 3.3V
 	{"16F1788,16F1789",
@@ -467,9 +472,9 @@ struct DEVICES{
 	{"18F25K22,18F45K22,18F25K50,18F45K50",
 		PIC18,8.5,1,Read18Fx,{0x8000,0x100,1},0,Write18Fx,{0x8000,0x100,64,0x0F0F,0x8F8F,1},0},	//32K, 256, 64, 9V
 	{"18F25K80,18F45K80,18F65K80",
-		PIC18,8.5,1,Read18Fx,{0x8000,0x100,0x13},0,Write18Fx,{0x8000,0x100,64,0,0,0x303},0},	//32K, 256, 64, 9V, xxK80
+		PIC18,8.5,1,Read18Fx,{0x8000,0x400,0x13},0,Write18Fx,{0x8000,0x400,64,0,0,0x303},0},	//32K, 1K, 64, 9V, xxK80
 	{"18F8520",
-		PIC18,12,0,Read18Fx,{0x8000,0x400,0},0,Write18Fx,{0x8000,0x400,8,0x10000,0x0080,0x10},0},//32K, 1024, 8, EE with unlock
+		PIC18,12,0,Read18Fx,{0x8000,0x400,0},0,Write18Fx,{0x8000,0x400,8,0x10000,0x0080,0x10},0},//32K, 1K, 8, EE with unlock
 	{"18F2515,18F4515",
 		PIC18,12,0,Read18Fx,{0xC000,0,0},0,Write18Fx,{0xC000,0,64,0x3F3F,0x8F8F,0},0},			//48K, 0, 64
 	{"18F65J15,18F85J15",
@@ -487,7 +492,7 @@ struct DEVICES{
 	{"18F26K20,18F46K20,18F26K22,18F46K22,18F26K50,18F46K50",
 		PIC18,12,0,Read18Fx,{0x10000,0x100,1},0,Write18Fx,{0x10000,0x100,64,0x0F0F,0x8F8F,1},0},//64K, 256, 64, 9V
 	{"18F26K80,18F46K80,18F66K80",
-		PIC18,8.5,1,Read18Fx,{0x10000,0x100,0x13},0,Write18Fx,{0x10000,0x100,64,0,0,0x303},0},	//64K, 256, 64, 9V, xxK80
+		PIC18,8.5,1,Read18Fx,{0x10000,0x400,0x13},0,Write18Fx,{0x10000,0x400,64,0,0,0x303},0},	//64K, 1K, 64, 9V, xxK80
 	{"18F2682,18F4682",
 		PIC18,12,0,Read18Fx,{0x14000,0x400,0},0,Write18Fx,{0x14000,0x400,64,0x3F3F,0x8F8F,0},0},//80K, 1K, 64
 	{"18F66J65,18F86J65,18F96J65,18F66J15,18F66J16,18F66J55,18F86J15,18F86J16,18F86J55",
@@ -626,6 +631,10 @@ struct DEVICES{
 		PIC24,12,0,Read24Fx,{0x16000,0x800,0x52,0x05BE},0x600,Write24Fx,{0x16000,0x800,0x31252,0x05BE,32},2.0},	//44KW, 2K, HV12
 	{"30F6010,30F6012,30F6014,30F6015",
 		PIC24,12,0,Read24Fx,{0x18000,0x1000,0x52,0x05BE},0x600,Write24Fx,{0x18000,0x1000,0x31252,0x05BE,32},2.0},	//49KW, 4K, HV12
+//-------------PIC32---------------------------------------------------------
+// options:
+	{"32MX270F256",
+				PIC32,-1,1,Read32x,{0x40000,0},0x800,0,{0,0,0,0,0},0.0},								//256K
 //-------------ATMEL---------------------------------------------------------
 	{"AT90S1200",
 		AVR,-1,0,ReadAT,{0x400,0x40,0},0,WriteAT,{0x400,0x40,0,0},0},									//1K, 64
@@ -797,12 +806,7 @@ struct DEVICES{
 };
 
 //Add all devices to the appropriate structure
-#ifdef _MSC_VER
-void COpenProgDlg::AddDevices(){
-	int i;
-	for(i=0;i<sizeof(devices)/sizeof(char*);i++) m_DispoPage.m_dispo.AddString(devices[i]);
-}
-#elif defined _GTKGUI
+#ifdef defined _GTKGUI
 extern	GtkWidget * devCombo;
 void AddDevices(){
 	int i;
@@ -865,11 +869,7 @@ void CheckDevices(){
 #endif
 
 
-#ifdef _MSC_VER
-	void COpenProgDlg::Read(char* dev,int ee,int r)
-#else
-	void Read(char* dev,int ee,int r)
-#endif
+void Read(char* dev,int ee,int r)
 {
 	int i,j;
 	int params[5];
@@ -915,6 +915,10 @@ void CheckDevices(){
 						if(!ee) params[1]=0;					//clear eeprom parameter
 						(*DEVLIST[i].ReadPtr)(params[0],params[1],params[2],params[3],r?DEVLIST[i].ResArea:0);
 					break;
+					case PIC32:
+//						if(!ee) params[1]=0;					//clear eeprom parameter
+						(*DEVLIST[i].ReadPtr)(params[0],params[1]);
+					break;
 					case AVR:
 						if(!ee) params[1]=0;					//clear eeprom parameter
 						(*DEVLIST[i].ReadPtr)(params[0],params[1],params[2]);
@@ -946,11 +950,7 @@ void CheckDevices(){
 }
 
 
-#ifdef _MSC_VER
-	void COpenProgDlg::Write(char* dev,int ee)
-#else
-	void Write(char* dev,int ee)
-#endif
+void Write(char* dev,int ee)
 {
 	int i,j;
 	int params[6];
@@ -1022,11 +1022,7 @@ void CheckDevices(){
 }
 
 ///Search the device type
-#ifdef _MSC_VER
-	int COpenProgDlg::GetDevType(const char* dev)
-#else
-	int GetDevType(const char* dev)
-#endif
+int GetDevType(const char* dev)
 {
 	int i,type=-1;
 	char *str=0,*tok;
@@ -1048,14 +1044,12 @@ void CheckDevices(){
 }
 
 ///Search and return device info
-#ifdef _MSC_VER
-	struct DevInfo COpenProgDlg::GetDevInfo(const char* dev)
-#else
-	struct DevInfo GetDevInfo(const char* dev)
-#endif
+struct DevInfo GetDevInfo(const char* dev)
 {
 	int i;
 	char *str=0,*tok;
+	char str2[256],str3[64],strF[32];
+	double x;
 	struct DevInfo info;
 	info.device=0;
 	info.type=-1;
@@ -1063,6 +1057,7 @@ void CheckDevices(){
 	info.V33=-1;
 	info.size=-1;
 	info.sizeEE=-1;
+	info.features=0;
 	//parse all device names until "dev" is found
 	for(i=0;i<sizeof(DEVLIST)/sizeof(DEVLIST[0]);i++){
 		str=malloc(strlen(DEVLIST[i].device)+1);
@@ -1078,6 +1073,104 @@ void CheckDevices(){
 				info.sizeEE=DEVLIST[i].ReadParam[1];
 				tok=0;
 				i=sizeof(DEVLIST)/sizeof(DEVLIST[0]);
+				str2[0]=0;
+				x=info.size/1024.0;
+				if(x-(int)x) sprintf(strF,"%.1f",x);
+				else sprintf(strF,"%d",(int)x);
+				switch(info.type){
+				case -1:
+					sprintf(str2,"?? ");
+					break;
+				case PIC12:
+					sprintf(str2,"PIC12, ");
+					if(info.size<1024) sprintf(str3,"%dW FLASH",info.size);
+					else sprintf(str3,"%sKW FLASH",strF);
+					strcat(str2,str3);
+					break;
+				case PIC16:
+					sprintf(str2,"PIC16, ");
+					if(info.size<1024) sprintf(str3,"%dW FLASH",info.size);
+					else sprintf(str3,"%sKW FLASH",strF);
+					strcat(str2,str3);
+					if(info.sizeEE){
+						int ee=info.sizeEE;
+						if(ee<0) ee=-ee;
+						sprintf(str3," + %dB EEPROM",ee);
+						strcat(str2,str3);
+					}
+					break;
+				case PIC18:
+					sprintf(str2,"PIC18, ");
+					if(info.size<1024) sprintf(str3,"%dB FLASH ",info.size);
+					else sprintf(str3,"%sKB FLASH ",strF);
+					strcat(str2,str3);
+					if(info.sizeEE){
+						sprintf(str3,"+ %dB EEPROM ",info.sizeEE);
+						strcat(str2,str3);
+					}
+					break;
+				case PIC24:
+					sprintf(str2,"PIC24, ");
+					if(info.size<1024) sprintf(str3,"%dW FLASH",info.size);
+					else sprintf(str3,"%sKW FLASH",strF);
+					strcat(str2,str3);
+					if(info.sizeEE){
+						sprintf(str3," + %dB EEPROM",info.sizeEE);
+						strcat(str2,str3);
+					}
+					break;
+				case PIC32:
+					sprintf(str2,"PIC32, ");
+					if(info.size<1024) sprintf(str3,"%dW FLASH",info.size);
+					else sprintf(str3,"%sKW FLASH",strF);
+					strcat(str2,str3);
+					if(info.sizeEE){
+						sprintf(str3," + %dB EEPROM",info.sizeEE);
+						strcat(str2,str3);
+					}
+					break;
+				case AVR:
+					sprintf(str2,"AVR, ");
+					if(info.size<1024) sprintf(str3,"%dB FLASH",info.size);
+					else sprintf(str3,"%sKB FLASH",strF);
+					strcat(str2,str3);
+					if(info.sizeEE){
+						sprintf(str3," + %dB EEPROM",info.sizeEE);
+						strcat(str2,str3);
+					}
+					break;
+				case I2CEE:
+					if(info.size<1024) sprintf(str2,"%s, %dB",strings[I_I2CMEM],info.size); //I2C Memory
+					else sprintf(str2,"%s, %sKB",strings[I_I2CMEM],strF); //I2C Memory
+					break;
+				case SPIEE:
+					if(info.size<1024) sprintf(str2,"%s, %dB",strings[I_SPIMEM],info.size); //SPI Memory
+					else sprintf(str2,"%s, %sKB",strings[I_SPIMEM],strF); //SPI Memory
+					break;
+				case UWEE:
+					if(info.size<1024) sprintf(str2,"%s, %dB",strings[I_UWMEM],info.size); //Microwire Memory
+					else sprintf(str2,"%s,%sKB",strings[I_UWMEM],strF);
+					break;
+				case OWEE:
+					if(info.size<0) sprintf(str2,strings[I_OWDEV]); //OneWire device
+					else if(info.size<1024) sprintf(str2,"%s, %dB",strings[I_OWMEM],info.size); //OneWire Memory
+					else sprintf(str2,"%s, %sKB",strings[I_OWMEM],strF);
+					break;
+				case UNIOEE:
+					if(info.size<1024) sprintf(str2,"%s, %dB",strings[I_UNIOMEM],info.size); //UNI/O Memory
+					else sprintf(str2,"%s, %sKB",strings[I_UNIOMEM],strF);
+					break;
+				}
+				if(info.HV>0){
+					sprintf(str3,", %.1fV",info.HV);
+					strcat(str2,str3);
+				}
+				if(info.V33){
+					strcat(str2,", ");
+					strcat(str2,strings[I_3V3REQUIRED]); // 3.3V adapter
+				}
+				info.features=malloc(strlen(str2)+1);
+				strcpy(info.features,str2);
 			}
 		}
 		free(str);

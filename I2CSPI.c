@@ -18,26 +18,15 @@
  * or see <http://www.gnu.org/licenses/>
  */
 
-//This cannot be executed conditionally on MSVC
-//#include "stdafx.h"
-
 
 //configure for GUI or command-line
-#ifdef _MSC_VER 
-	#define _GUI
-	#include "msvc_common.h"
-#else 
-	#define _CMD
-	#include "common.h"
-#endif
+#include "common.h"
 #ifdef __GTK_H__
 #define _GTKGUI
 #endif
 
 
-#ifdef _MSC_VER
-	#define printM(id) m_I2CSPIPage.SetDlgItemText(IDC_STRU,id);
-#elif defined _GTKGUI
+#ifdef defined _GTKGUI
 	#define printM(id) PrintMessageI2C(id);
 #else
 	#define printM(id) printf(id);
@@ -46,11 +35,7 @@
 #define CS 8
 #define HLD 16
 
-#ifdef _MSC_VER
-	void COpenProgDlg::I2CReceive(int mode,int speed,int N,BYTE *buffer)
-#else
-	void I2CReceive(int mode,int speed,int N,BYTE *buffer)
-#endif
+void I2CReceive(int mode,int speed,int N,BYTE *buffer)
 // I2C/SPI receive
 // mode:
 // 0 = I2C 8bit
@@ -152,11 +137,8 @@
 	else printM(strings[S_ComErr]);
 }
 
-#ifdef _MSC_VER
-	void COpenProgDlg::I2CSend(int mode,int speed,int N,BYTE *buffer)
-#else
-	void I2CSend(int mode,int speed,int N,BYTE *buffer)
-#endif
+void I2CSend(int mode,int speed,int N,BYTE *buffer)
+{
 // I2C/SPI send
 // mode:
 // 0 = I2C 8bit
@@ -170,7 +152,6 @@
 // 1 = 200 kbps
 // 2 = 300/400 kbps (SPI/I2C)
 // 3 = 500/800 kbps (SPI/I2C)
-{
 	int i,j=0;
 	if(N<0) N=0;
 	if(N>57) N=57;

@@ -179,6 +179,7 @@ int analyzeCOFF(char *filename,char* label[LMAX],char* ulabel[ULMAX],struct src_
 	}
 	free(strtable);
 	free(strings);
+	free(raw);
 	return 1;
 }
 

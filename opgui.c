@@ -2,7 +2,7 @@
  * \file opgui.c
  * main control program for the open programmer
  *
- * Copyright (C) 2009-2016 Alberto Maccioni
+ * Copyright (C) 2009-2018 Alberto Maccioni
  * for detailed info see:
  * http://openprog.altervista.org/
  *
@@ -625,7 +625,7 @@ void DeviceChanged(GtkWidget *widget,GtkWidget *window)
 	g_free(str);
 	info=GetDevInfo(dev);
 	devType=info.type;
-	str2[0]=0;
+/*	str2[0]=0;
 	x=info.size/1024.0;
 	if(x-(int)x) sprintf(strF,"%.1f",x);
 	else sprintf(strF,"%d",(int)x);
@@ -671,6 +671,11 @@ void DeviceChanged(GtkWidget *widget,GtkWidget *window)
 			strcat(str2,str3);
 		}
 		break;
+	case PIC32:
+		sprintf(str2,"PIC32, ");
+		sprintf(str3,"%sKB FLASH",strF);
+		strcat(str2,str3);
+		break;
 	case AVR:
 		sprintf(str2,"AVR, ");
 		if(info.size<1024) sprintf(str3,"%dB FLASH",info.size);
@@ -710,8 +715,9 @@ void DeviceChanged(GtkWidget *widget,GtkWidget *window)
 	if(info.V33){
 		strcat(str2,", ");
 		strcat(str2,strings[I_3V3REQUIRED]); // 3.3V adapter
-	}
-	gtk_label_set_text(GTK_LABEL(devinfo),str2);
+	}*/
+//	gtk_label_set_text(GTK_LABEL(devinfo),str2);
+	gtk_label_set_text(GTK_LABEL(devinfo),info.features);
 	//printf("%s=%d\n",dev,GetDevType(dev));fflush(stdout);
 	if(devType==PIC12||devType==PIC16||devType==PIC18||devType==PIC24){
 		gtk_widget_show_all(GTK_WIDGET(devFramePIC));
@@ -1063,7 +1069,7 @@ void info(GtkWidget *widget,GtkWidget *window)
 		//"authors","Alberto Maccioni",NULL,
 		"comments", "A graphical interface for the Open Programmer",
 		"copyright",
-		"Copyright (C) Alberto Maccioni 2009-2011\n\n"
+		"Copyright (C) Alberto Maccioni 2009-2018\n\n"
 		"This program is free software; you can \n"
 		"redistribute it and/or modify it under \n"
 		"the terms of the GNU General Public License \n"

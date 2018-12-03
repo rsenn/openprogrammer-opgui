@@ -1,23 +1,12 @@
 // Strings.c v0.9.1
 
-//This cannot be executed conditionally on MSVC
-//#include "stdafx.h"
-
-
-//configure for GUI or command-line
-#ifdef _MSC_VER
-	#include "msvc_common.h"
-	#define NL "\r\n"
-#else
-	#include "common.h"
-	#define NL "\n"
-#endif
+#include "common.h"
+#define NL "\n"
 
 char *STR_ID[DIM];
 char *strings_it[DIM];
 char *strings_en[DIM];
 
-#ifndef _MSC_VER
 
 int strfind(const char* langid,const char* langfile){
 	FILE* f=fopen(langfile,"r");
@@ -80,13 +69,8 @@ void GenerateLangFile(const char* langid,const char* langfile){
 		fclose(f);
 	}
 }
-#endif
 
-#ifdef _MSC_VER
-void COpenProgDlg::strinit()
-#else
 void strinit()
-#endif
 {
 	STR_ID[S_NL]=(char*) "S_NL";
 	STR_ID[S_noprog]=(char*) "S_noprog";

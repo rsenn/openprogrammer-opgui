@@ -14,8 +14,6 @@
 #else
 #include <windows.h>
 #include <setupapi.h>
-//#include <ddk/hidusage.h>
-//#include <ddk/hidpi.h>
 #include <hidusage.h>
 #include <hidpi.h>
 #include <math.h>
@@ -51,7 +49,7 @@ typedef unsigned char BYTE;
 
 #define COL 16
 #if !defined VERSION
-  #define VERSION "0.10.0"
+  #define VERSION "0.10.1"
 #endif
 #define G (12.0/34*1024/5)		//=72,2823529412
 #define LOCK	1

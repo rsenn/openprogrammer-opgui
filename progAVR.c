@@ -18,18 +18,7 @@
  * or see <http://www.gnu.org/licenses/>
  */
 
-//This cannot be executed conditionally on MSVC
-//#include "stdafx.h"
-
-
-//configure for GUI or command-line
-#ifdef _MSC_VER
-	#define _GUI
-	#include "msvc_common.h"
-#else
-	#define _CMD
 #include "common.h"
-#endif
 
 #define  LOCK	1
 #define  FUSE	2
@@ -92,11 +81,7 @@ struct AVRID{
 	{0x9706,"ATmega1284"},
 };
 
-#ifdef _MSC_VER
-void COpenProgDlg::AtmelID(BYTE id[])
-#else
 void AtmelID(BYTE id[])
-#endif
 {
 	char str[128]="";
 	int i,idw=(id[1]<<8)+id[2];
@@ -142,11 +127,7 @@ void AtmelID(BYTE id[])
 	PrintMessage(str);
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::DisplayCODEAVR(int dim){
-#else
 void DisplayCODEAVR(int dim){
-#endif
 // display AVR CODE memory
 	char s[256]="",t[256]="";
 	int valid=0,empty=1,i,j,lines=0;
@@ -181,11 +162,7 @@ void DisplayCODEAVR(int dim){
 //Software SPI for very slow speed
 //RB1=CLK, RB0=MISO, RC7=MOSI, RC6=RESET
 //speed in bit/s  min 10
-#ifdef _MSC_VER
-int COpenProgDlg::SWSPI(int data, int speed){
-#else
-int SWSPI(int data, int speed){
-#endif
+SWSPI(int data, int speed){
 	int i,j,din=0;
 	double Tbit=1.0/speed*1e6;		//Tbit in us
 	if(saveLog)	fprintf(logfile,"SWSPI(0x%X,%d)\n",data,speed);
@@ -260,11 +237,7 @@ int SWSPI(int data, int speed){
 
 //Write fuse at low speed
 //speed in bit/s  min 10
-#ifdef _MSC_VER
-void COpenProgDlg::WriteATfuseSlow(int fuse){
-#else
 void WriteATfuseSlow(int fuse){
-#endif
 #define SPEED 3000
 	int j,d;
 	fuse&=0xFF;
@@ -340,11 +313,7 @@ void WriteATfuseSlow(int fuse){
 //Find right SPI speed to enter
 //test mode and synchronize with AVR
 //return Tbyte or 0 when sync was not found
-#ifdef _MSC_VER
-double COpenProgDlg::SyncSPI(){
-#else
 double SyncSPI(){
-#endif
 	int z=0,i,j;
 	double Tbyte;	//byte delay in ms
 	j=0;
@@ -500,11 +469,7 @@ double SyncSPI(){
 	return Tbyte;
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::ReadAT(int dim, int dim2, int options)
-#else
 void ReadAT(int dim, int dim2, int options)
-#endif
 // read ATMEL AVR
 // dim=FLASH size in bytes, dim2=EEPROM size
 // options: LOCK,FUSE,FUSE_H,FUSE_X,CAL
@@ -778,11 +743,7 @@ void ReadAT(int dim, int dim2, int options)
 /// read ATMEL AVR using HV serial programming
 /// dim=FLASH size in bytes, dim2=EEPROM size
 /// options: LOCK,FUSE,FUSE_H,FUSE_X,CAL
-#ifdef _MSC_VER
-void COpenProgDlg::ReadAT_HV(int dim, int dim2, int options)
-#else
 void ReadAT_HV(int dim, int dim2, int options)
-#endif
 {
 	int k=0,z=0,i,j;
 	BYTE signature[]={0,0,0};
@@ -1139,11 +1100,7 @@ void ReadAT_HV(int dim, int dim2, int options)
 	}
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::WriteAT(int dim, int dim2, int dummy1, int dummy2)
-#else
 void WriteAT(int dim, int dim2, int dummy1, int dummy2)
-#endif
 // write ATMEL micro
 // dim=FLASH size in bytes, dim2=EEPROM size
 {
@@ -1443,11 +1400,8 @@ void WriteAT(int dim, int dim2, int dummy1, int dummy2)
 	PrintStatusClear();
 }
 
-#ifdef _MSC_VER
-void COpenProgDlg::WriteATmega(int dim, int dim2, int page, int options)
-#else
+
 void WriteATmega(int dim, int dim2, int page, int options)
-#endif
 // write ATMEL micro
 // dim=FLASH size in bytes, dim2=EEPROM, page=FLASH page size in bytes
 {
@@ -1800,11 +1754,7 @@ void WriteATmega(int dim, int dim2, int page, int options)
 /// Write ATMEL AVR using HV serial programming
 /// dim=FLASH size in bytes, dim2=EEPROM, page=FLASH page size in words (0 if page write not supported)
 /// options: not used
-#ifdef _MSC_VER
-void COpenProgDlg::WriteAT_HV(int dim, int dim2, int page, int options)
-#else
 void WriteAT_HV(int dim, int dim2, int page, int options)
-#endif
 {
 	int k=0,z=0,i,j,t,sdo,err=0;
 	BYTE signature[]={0,0,0};
