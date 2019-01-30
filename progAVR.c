@@ -297,7 +297,7 @@ void WriteATfuseSlow(int fuse){
 	SWSPI(0x00,SPEED);
 	d=SWSPI(0,SPEED);
 	if(d!=fuse){
-		PrintMessage3(strings[S_ConfigWErr4],"fuse",fuse,d);	//"Error writing %s: written %02X, read %02X" NL;
+		PrintMessage3(strings[S_WErr1],"fuse",fuse,d);	//"Error writing %s: written %02X, read %02X" NL;
 	}
 	j=0;
 	bufferU[j++]=CLOCK_GEN;
@@ -2273,7 +2273,7 @@ void WriteAT_HV(int dim, int dim2, int page, int options)
 		j=0;
 		for(z=0;z<DIMBUF-1&&bufferI[z]!=AT_HV_RTX;z++);
 		if(z==DIMBUF-1||AVRfuse!=bufferI[z+1]){
-			PrintMessage3(strings[S_ConfigWErr4],"fuse",AVRfuse,bufferI[z+1]);	//"Error writing %s: written %02X, read %02X"
+			PrintMessage3(strings[S_WErr1],"fuse",AVRfuse,bufferI[z+1]);	//"Error writing %s: written %02X, read %02X"
 			err_f++;
 		}
 	}
@@ -2320,7 +2320,7 @@ void WriteAT_HV(int dim, int dim2, int page, int options)
 		j=0;
 		for(z=0;z<DIMBUF-1&&bufferI[z]!=AT_HV_RTX;z++);
 		if(z==DIMBUF-1||AVRfuse_h!=bufferI[z+1]){
-			PrintMessage3(strings[S_ConfigWErr4],"fuseH",AVRfuse_h,bufferI[z+1]);	//"Error writing %s: written %02X, read %02X"
+			PrintMessage3(strings[S_WErr1],"fuseH",AVRfuse_h,bufferI[z+1]);	//"Error writing %s: written %02X, read %02X"
 			err_f++;
 		}
 	}
@@ -2367,7 +2367,7 @@ void WriteAT_HV(int dim, int dim2, int page, int options)
 		j=0;
 		for(z=0;z<DIMBUF-1&&bufferI[z]!=AT_HV_RTX;z++);
 		if(z==DIMBUF-1||AVRfuse_x!=bufferI[z+1]){
-			PrintMessage3(strings[S_ConfigWErr4],"fuseX",AVRfuse_x,bufferI[z+1]);	//"Error writing %s: written %02X, read %02X"
+			PrintMessage3(strings[S_WErr1],"fuseX",AVRfuse_x,bufferI[z+1]);	//"Error writing %s: written %02X, read %02X"
 			err_f++;
 		}
 	}
@@ -2414,7 +2414,7 @@ void WriteAT_HV(int dim, int dim2, int page, int options)
 		j=0;
 		for(z=0;z<DIMBUF-1&&bufferI[z]!=AT_HV_RTX;z++);
 		if(z==DIMBUF-1||AVRlock!=bufferI[z+1]){
-			PrintMessage3(strings[S_ConfigWErr4],"lock",AVRlock,bufferI[z+1]);	//"Error writing %s: written %02X, read %02X"
+			PrintMessage3(strings[S_WErr1],"lock",AVRlock,bufferI[z+1]);	//"Error writing %s: written %02X, read %02X"
 			err_f++;
 		}
 	}

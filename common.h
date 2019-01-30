@@ -48,9 +48,10 @@ typedef unsigned char BYTE;
 #define	PrintStatusClear() gtk_statusbar_push(GTK_STATUSBAR(status_bar),statusID,"");
 
 #define COL 16
-#if !defined VERSION
-  #define VERSION "0.10.1"
-#endif
+//Version defined in makefile
+//#if !defined VERSION
+//  #define VERSION "0.11.0"
+//#endif
 #define G (12.0/34*1024/5)		//=72,2823529412
 #define LOCK	1
 #define FUSE	2

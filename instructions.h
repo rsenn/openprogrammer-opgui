@@ -84,9 +84,12 @@
 #define JTAG_SEND_CMD		0x54	//1B
 #define JTAG_XFER_DATA		0x55	//4B -> 4B
 #define JTAG_XFER_F_DATA	0x56	//4B -> 4B
+#define ICSP8_SHORT  		0x57	//+1B
+#define ICSP8_READ  		0x58	//+1B -> 3B
+#define ICSP8_LOAD  		0x59	//+4B
 // special ins.
 #define SPI_TEST			0xEF	//+2B	->2B
 #define READ_RAM			0xF0	//+2B	->3B
 #define WRITE_RAM			0xF1	//+3B	->3B
 #define LOOP				0xF2
-#define MAX_INS 			0x56	//last instruction
+#define MAX_INS 			0x59	//last instruction

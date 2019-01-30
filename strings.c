@@ -1,4 +1,4 @@
-// Strings.c v0.9.1
+// Strings.c v0.11.0
 
 #include "common.h"
 #define NL "\n"
@@ -150,7 +150,8 @@ void strinit()
 	STR_ID[S_ConfigWErr]="S_ConfigWErr";
 	STR_ID[S_ConfigWErr2]="S_ConfigWErr2";
 	STR_ID[S_ConfigWErr3]="S_ConfigWErr3";
-	STR_ID[S_ConfigWErr4]="S_ConfigWErr4";
+	STR_ID[S_WErr1]="S_WErr1";
+	STR_ID[S_WErr2]="S_WErr2";
 	STR_ID[S_IDErr]="S_IDErr";
 	STR_ID[S_ICDErr]="S_ICDErr";
 	STR_ID[S_Calib1Err]="S_Calib1Err";
@@ -244,10 +245,12 @@ void strinit()
 	STR_ID[S_NoConfigW3]="S_NoConfigW3";
 	STR_ID[S_NoConfigW4]="S_NoConfigW4";
 	STR_ID[S_NoConfigW5]="S_NoConfigW5";
+	STR_ID[S_NoConfigW6]="S_NoConfigW6";
 	STR_ID[S_Empty]="S_Empty";
 	STR_ID[S_NextIns]="S_NextIns";
 	STR_ID[S_ForceConfigW]="S_ForceConfigW";
 	STR_ID[S_ForceConfigWx]="S_ForceConfigWx";
+	STR_ID[S_WarnFlashSize]="S_WarnFlashSize";
 	STR_ID[I_Fopen]="I_Fopen";
 	STR_ID[I_Fsave]="I_Fsave";
 	STR_ID[I_DevR]="I_DevR";
@@ -343,7 +346,7 @@ void strinit()
 	strings_it[S_nodev_w]="Dispositivo non supportato in scrittura" NL;
 	strings_it[S_nodev]="Dispositivo sconosciuto" NL;
 	strings_it[S_DevMismatch]="Attenzione: il dispositivo è diverso da quello specificato nei dati" NL;
-	strings_it[S_noV33reg]="Regolatore a 3.3V non rilevato" NL;
+	strings_it[S_noV33reg]="Regolatore a 3,3V non rilevato" NL;
 	strings_it[S_progver]="Versione firmware %d.%d.%d" NL;
 	strings_it[S_progid]="ID Hardware: %d.%d.%d";
 	strings_it[S_FWver2old]="Questo firmware è troppo vecchio. E' richiesta la versione %s" NL;
@@ -413,7 +416,8 @@ void strinit()
 	strings_it[S_ConfigWErr]="Errore in scrittura config: scritto %03X, letto %03X" NL;
 	strings_it[S_ConfigWErr2]="Errore in scrittura CONFIG";
 	strings_it[S_ConfigWErr3]="Errore in scrittura config: scritto %04X, letto %04X" NL;
-	strings_it[S_ConfigWErr4]="Errore in scrittura %s: scritto %02X, letto %02X" NL;
+	strings_it[S_WErr1]="Errore in scrittura %s: scritto %02X, letto %02X" NL;
+	strings_it[S_WErr2]="Errore in scrittura %s: scritto %04X, letto %04X" NL;
 	strings_it[S_IDErr]="Errore in scrittura ID%d: scritto %04X, letto %04X" NL;
 	strings_it[S_ICDErr]="Errore in scrittura ICD (0x%X): scritto %04X, letto %04X" NL;
 	strings_it[S_Calib1Err]="Errore in scrittura Calib1: scritto %04X, letto %04X" NL;
@@ -430,6 +434,7 @@ void strinit()
 	strings_it[S_InsErr]="Istruzione sconosciuta" NL;
 	strings_it[S_SyncErr]="Errore di sincronizzazione" NL;
 	strings_it[S_HVregErr]="Errore sul regolatore HV" NL;
+	strings_it[S_WarnFlashSize]="Attenzione, la dimensione della flash non corrisponde a quella del dispositivo scelto" NL;
 						//
 	strings_it[S_Log1]="i=%d(0x%X), k=%d(0x%X)  NumberOfBytesRead=%d" NL;
 	strings_it[S_Log2]="i=%d, k=%d, errori=%d, NumberOfBytesRead=%d" NL NL;
@@ -513,6 +518,7 @@ void strinit()
 	strings_it[S_NoConfigW3]="Impossibile trovare la locazione CONFIG (0x2007)" NL "Fine" NL;
 	strings_it[S_NoConfigW4]="Impossibile trovare la locazione CONFIG (0x2008)" NL "Fine" NL;
 	strings_it[S_NoConfigW5]="Impossibile trovare la locazione CONFIG (0x8007-0x8008)" NL "Fine" NL;
+	strings_it[S_NoConfigW6]="Impossibile trovare la locazione CONFIG (0x8007-0x800B)" NL "Fine" NL;
 	strings_it[S_Empty]="(vuoto)" NL;
 	strings_it[S_NextIns]="Prossima istruzione";
 	strings_it[S_ForceConfigW]="Forzo config word" NL;
@@ -538,7 +544,7 @@ void strinit()
 	strings_it[I_OSCF]="Da File";
 	strings_it[I_CONN]="Riconnetti";
 	strings_it[I_LOG]="Registra eventi su file";
-	strings_it[I_CK_V33]="Non richiedere espansioni LV";
+	strings_it[I_CK_V33]="Salta controllo regolatore a 3,3V";
 	strings_it[I_LANG]="Lingua";
 	strings_it[I_MAXERR]="Max errori in scrittura";
 	strings_it[I_ADDR]="Indirizzo";
@@ -657,12 +663,12 @@ void strinit()
 		"-i2c_w2 <N Ctr Ind(2) Dati> scrivi N byte sul bus I2C (indirizzi 16b)" NL
 		"-i2cspeed <s>               cambia velocit� I2C: 0=100k,1=200k,2=500k,3=800k" NL
 		"-id                         usa ID" NL
-		"-l, log [=file]              salva registro" NL
+		"-l, log [=file]             salva registro" NL
 		"-lang <lingua>              carica <lingua>" NL
 		"-langfile                   scrivi tutte le stringhe su file" NL
 		"-lock <val>                 scrive il byte lock (solo Atmel)" NL
 		"-mode <mode>                SPI mode: 00,01,10,11" NL
-		"-nolvcheck                  non richiedere espansioni LV" NL
+		"-nolvcheck                  salta controllo regolatore a 3,3V" NL
 		"-osccal                     carica osccal da file invece che dal valore salvato prima della cancellazione" NL
 		"-p, path <percorso>         percorso programmatore [/dev/usb/hiddev0]" NL
 		"-pid <pid>                  pid programmatore [0x100]" NL
@@ -772,7 +778,8 @@ void strinit()
 	strings_en[S_ConfigWErr]="Error writing config area: written %03X, read %03X" NL;
 	strings_en[S_ConfigWErr2]="Error writing CONFIG";
 	strings_en[S_ConfigWErr3]="Error writing config area: written %04X, read %04X" NL;
-	strings_en[S_ConfigWErr4]="Error writing %s: written %02X, read %02X" NL;
+	strings_en[S_WErr1]="Error writing %s: written %02X, read %02X" NL;
+	strings_en[S_WErr2]="Error writing %s: written %04X, read %04X" NL;
 	strings_en[S_IDErr]="Error writing ID%d: written %04X, read %04X" NL;
 	strings_en[S_ICDErr]="Error writing ICD (0x%X): written %04X, read %04X" NL;
 	strings_en[S_Calib1Err]="Error writing Calib1: written %04X, read %04X" NL;
@@ -872,10 +879,12 @@ void strinit()
 	strings_en[S_NoConfigW3]="Can't find CONFIG location (0x2007)" NL "End" NL;
 	strings_en[S_NoConfigW4]="Can't find CONFIG location (0x2008)" NL "End" NL;
 	strings_en[S_NoConfigW5]="Can't find CONFIG location (0x8007-0x8008)" NL "End" NL;
+	strings_en[S_NoConfigW6]="Can't find CONFIG location (0x8007-0x800B)" NL "End" NL;
 	strings_en[S_Empty]="(empty)" NL;
 	strings_en[S_NextIns]="Next instruction";
 	strings_en[S_ForceConfigW]="Forcing config words" NL;
 	strings_en[S_ForceConfigWx]="Forcing config word%d [0x%04X]=0x%04X" NL;
+	strings_en[S_WarnFlashSize]="Warning, flash size is different from the expected value" NL;
 		//
 	strings_en[I_Fopen]="Open file";
 	strings_en[I_Fsave]="Save file";
@@ -897,7 +906,7 @@ void strinit()
 	strings_en[I_OSCF]="From File";
 	strings_en[I_CONN]="Reconnect";
 	strings_en[I_LOG]="Log activity";
-	strings_en[I_CK_V33]="Don't require LV boards";
+	strings_en[I_CK_V33]="Skip 3.3V regulator check";
 	strings_en[I_LANG]="Language";
 	strings_en[I_MAXERR]="Max errors during write";
 	strings_en[I_ADDR]="Address";
@@ -1019,7 +1028,7 @@ void strinit()
 		"-langfile                   write all strings to file" NL
 		"-lock <val>                 write lock byte (Atmel only)" NL
 		"-mode <mode>                SPI mode: 00,01,10,11" NL
-		"-nolvcheck                  don't require LV boards" NL
+		"-nolvcheck                  skip 3.3V regulator check" NL
 		"-osccal                     loads osccal from file instead of using the value saved before erase" NL
 		"-p, path <path>             programmer path [/dev/usb/hiddev0]" NL
 		"-pid <pid>                  programmer pid [0x100]" NL

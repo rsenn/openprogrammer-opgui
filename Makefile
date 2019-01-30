@@ -1,4 +1,4 @@
-VERSION = 0.10.1
+VERSION = 0.11.0# equivalent to #define in c code
 CC = gcc
 PREFIX = /usr/local
 CFLAGS =  '-DVERSION="$(VERSION)"' -w `pkg-config --libs --cflags gtk+-2.0` 
@@ -57,7 +57,7 @@ install: all
 	install -m 0755 opgui $(PREFIX)/bin;
 
 package:
-	@echo "Creating opgui-$(VERSION).tar.gz"
+	@echo "Creating opgui_$(VERSION).tar.gz"
 	@mkdir opgui-$(VERSION)
 	@cp *.c *.h *.png gpl-2.0.txt Makefile readme opgui-$(VERSION)
 	@tar -czf opgui-$(VERSION).tar.gz opgui-$(VERSION)

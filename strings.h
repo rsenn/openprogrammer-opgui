@@ -1,4 +1,4 @@
-// Strings.h v0.9.1
+// Strings.h v0.11.0
 
 enum S {
 	S_NL,
@@ -79,7 +79,8 @@ enum S {
 	S_ConfigWErr,
 	S_ConfigWErr2,
 	S_ConfigWErr3,
-	S_ConfigWErr4,
+	S_WErr1,
+	S_WErr2,
 	S_IDErr,
 	S_ICDErr,
 	S_Calib1Err,
@@ -173,12 +174,14 @@ enum S {
 	S_NoConfigW3,
 	S_NoConfigW4,
 	S_NoConfigW5,
+	S_NoConfigW6,
 	S_Empty,
 	S_NextIns,
 	S_ForceConfigW,
 	S_ForceConfigWx,
 	S_WaitS1W,
 	S_WaitS1R,
+	S_WarnFlashSize,
 // GUI strings
 	I_Fopen,
 	I_Fsave,

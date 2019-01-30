@@ -1,6 +1,6 @@
 /**
  * \file progP16.c - algorithms to program the PIC16 (14 bit word) family of microcontrollers
- * Copyright (C) 2009-2018 Alberto Maccioni
+ * Copyright (C) 2009-2019 Alberto Maccioni
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -255,6 +255,20 @@ struct ID16{
 	{0x3067,"16F18323\r\n",0},
 	{0x3068,"16LF18313\r\n",0},
 	{0x3069,"16LF18323\r\n",0},
+	{0x306A,"16F18854\r\n",0},
+	{0x306B,"16LF18854\r\n",0},
+	{0x306C,"16F18855\r\n",0},
+	{0x306D,"16F18875\r\n",0},
+	{0x306E,"16LF18855\r\n",0},
+	{0x306F,"16LF18875\r\n",0},
+	{0x3070,"16F18856\r\n",0},
+	{0x3071,"16F18876\r\n",0},
+	{0x3072,"16LF18856\r\n",0},
+	{0x3073,"16LF18876\r\n",0},
+	{0x3074,"16F18857\r\n",0},
+	{0x3075,"16F18877\r\n",0},
+	{0x3076,"16LF18857\r\n",0},
+	{0x3077,"16LF18877\r\n",0},
 	{0x3078,"16F1614\r\n",0},
 	{0x3079,"16F1618\r\n",0},
 	{0x307A,"16LF1614\r\n",0},
@@ -281,10 +295,70 @@ struct ID16{
 	{0x3091,"16LF1777\r\n",0},
 	{0x3092,"16LF1778\r\n",0},
 	{0x3093,"16LF1779\r\n",0},
+	{0x3096,"16F19155\r\n",0},
+	{0x3097,"16LF19155\r\n",0},
+	{0x3098,"16F19156\r\n",0},
+	{0x3099,"16LF19156\r\n",0},
+	{0x309A,"16F19175\r\n",0},
+	{0x309B,"16LF19175\r\n",0},
+	{0x309C,"16F19176\r\n",0},
+	{0x309D,"16LF19176\r\n",0},
+	{0x309E,"16F19195\r\n",0},
+	{0x309F,"16LF19195\r\n",0},
+	{0x30A0,"16F19196\r\n",0},
+	{0x30A1,"16LF19196\r\n",0},
+	{0x30A2,"16F19197\r\n",0},
+	{0x30A3,"16LF19197\r\n",0},
 	{0x30A4,"16F18326\r\n",0},
 	{0x30A5,"16F18346\r\n",0},
 	{0x30A6,"16LF18326\r\n",0},
 	{0x30A7,"16LF18346\r\n",0},
+	{0x30AC,"16F15354\r\n",0},
+	{0x30AD,"16LF15354\r\n",0},
+	{0x30AE,"16F15355\r\n",0},
+	{0x30AF,"16LF15355\r\n",0},
+	{0x30B0,"16F15356\r\n",0},
+	{0x30B1,"16LF15356\r\n",0},
+	{0x30B2,"16F15375\r\n",0},
+	{0x30B3,"16LF15375\r\n",0},
+	{0x30B4,"16F15376\r\n",0},
+	{0x30B5,"16LF15376\r\n",0},
+	{0x30B6,"16F15385\r\n",0},
+	{0x30B7,"16LF15385\r\n",0},
+	{0x30B8,"16F15386\r\n",0},
+	{0x30B9,"16LF15386\r\n",0},
+	{0x30BE,"16F15313\r\n",0},
+	{0x30BF,"16LF15313\r\n",0},
+	{0x30BA,"16F19185\r\n",0},
+	{0x30BB,"16LF19185\r\n",0},
+	{0x30BC,"16F19186\r\n",0},
+	{0x30BD,"16LF19186\r\n",0},
+	{0x30C0,"16F15323\r\n",0},
+	{0x30C1,"16LF15323\r\n",0},
+	{0x30C2,"16F15324\r\n",0},
+	{0x30C3,"16LF15324\r\n",0},
+	{0x30C4,"16F15344\r\n",0},
+	{0x30C5,"16LF15344\r\n",0},
+	{0x30C6,"16F15325\r\n",0},
+	{0x30C7,"16LF15325\r\n",0},
+	{0x30C8,"16F15345\r\n",0},
+	{0x30C9,"16LF15345\r\n",0},
+	{0x30CA,"16F18424\r\n",0},
+	{0x30CB,"16LF18424\r\n",0},
+	{0x30CC,"16F18425\r\n",0},
+	{0x30CD,"16LF18425\r\n",0},
+	{0x30CE,"16F18444\r\n",0},
+	{0x30CF,"16LF18444\r\n",0},
+	{0x30D0,"16F18445\r\n",0},
+	{0x30D1,"16LF18445\r\n",0},
+	{0x30D2,"16F18426\r\n",0},
+	{0x30D3,"16LF18426\r\n",0},
+	{0x30D4,"16F18446\r\n",0},
+	{0x30D5,"16LF18446\r\n",0},
+	{0x30D7,"16F18455\r\n",0},
+	{0x30D8,"16LF18455\r\n",0},
+	{0x30D9,"16F18456\r\n",0},
+	{0x30DA,"16LF18456\r\n",0}
 };
 
 void PIC16_ID(int id)
@@ -769,7 +843,6 @@ void Read16F1xxx(int dim,int dim2,int dim3,int options){
 		PrintMessage2(strings[S_ReadCodeErr],dim,k);	//"Error reading code area, requested %d words, read %d\r\n"
 	}
 	else PrintMessage(strings[S_Compl]);
-//	for(i=k;i<0x8000;i++) memCODE_W[i]=0x3fff;
 //****************** read config area ********************
 	PrintMessage(strings[S_Read_CONFIG_A]);		//read config ...
 	if(saveLog) fprintf(logfile,"%s\n",strings[S_Read_CONFIG_A]);		//read config ...
@@ -966,6 +1039,344 @@ void Read16F1xxx(int dim,int dim2,int dim3,int options){
 		else PrintMessage(aux);
 		free(aux);
 	}
+	if(dim2) DisplayEE();	//visualize
+	sprintf(str,strings[S_End],(stop-start)/1000.0);	//"\r\nEnd (%.2f s)\r\n"
+	PrintMessage(str);
+	if(saveLog){
+		fprintf(logfile,str);
+		CloseLogFile();
+	}
+	PrintStatusClear();			//clear status report
+}
+
+#define LOAD_PC_ADDR 0x80
+#define BULK_ERASE_PROGRAM_MEM 0x18
+#define ROW_ERASE_PROGRAM_MEM 0xF0
+#define LOAD_NVM 0x00
+#define LOAD_NVM_INC 0x02
+#define READ_NVM 0xFC
+#define READ_NVM_INC 0xFE
+#define INC_ADDR8 0xF8
+#define BEGIN_INT_PROG 0xE0
+#define BEGIN_EXT_PROG 0xC0
+#define END_EXT_PROG 0x82
+
+void Read16F18xxx(int dim,int dim2,int dim3,int options)
+// read 14 bit enhanced PIC with new 8b commands
+// dim=program size (up to 0x8000)
+// dim2=if>0 use eeprom, size is automatic
+// dim3=not used
+// options:
+//		bit0=0 -> vpp before vdd
+//		bit0=1 -> vdd before vpp
+//		bit1=1 -> LVP programming
+// DevREV@0x8005     DevID@0x8006
+// Config1@0x8007    Config2@0x8008 ...
+// Device info area @0x8100
+// Device configuration area @0x8200
+{
+	int k=0,k2=0,z=0,i,j;
+	if(FWVersion<0xB00){		//only for 16F18xxx
+		PrintMessage1(strings[S_FWver2old],"0.11.0");	//"This firmware is too old. Version %s is required\r\n"
+		return;
+	}
+	if(!CheckV33Regulator()){
+		PrintMessage(strings[S_noV33reg]);	//Can't find 3.3V expansion board
+		return;
+	}
+	char s[256],t[256],*aux;
+	if(dim>0x8000||dim<0){
+		PrintMessage(strings[S_CodeLim]);	//"Code size exceeds limits\r\n"
+		return;
+	}
+	if(saveLog){
+		OpenLogFile();	//"Log.txt"
+		fprintf(logfile,"Read16F18xxx(%d,%d,%d,%d)\n",dim,dim2,dim3,options);
+	}
+	if((options&2)==0){				//HV entry
+		if(!StartHVReg(8.5)){
+			PrintMessage(strings[S_HVregErr]); //"HV regulator error\r\n"
+			return;
+		}
+		else hvreg=8.5;
+	}
+	else StartHVReg(-1);			//LVP mode, turn off HV
+	sizeW=0x8220;
+	if(memCODE_W) free(memCODE_W);
+	memCODE_W=(WORD*)malloc(sizeof(WORD)*sizeW);
+	for(i=0;i<sizeW;i++) memCODE_W[i]=0x3fff;
+	unsigned int start=GetTickCount();
+	j=0;
+	bufferU[j++]=SET_PARAMETER;
+	bufferU[j++]=SET_T1T2;
+	bufferU[j++]=1;						//T1=1u
+	bufferU[j++]=100;					//T2=100u
+	bufferU[j++]=SET_PARAMETER;
+	bufferU[j++]=SET_T3;
+	bufferU[j++]=2000>>8;
+	bufferU[j++]=2000&0xff;
+	bufferU[j++]=EN_VPP_VCC;		//enter program mode
+	bufferU[j++]=0x0;
+	bufferU[j++]=SET_CK_D;
+	bufferU[j++]=0x0;
+	if((options&2)==0){				//HV entry
+		if((options&1)==0){				//VPP before VDD
+			bufferU[j++]=EN_VPP_VCC;
+			bufferU[j++]=4;				//VPP
+			bufferU[j++]=EN_VPP_VCC;
+			bufferU[j++]=0x5;			//VDD+VPP
+		}
+		else{							//VDD before VPP without delay
+			bufferU[j++]=EN_VPP_VCC;
+			bufferU[j++]=1;				//VDD
+			bufferU[j++]=EN_VPP_VCC;
+			bufferU[j++]=0x5;			//VDD+VPP
+		}
+	}
+	else{			//Low voltage programming
+		bufferU[j++]=EN_VPP_VCC;
+		bufferU[j++]=4;				//VPP
+		bufferU[j++]=WAIT_T3;
+		bufferU[j++]=TX16;			//0000 1010 0001 0010 1100 0010 1011 0010 = 0A12C2B2
+		bufferU[j++]=2;
+		bufferU[j++]=0x0A;
+		bufferU[j++]=0x12;
+		bufferU[j++]=0xC2;
+		bufferU[j++]=0xB2;
+		bufferU[j++]=SET_CK_D;		//Clock pulse
+		bufferU[j++]=0x4;
+		bufferU[j++]=SET_CK_D;
+		bufferU[j++]=0x0;
+	}
+	bufferU[j++]=FLUSH;
+	for(;j<DIMBUF;j++) bufferU[j]=0x0;
+	PacketIO(2);
+//****************** read code ********************
+	PrintMessage(strings[S_CodeReading1]);		//read code ...
+	if(saveLog) fprintf(logfile,"%s\n",strings[S_CodeReading1]);		//read code ...
+	PrintStatusSetup();
+	for(i=0,j=0;i<dim;i++){
+		bufferU[j++]=ICSP8_READ;
+		bufferU[j++]=READ_NVM_INC;
+		if((j+1)/2*3+3>DIMBUF||i==dim-1){		//2B cmd -> 3B data
+			bufferU[j++]=FLUSH;				//remember: FLUSH generates a response (even empty)!
+			for(;j<DIMBUF;j++) bufferU[j]=0x0;
+			PacketIO(5);
+			for(z=0;z<DIMBUF-2;z++){
+				if(bufferI[z]==ICSP8_READ){
+					memCODE_W[k++]=(bufferI[z+1]<<8)+bufferI[z+2];
+					z+=2;
+				}
+			}
+			PrintStatus(strings[S_CodeReading],i*100/(dim+dim2+0x60),i);	//"Read: %d%%, addr. %03X"
+			j=0;
+			if(saveLog){
+				fprintf(logfile,strings[S_Log7],i,i,k,k);	//"i=%d(0x%X), k=%d(0x%X)\n"
+			}
+		}
+	}
+	PrintStatusEnd();
+	if(k!=dim){
+		PrintMessage("\r\n");
+		PrintMessage2(strings[S_ReadCodeErr],dim,k);	//"Error reading code area, requested %d words, read %d\r\n"
+	}
+	else PrintMessage(strings[S_Compl]);
+//****************** read config area ********************
+	PrintMessage(strings[S_Read_CONFIG_A]);		//read config ...
+	if(saveLog) fprintf(logfile,"%s\n",strings[S_Read_CONFIG_A]);		//read config ...
+	bufferU[j++]=ICSP8_LOAD;			//counter at 0x8000
+	bufferU[j++]=LOAD_PC_ADDR;
+	bufferU[j++]=0x80;
+	bufferU[j++]=0x00;
+	k2=0;
+	for(i=0x8000;i<0x8010;i++){		//Config
+		bufferU[j++]=ICSP8_READ;
+		bufferU[j++]=READ_NVM_INC;
+		if((j+1)/2*3+3>DIMBUF||i==0x800F){		//2B cmd -> 3B data
+			bufferU[j++]=FLUSH;
+			for(;j<DIMBUF;j++) bufferU[j]=0x0;
+			PacketIO(5);
+			for(z=0;z<DIMBUF-2;z++){
+				if(bufferI[z]==ICSP8_READ){
+					memCODE_W[0x8000+k2++]=(bufferI[z+1]<<8)+bufferI[z+2];
+					z+=2;
+				}
+			}
+			PrintStatus(strings[S_CodeReading],(i-0x8000+dim)*100/(dim+dim2+0x60),i);	//"Read: %d%%, addr %03X"
+			j=0;
+			if(saveLog){
+				fprintf(logfile,strings[S_Log7],i,i,k2,k2);	//"i=%d(0x%X), k=%d(0x%X)\n"
+			}
+		}
+	}
+	if(k2!=0x10){
+		PrintMessage("\r\n");
+		PrintMessage2(strings[S_ConfigErr],0x10,k2);	//"Error reading config area, requested %d words, read %d\r\n"
+	}
+	else PrintMessage(strings[S_Compl]);
+//****************** read device info area ********************
+	if(saveLog) fprintf(logfile,"Read device info area @0x8100\n");
+	bufferU[j++]=ICSP8_LOAD;			//counter at 0x8000
+	bufferU[j++]=LOAD_PC_ADDR;
+	bufferU[j++]=0x81;
+	bufferU[j++]=0x00;
+	k2=0;
+	for(i=0x8100;i<0x8120;i++){		//DIA
+		bufferU[j++]=ICSP8_READ;
+		bufferU[j++]=READ_NVM_INC;
+		if((j+1)/2*3+3>DIMBUF||i==0x811F){		//2B cmd -> 3B data
+			bufferU[j++]=FLUSH;
+			for(;j<DIMBUF;j++) bufferU[j]=0x0;
+			PacketIO(5);
+			for(z=0;z<DIMBUF-2;z++){
+				if(bufferI[z]==ICSP8_READ){
+					memCODE_W[0x8100+k2++]=(bufferI[z+1]<<8)+bufferI[z+2];
+					z+=2;
+				}
+			}
+			PrintStatus(strings[S_CodeReading],(i-0x8100+dim+0x20)*100/(dim+dim2+0x60),i);	//"Read: %d%%, addr %03X"
+			j=0;
+			if(saveLog){
+				fprintf(logfile,strings[S_Log7],i,i,k2,k2);	//"i=%d(0x%X), k=%d(0x%X)\n"
+			}
+		}
+	}
+	if(k2!=0x20){
+		PrintMessage("\r\n");
+		PrintMessage2(strings[S_ConfigErr],0x20,k2);	//"Error reading config area, requested %d words, read %d\r\n"
+	}
+//****************** read calibration area (Device Configuration Information) ********************
+	if(saveLog) fprintf(logfile,"Read Device Configuration Information @0x8200\n");
+	bufferU[j++]=ICSP8_LOAD;			//counter at 0x8200
+	bufferU[j++]=LOAD_PC_ADDR;
+	bufferU[j++]=0x82;
+	bufferU[j++]=0x00;
+	k2=0;
+	for(i=0x8200;i<0x8220;i++){		//DCI
+		bufferU[j++]=ICSP8_READ;
+		bufferU[j++]=READ_NVM_INC;
+		if((j+1)/2*3+3>DIMBUF||i==0x821F){		//2B cmd -> 3B data
+			bufferU[j++]=FLUSH;
+			for(;j<DIMBUF;j++) bufferU[j]=0x0;
+			PacketIO(5);
+			for(z=0;z<DIMBUF-2;z++){
+				if(bufferI[z]==ICSP8_READ){
+					memCODE_W[0x8200+k2++]=(bufferI[z+1]<<8)+bufferI[z+2];
+					z+=2;
+				}
+			}
+			PrintStatus(strings[S_CodeReading],(i-0x8200+dim+0x40)*100/(dim+dim2+0x60),i);	//"Read: %d%%, addr %03X"
+			j=0;
+			if(saveLog){
+				fprintf(logfile,strings[S_Log7],i,i,k2,k2);	//"i=%d(0x%X), k=%d(0x%X)\n"
+			}
+		}
+	}
+	if(k2!=0x20){
+		PrintMessage("\r\n");
+		PrintMessage2(strings[S_ConfigErr],0x20,k2);	//"Error reading config area, requested %d words, read %d\r\n"
+	}
+//****************** read eeprom ********************
+	if(dim2){					//EEPROM
+		dim2=memCODE_W[0x8203]; 	//EEPROM size from DCI
+		if(dim2>0x1000||dim2<0){		//Max 4K
+			PrintMessage(strings[S_EELim]);	//"EEPROM size exceeds limits\r\n"
+			return;
+		}
+		sizeEE=dim2;
+		if(memEE) free(memEE);
+		memEE=(unsigned char*)malloc(sizeEE);			//EEPROM
+		for(i=0;i<sizeEE;i++) memEE[i]=0xFF;
+		PrintMessage(strings[S_ReadEE]);		//Read EEPROM ...
+		if(saveLog) fprintf(logfile,"%s\n",strings[S_ReadEE]);		//Read EEPROM ...
+		bufferU[j++]=ICSP8_LOAD;			//counter at 0xF000
+		bufferU[j++]=LOAD_PC_ADDR;
+		bufferU[j++]=0xF0;
+		bufferU[j++]=0x00;
+		for(i=k=0;i<dim2;i++){
+			bufferU[j++]=ICSP8_READ;
+			bufferU[j++]=READ_NVM_INC;
+			if((j+1)/2*3+3>DIMBUF||i==dim2-1){		//2B cmd -> 3B answer
+				bufferU[j++]=FLUSH;
+				for(;j<DIMBUF;j++) bufferU[j]=0x0;
+				PacketIO(5);
+				for(z=0;z<DIMBUF-2;z++){
+					if(bufferI[z]==ICSP8_READ){
+						memEE[k++]=bufferI[z+2];	//LSB
+						z+=2;
+					}
+				}
+				PrintStatus(strings[S_CodeReading],i*100+dim+0x60/(dim+dim2+0x60),i);	//"Read: %d%%, addr %03X"
+				j=0;
+				if(saveLog){
+					fprintf(logfile,strings[S_Log7],i,i,k,k);	//"i=%d(0x%X), k=%d(0x%X)\n"
+				}
+			}
+		}
+		PrintStatusEnd();
+		if(i!=dim2){
+			PrintMessage("\r\n");
+			PrintMessage2(strings[S_ReadEEErr],dim2,i);	//"Error reading EE area, ..."
+			for(;i<dim2;i++) memEE[i]=0xff;
+		}
+		else PrintMessage(strings[S_Compl]);
+	}
+/***********************************/
+	bufferU[j++]=NOP;				//exit program mode
+	bufferU[j++]=EN_VPP_VCC;
+	bufferU[j++]=1;					//VDD
+	bufferU[j++]=EN_VPP_VCC;
+	bufferU[j++]=0x0;
+	bufferU[j++]=SET_CK_D;
+	bufferU[j++]=0x0;
+	bufferU[j++]=FLUSH;
+	for(;j<DIMBUF;j++) bufferU[j]=0x0;
+	PacketIO(2);
+	unsigned int stop=GetTickCount();
+	PrintStatusClear();			//clear status report
+//****************** visualize ********************
+	for(i=0;i<4;i+=2){
+		PrintMessage4("ID%d: 0x%04X\tID%d: 0x%04X\r\n",i,memCODE_W[0x8000+i],i+1,memCODE_W[0x8000+i+1]);
+	}
+	PrintMessage1(strings[S_DevID],memCODE_W[0x8006]);	//"DevID: 0x%04X\r\n"
+	if(memCODE_W[0x8005]<0x3FFF) PrintMessage1(strings[S_DevREV],memCODE_W[0x8005]);	//"DevREV: 0x%04X\r\n"
+	PIC16_ID(memCODE_W[0x8006]);
+	for(i=0;i<5;i++){
+		PrintMessage2(strings[S_ConfigWordX],i+1,memCODE_W[0x8007+i]);	//"Configuration word %d: 0x%04X\r\n"
+	}
+	PrintMessage("Device Information Area @0x8100\r\n");
+	s[0]=0;
+	for(i=0;i<0x20;i+=COL){
+		sprintf(t,"%04X: ",0x8100+i);
+		strcat(s,t);
+		for(j=i;j<i+COL&&j<0x20;j++){
+			sprintf(t,"%04X ",memCODE_W[0x8100+j]);
+			strcat(s,t);
+		}
+		strcat(s,"\r\n");
+	}
+	PrintMessage(s);
+	PrintMessage("Device Configuration Information @0x8200\r\n");
+	s[0]=0;
+	for(i=0;i<0x20;i+=COL){
+		sprintf(t,"%04X: ",0x8200+i);
+		strcat(s,t);
+		for(j=i;j<i+COL&&j<0x20;j++){
+			sprintf(t,"%04X ",memCODE_W[0x8200+j]);
+			strcat(s,t);
+		}
+		strcat(s,"\r\n");
+	}
+	PrintMessage(s);
+	PrintMessage1("Erase row size: %d words\r\n",memCODE_W[0x8200]);
+	PrintMessage1("Write latches: %d\r\n",memCODE_W[0x8201]);
+	PrintMessage1("User rows: %d\r\n",memCODE_W[0x8202]);
+	PrintMessage1("->%d Flash words\r\n",memCODE_W[0x8200]*memCODE_W[0x8202]);
+	PrintMessage1("EE data memory size: %d\r\n",memCODE_W[0x8203]);
+	PrintMessage1("Pin count: %d\r\n",memCODE_W[0x8204]);
+	if(dim!=memCODE_W[0x8200]*memCODE_W[0x8202]) PrintMessage(strings[S_WarnFlashSize]);	//"Warning, flash size is different from the expected value"
+	PrintMessage(strings[S_CodeMem2]);	//"\r\nCode memory:\r\n"
+	DisplayCODE16F(dim);
 	if(dim2) DisplayEE();	//visualize
 	sprintf(str,strings[S_End],(stop-start)/1000.0);	//"\r\nEnd (%.2f s)\r\n"
 	PrintMessage(str);
@@ -5557,3 +5968,524 @@ void Write16F1xxx(int dim,int dim2,int options)
 	}
 	PrintStatusClear();			//clear status report
 }
+
+
+
+void Write16F18xxx(int dim,int dim2,int options)
+// write 14 bit enhanced PIC
+// dim=program size (words)
+// dim2=if>0 use eeprom, size is automatic
+// options:
+//		bit0=0 -> vpp before vdd
+//		bit0=1 -> vdd before vpp
+//		bit1=1 -> LVP programming
+// DevREV@0x8005     DevID@0x8006
+// Config@0x8007-800B
+// Device info area @0x8100
+// Device configuration area @0x8200
+// erase: BULK_ERASE_PROGRAM_MEM (0x18) +10ms
+// write flash or eeprom: LOAD_NVM (0x0/2) + BEGIN_INT_PROG (0xE0) + 2.8ms (32 word algorithm)
+// config write: one word, 5.6ms
+// verify after write
+{
+	int err=0;
+	WORD devID=0x3fff,devREV=0x3fff;
+	int k=0,k2=0,z=0,i,j,w;
+	if(FWVersion<0xB00){
+		PrintMessage1(strings[S_FWver2old],"0.11.0");	//"This firmware is too old. Version %s is required\r\n"
+		return;
+	}
+	if(!CheckV33Regulator()){
+		PrintMessage(strings[S_noV33reg]);	//Can't find 3.3V expansion board
+		return;
+	}
+	if(sizeW<0x800C){
+		PrintMessage(strings[S_NoConfigW6]);	//"Can't find CONFIG (0x8007-0x800B)\r\n"
+		PrintMessage(strings[S_End]);
+		return;
+	}
+	if(saveLog){
+		OpenLogFile();	//"Log.txt"
+		fprintf(logfile,"Write16F18xxx(%d,%d,%d)\n",dim,dim2,options);
+	}
+	if(dim2>0) dim2=sizeEE;
+	if(dim2>0x1000) dim2=0x100;
+	if((options&2)==0){				//HV entry
+			if(!StartHVReg(8.5)){
+			PrintMessage(strings[S_HVregErr]); //"HV regulator error\r\n"
+			return;
+		}
+	}
+	else StartHVReg(-1);			//LVP mode, turn off HV
+	for(i=0;i<0x800C&&i<sizeW;i++) memCODE_W[i]&=0x3FFF;
+	unsigned int start=GetTickCount();
+	j=0;
+	bufferU[j++]=SET_PARAMETER;
+	bufferU[j++]=SET_T1T2;
+	bufferU[j++]=1;						//T1=1u
+	bufferU[j++]=100;					//T2=100u
+	bufferU[j++]=EN_VPP_VCC;		//enter program mode
+	bufferU[j++]=0x0;
+	bufferU[j++]=SET_CK_D;
+	bufferU[j++]=0x0;
+	if((options&2)==0){				//HV entry
+		if((options&1)==0){				//VPP before VDD
+			bufferU[j++]=EN_VPP_VCC;
+			bufferU[j++]=4;				//VPP
+			bufferU[j++]=EN_VPP_VCC;
+			bufferU[j++]=0x5;			//VDD+VPP
+		}
+		else{							//VDD before VPP without delay
+			bufferU[j++]=EN_VPP_VCC;
+			bufferU[j++]=1;				//VDD
+			bufferU[j++]=EN_VPP_VCC;
+			bufferU[j++]=0x5;			//VDD+VPP
+		}
+	}
+	else{			//Low voltage programming
+		bufferU[j++]=EN_VPP_VCC;
+		bufferU[j++]=4;				//VPP
+		bufferU[j++]=WAIT_T3;
+		bufferU[j++]=TX16;			//0000 1010 0001 0010 1100 0010 1011 0010 = 0A12C2B2
+		bufferU[j++]=2;
+		bufferU[j++]=0x0A;
+		bufferU[j++]=0x12;
+		bufferU[j++]=0xC2;
+		bufferU[j++]=0xB2;
+		bufferU[j++]=SET_CK_D;		//Clock pulse
+		bufferU[j++]=0x4;
+		bufferU[j++]=SET_CK_D;
+		bufferU[j++]=0x0;
+	}
+	bufferU[j++]=WAIT_T2;
+	bufferU[j++]=WAIT_T2;
+	bufferU[j++]=WAIT_T2;
+	bufferU[j++]=ICSP8_LOAD;
+	bufferU[j++]=LOAD_PC_ADDR;
+	bufferU[j++]=0x80;
+	bufferU[j++]=0x05;
+	bufferU[j++]=ICSP8_READ;
+	bufferU[j++]=READ_NVM_INC;	//DevREV
+	bufferU[j++]=ICSP8_READ;
+	bufferU[j++]=READ_NVM_INC;	//DevID
+	bufferU[j++]=SET_PARAMETER;
+	bufferU[j++]=SET_T3;
+	bufferU[j++]=2800>>8;
+	bufferU[j++]=2800&0xff;
+	bufferU[j++]=FLUSH;
+	for(;j<DIMBUF;j++) bufferU[j]=0x0;
+	PacketIO(5);
+	j=0;
+	for(z=0;z<DIMBUF-2&&bufferI[z]!=ICSP8_READ;z++);
+	devREV=(bufferI[z+1]<<8)+bufferI[z+2];
+	for(z+=3;z<DIMBUF-2&&bufferI[z]!=ICSP8_READ;z++);
+	devID=(bufferI[z+1]<<8)+bufferI[z+2];
+	PrintMessage1(strings[S_DevID],devID);	//"DevID: 0x%04X\r\n"
+	if(devREV<0x3FFF) PrintMessage1(strings[S_DevREV],devREV);	//"DevREV: 0x%04X\r\n"
+	PIC16_ID(devID);
+	if(memCODE_W[0x8006]<0x3FFF&&devID!=memCODE_W[0x8006]) PrintMessage(strings[S_DevMismatch]);	//"Warning: the device is different from what specified in source data"
+//****************** DIA-DCI ********************
+	if(saveLog) fprintf(logfile,"Device Information Area @0x8100\n");
+	WORD DIA[0x20];
+	bufferU[j++]=ICSP8_LOAD;			//counter at 0x8100
+	bufferU[j++]=LOAD_PC_ADDR;
+	bufferU[j++]=0x81;
+	bufferU[j++]=0x00;
+	k=0;
+	for(i=0;i<0x20;i++){		//DIA
+		bufferU[j++]=ICSP8_READ;
+		bufferU[j++]=READ_NVM_INC;
+		if((j+1)/2*3+3>DIMBUF||i==0x1F){		//2B cmd -> 3B data
+			bufferU[j++]=FLUSH;
+			for(;j<DIMBUF;j++) bufferU[j]=0x0;
+			PacketIO(5);
+			for(z=0;z<DIMBUF-2;z++){
+				if(bufferI[z]==ICSP8_READ){
+					DIA[k++]=(bufferI[z+1]<<8)+bufferI[z+2];
+					z+=2;
+				}
+			}
+			j=0;
+		}
+	}
+	PrintMessage("Device Information Area @0x8100\r\n");
+	char s[256],t[256];
+	s[0]=0;
+	for(i=0;i<0x20;i+=COL){
+		sprintf(t,"%04X: ",0x8100+i);
+		strcat(s,t);
+		for(j=i;j<i+COL&&j<0x20;j++){
+			sprintf(t,"%04X ",DIA[j]);
+			strcat(s,t);
+		}
+		strcat(s,"\r\n");
+	}
+	PrintMessage(s);
+	if(saveLog) fprintf(logfile,"Device Configuration Information @0x8200\n");
+	WORD DCI[0x20];
+	j=0;
+	k=0;
+	bufferU[j++]=ICSP8_LOAD;
+	bufferU[j++]=LOAD_PC_ADDR;
+	bufferU[j++]=0x82;
+	bufferU[j++]=0x00;
+	for(i=0;i<0x20;i++){		//DCI
+		bufferU[j++]=ICSP8_READ;
+		bufferU[j++]=READ_NVM_INC;
+		if((j+1)/2*3+3>DIMBUF||i==0x1F){		//2B cmd -> 3B data
+			bufferU[j++]=FLUSH;
+			for(;j<DIMBUF;j++) bufferU[j]=0x0;
+			PacketIO(5);
+			for(z=0;z<DIMBUF-2;z++){
+				if(bufferI[z]==ICSP8_READ){
+					DCI[k++]=(bufferI[z+1]<<8)+bufferI[z+2];
+					z+=2;
+				}
+			}
+			j=0;
+		}
+	}
+	PrintMessage("Device Configuration Information @0x8200\r\n");
+	s[0]=0;
+	for(i=0;i<0x20;i+=COL){
+		sprintf(t,"%04X: ",0x8200+i);
+		strcat(s,t);
+		for(j=i;j<i+COL&&j<0x20;j++){
+			sprintf(t,"%04X ",DCI[j]);
+			strcat(s,t);
+		}
+		strcat(s,"\r\n");
+	}
+	PrintMessage(s);
+	PrintMessage1("Erase row size: %d words\r\n",DCI[0]);
+	PrintMessage1("Write latches: %d\r\n",DCI[1]);
+	PrintMessage1("User rows: %d\r\n",DCI[2]);
+	PrintMessage1("->%d Flash words\r\n",DCI[0]*DCI[2]);
+	PrintMessage1("EE data memory size: %d\r\n",DCI[3]);
+	PrintMessage1("Pin count: %d\r\n",DCI[4]);
+	if(DCI[0]*DCI[2]!=dim) PrintMessage(strings[S_WarnFlashSize]);	//"Warning, flash size is different from the expected value"
+	if(dim2>DCI[3]) dim2=DCI[3];	//limit EE to the real one
+//****************** erase memory ********************
+	PrintMessage(strings[S_StartErase]);	//"Erasing ... "
+	if(saveLog)	fprintf(logfile,"%s\n",strings[S_StartErase]);
+	j=0;
+	bufferU[j++]=ICSP8_LOAD;
+	bufferU[j++]=LOAD_PC_ADDR;
+	if(programID){	//0x8000 to erase UserID
+		bufferU[j++]=0x80;
+		bufferU[j++]=0x00;
+	}
+	else{
+		bufferU[j++]=0x00;
+		bufferU[j++]=0x00;
+	}
+	bufferU[j++]=ICSP8_SHORT;
+	bufferU[j++]=BULK_ERASE_PROGRAM_MEM;
+	bufferU[j++]=WAIT_T3;			// wait ~11ms
+	bufferU[j++]=WAIT_T3;
+	bufferU[j++]=WAIT_T3;
+	bufferU[j++]=WAIT_T3;
+	bufferU[j++]=FLUSH;
+	for(;j<DIMBUF;j++) bufferU[j]=0x0;
+	PacketIO(12);
+	PrintMessage(strings[S_Compl]);	//"completed\r\n"
+//****************** write code ********************
+	PrintMessage(strings[S_StartCodeProg]);	//"Write code ... "
+	PrintStatusSetup();
+	if(saveLog)	fprintf(logfile,"%s\n",strings[S_StartCodeProg]);
+	fflush(logfile);
+	int valid,inc;
+	#define rowN 32			//32 word algorithm
+	for(;dim>0&&memCODE_W[dim]>=0x3fff;dim--); //skip empty space at end
+	dim+=dim%rowN;		//grow to 32 word multiple
+	for(i=k=0,j=0;i<dim;i+=rowN){
+		for(valid=0;i<dim&&!valid;i+=valid?0:rowN){	//skip empty locations (32 words)
+			valid=0;
+			for(k=0;k<rowN;k++) if(memCODE_W[i+k]<0x3fff) valid=1;
+		}
+		bufferU[j++]=ICSP8_LOAD;
+		bufferU[j++]=LOAD_PC_ADDR;	//update counter
+		bufferU[j++]=i>>8;
+		bufferU[j++]=i&0xFF;
+		for(k=0;k<rowN&&i<dim;k++){	//load all latches
+			bufferU[j++]=ICSP8_LOAD;
+			bufferU[j++]=k<(rowN-1)?LOAD_NVM_INC:LOAD_NVM;
+			bufferU[j++]=memCODE_W[i+k]>>8;  		//MSB
+			bufferU[j++]=memCODE_W[i+k]&0xff;		//LSB
+			if(j>DIMBUF-5){
+				bufferU[j++]=FLUSH;
+				for(;j<DIMBUF;j++) bufferU[j]=0x0;
+				PacketIO(3);
+				j=0;
+			}
+		}
+		if(i<dim){
+			bufferU[j++]=ICSP8_SHORT;
+			bufferU[j++]=BEGIN_INT_PROG;			//internally timed, T=2.8ms
+			bufferU[j++]=WAIT_T3;
+			bufferU[j++]=FLUSH;
+			for(;j<DIMBUF;j++) bufferU[j]=0x0;
+			PacketIO(3);
+			j=0;
+			if(saveLog){
+				fprintf(logfile,strings[S_Log7],i,i,0,0);	//"i=%d, k=%d 0=%d\n"
+			}
+			PrintStatus(strings[S_CodeWriting],i*100/dim,i);	//"Writing: %d%%, addr. %03X"
+		}
+	}
+	PrintStatusEnd();
+	PrintMessage(strings[S_Compl]);	//"completed\r\n"
+//****************** verify code ********************
+	PrintMessage(strings[S_CodeV]);	//"Verifying code ... "
+	PrintStatusSetup();
+	if(saveLog)	fprintf(logfile,"%s\n",strings[S_CodeV]);
+	j=0;
+	bufferU[j++]=ICSP8_LOAD;
+	bufferU[j++]=LOAD_PC_ADDR;	//update counter
+	bufferU[j++]=0x00;
+	bufferU[j++]=0x00;
+	bufferU[j++]=FLUSH;
+	for(;j<DIMBUF;j++) bufferU[j]=0x0;
+	PacketIO(2);
+	j=0;
+	for(i=k=0;i<dim;i++){
+		if(j==0){				//skip empty locations (only at the beginning of a packet)
+			for(k2=i;k2<dim&&memCODE_W[k2]>=0x3fff;k2++);
+			if(k2>i+10){			//at least 10 skipped
+				i=k2;
+				bufferU[j++]=ICSP8_LOAD;
+				bufferU[j++]=LOAD_PC_ADDR;	//update counter
+				bufferU[j++]=(i>>8)&0xFF;
+				bufferU[j++]=i&0xFF;
+			}
+		}
+		bufferU[j++]=ICSP8_READ;
+		bufferU[j++]=READ_NVM_INC;
+		if((j+1)/2*3+3>DIMBUF||i==dim-1){		//2B cmd -> 3B data
+			bufferU[j++]=FLUSH;
+			for(;j<DIMBUF;j++) bufferU[j]=0x0;
+			PacketIO(5);
+			for(z=0;z<DIMBUF-2;z++){
+				if(bufferI[z]==ICSP8_READ){
+					if(memCODE_W[k]<0x3FFF&&(memCODE_W[k]!=(bufferI[z+1]<<8)+bufferI[z+2])){
+						PrintMessage3(strings[S_CodeWError2],k,memCODE_W[k],(bufferI[z+1]<<8)+bufferI[z+2]);	//"Error writing address %3X: written %04X, read %04X\r\n"
+						err++;
+					}
+					z+=2;
+					k++;
+				}
+			}
+			PrintStatus(strings[S_CodeV2],i*100/(dim+dim2),i);	//"Verify: %d%%, addr. %04X"
+			j=0;
+			if(saveLog){
+				fprintf(logfile,strings[S_Log8],i,i,k,k,err);	//"i=%d, k=%d, errors=%d\n"
+			}
+			if(err>=max_err) i=dim;
+		}
+	}
+	PrintStatusEnd();
+	PrintMessage1(strings[S_ComplErr],err);	//"completed, %d errors\r\n"
+	if(err>=max_err){
+		PrintMessage1(strings[S_MaxErr],err);	//"Exceeded maximum number of errors (%d), write interrupted\r\n"
+	}
+//****************** write eeprom ********************
+	else if(dim2&&err<max_err){
+		int errEE=0;
+		PrintMessage(strings[S_EEAreaW]);	//"Writing EEPROM ... "
+		PrintStatusSetup();
+		if(saveLog)	fprintf(logfile,"%s\n",strings[S_EEAreaW]);
+		for(;dim2>0&&memEE[dim2]>=0xff;dim2--); //skip empty space at end
+		dim2+=dim2%rowN;		//grow to 32 word multiple
+		for(i=k=0,j=0;i<dim2;i+=rowN){
+			for(valid=0;i<dim2&&!valid;i+=valid?0:rowN){	//skip empty locations (32 words)
+				valid=0;
+				for(k=0;k<rowN;k++) if(memEE[i+k]<0xff) valid=1;
+			}
+			bufferU[j++]=ICSP8_LOAD;
+			bufferU[j++]=LOAD_PC_ADDR;	//update counter
+			bufferU[j++]=0xF0+(i>>8);
+			bufferU[j++]=i&0xFF;
+			for(k=0;k<rowN&&i<dim2;k++){	//load all latches
+				bufferU[j++]=ICSP8_LOAD;
+				bufferU[j++]=k<(rowN-1)?LOAD_NVM_INC:LOAD_NVM;
+				bufferU[j++]=0;  		//MSB
+				bufferU[j++]=memEE[i+k]&0xff;		//LSB
+				if(j>DIMBUF-4){
+					bufferU[j++]=FLUSH;
+					for(;j<DIMBUF;j++) bufferU[j]=0x0;
+					PacketIO(3);
+					j=0;
+				}
+			}
+			if(i<dim2){
+				bufferU[j++]=ICSP8_SHORT;
+				bufferU[j++]=BEGIN_INT_PROG;			//internally timed, T=2.8ms
+				bufferU[j++]=WAIT_T3;
+				bufferU[j++]=FLUSH;
+				for(;j<DIMBUF;j++) bufferU[j]=0x0;
+				PacketIO(3);
+				j=0;
+				if(saveLog){
+					fprintf(logfile,strings[S_Log7],i,i,0,0);	//"i=%d, k=%d 0=%d\n"
+				}
+				PrintStatus(strings[S_CodeWriting],(i+dim)*100/(dim+dim2),0xF000+i);	//"Writing: %d%%, addr. %03X"
+			}
+		}
+		PrintStatusEnd();
+		PrintMessage(strings[S_Compl]);	//"completed\r\n"
+//****************** verify eeprom ********************
+		PrintMessage(strings[S_EEV]);	//"Verifying eeprom ... "
+		PrintStatusSetup();
+		if(saveLog)	fprintf(logfile,"%s\n",strings[S_EEV]);
+		j=0;
+		bufferU[j++]=ICSP8_LOAD;
+		bufferU[j++]=LOAD_PC_ADDR;	//update counter
+		bufferU[j++]=0xF0;
+		bufferU[j++]=0x00;
+		bufferU[j++]=FLUSH;
+		for(;j<DIMBUF;j++) bufferU[j]=0x0;
+		PacketIO(2);
+		j=0;
+		for(i=k=0;i<dim2;i++){
+			if(j==0){				//skip empty locations (only after a write)
+				for(k2=i;k2<dim2&&memEE[k2]>=0xff;k2++);
+				if(k2>i+10){			//at least 10 skipped
+					i=k2;
+					bufferU[j++]=ICSP8_LOAD;
+					bufferU[j++]=LOAD_PC_ADDR;	//update counter
+					bufferU[j++]=0xF0+((i>>8)&0x0F);
+					bufferU[j++]=i&0xFF;
+				}
+			}
+			bufferU[j++]=ICSP8_READ;
+			bufferU[j++]=READ_NVM_INC;
+			if((j+1)/2*3+3>DIMBUF||i==dim-1){		//2B cmd -> 3B data
+				bufferU[j++]=FLUSH;
+				for(;j<DIMBUF;j++) bufferU[j]=0x0;
+				PacketIO(5);
+				for(z=0;z<DIMBUF-2;z++){
+					if(bufferI[z]==ICSP8_READ){
+						if(memEE[k]<0xFF&&(memEE[k]!=bufferI[z+2])){
+							PrintMessage3(strings[S_CodeWError3],k,memEE[k],bufferI[z+2]);	//"Error writing address %4X: written %02X, read %02X\r\n"
+							errEE++;
+						}
+						z+=2;
+						k++;
+					}
+				}
+				PrintStatus(strings[S_CodeV2],(dim+i*100)/(dim+dim2),i);	//"Verify: %d%%, addr. %04X"
+				j=0;
+				if(saveLog){
+					fprintf(logfile,strings[S_Log8],i,i,k,k,err);	//"i=%d, k=%d, errors=%d\n"
+				}
+				if(err+errEE>=max_err) i=dim2;
+			}
+		}
+		PrintStatusEnd();
+		if(k<dim){
+			PrintMessage2(strings[S_CodeVError3],dim,k);	//"Error verifying code area, requested %d words, read %d\r\n"
+		}
+		PrintMessage1(strings[S_ComplErr],err);	//"completed, %d errors\r\n"
+		if(max_err&&err+errEE>max_err){
+			PrintMessage1(strings[S_MaxErr],err+errEE);	//"Exceeded maximum number of errors (%d), write interrupted\r\n"
+		}
+		err+=errEE;
+	}
+//****************** write ID, CONFIG, CALIB ********************
+	if(max_err&&err<max_err){
+		PrintMessage(strings[S_ConfigAreaW]);	//"Writing CONFIG area ... "
+		PrintMessage("\r\n");
+		if(saveLog)	fprintf(logfile,"%s\n",strings[S_ConfigAreaW]);
+		int err_c=0;
+		bufferU[j++]=SET_PARAMETER;
+		bufferU[j++]=SET_T3;
+		bufferU[j++]=10000>>8;		//5.6ms in datasheet, but requires more in practice
+		bufferU[j++]=10000&0xff;
+		if(programID){
+			bufferU[j++]=ICSP8_LOAD;
+			bufferU[j++]=LOAD_PC_ADDR;	//load address
+			bufferU[j++]=0x80;
+			bufferU[j++]=0x00;
+			for(i=0x8000;i<0x8004;i++){
+				bufferU[j++]=ICSP8_LOAD;
+				bufferU[j++]=LOAD_NVM;
+				bufferU[j++]=memCODE_W[i]>>8;		//MSB
+				bufferU[j++]=memCODE_W[i]&0xff;		//LSB
+				bufferU[j++]=ICSP8_SHORT;
+				bufferU[j++]=BEGIN_INT_PROG;		//internally timed
+				bufferU[j++]=WAIT_T3;				//Tprogram 5.6ms
+				bufferU[j++]=ICSP8_READ;
+				bufferU[j++]=READ_NVM_INC;
+			}
+			bufferU[j++]=FLUSH;
+			for(;j<DIMBUF;j++) bufferU[j]=0x0;
+			PacketIO(25);
+			for(i=0,z=0;i<4;i++){
+				for(;z<DIMBUF-2&&bufferI[z]!=ICSP8_READ;z++);
+				if (memCODE_W[0x8000+i]!=(bufferI[z+1]<<8)+bufferI[z+2]){
+					PrintMessage3(strings[S_IDErr],i,memCODE_W[0x8000+i],(bufferI[z+1]<<8)+bufferI[z+2]);	//"Error writing ID%d: written %04X, read %04X\r\n"
+					err_c++;
+				}
+				z+=6;
+			}
+			j=0;
+		}
+		bufferU[j++]=ICSP8_LOAD;
+		bufferU[j++]=LOAD_PC_ADDR;	//load address
+		bufferU[j++]=0x80;
+		bufferU[j++]=0x07;
+		for(i=0x8007;i<0x800C;i++){		//5 config words
+			bufferU[j++]=ICSP8_LOAD;
+			bufferU[j++]=LOAD_NVM;
+			bufferU[j++]=memCODE_W[i]>>8;		//MSB
+			bufferU[j++]=memCODE_W[i]&0xff;		//LSB
+			bufferU[j++]=ICSP8_SHORT;
+			bufferU[j++]=BEGIN_INT_PROG;		//internally timed
+			bufferU[j++]=WAIT_T3;				//Tprogram 5.6ms
+			bufferU[j++]=ICSP8_READ;
+			bufferU[j++]=READ_NVM_INC;
+		}
+		bufferU[j++]=FLUSH;
+		for(;j<DIMBUF;j++) bufferU[j]=0x0;
+		PacketIO(30);
+		for(i=0,z=0;i<5;i++){
+			for(;z<DIMBUF-2&&bufferI[z]!=ICSP8_READ;z++);
+			if (~memCODE_W[0x8007+i]&((bufferI[z+1]<<8)+bufferI[z+2])){	//error if written 0 and read 1 (~W&R)
+				sprintf(t,"config%d",i+1);
+				PrintMessage3(strings[S_WErr2],t,memCODE_W[0x8007+i],(bufferI[z+1]<<8)+bufferI[z+2]);	//"Error writing %s: written %04X, read %04X"
+				err_c++;
+			}
+			z+=6;
+		}
+		err+=err_c;
+		PrintMessage1(strings[S_ComplErr],err_c);	//"completed, %d errors\r\n"
+		if(saveLog){
+			fprintf(logfile,strings[S_Log9],err_c);	//"Config area 	errors=%d \n"
+		}
+	}
+//****************** exit ********************
+	j=0;
+	bufferU[j++]=SET_PARAMETER;
+	bufferU[j++]=SET_T3;
+	bufferU[j++]=2000>>8;
+	bufferU[j++]=2000&0xff;
+	bufferU[j++]=NOP;				//exit program mode
+	bufferU[j++]=EN_VPP_VCC;
+	bufferU[j++]=0x1;
+	bufferU[j++]=EN_VPP_VCC;
+	bufferU[j++]=0x0;
+	bufferU[j++]=SET_CK_D;
+	bufferU[j++]=0x0;
+	bufferU[j++]=FLUSH;
+	for(;j<DIMBUF;j++) bufferU[j]=0x0;
+	PacketIO(2);
+	unsigned int stop=GetTickCount();
+	sprintf(str,strings[S_EndErr],(stop-start)/1000.0,err,err!=1?strings[S_ErrPlur]:strings[S_ErrSing]);	//"\r\nEnd (%.2f s) %d %s\r\n\r\n"
+	PrintMessage(str);
+	if(saveLog){
+		fprintf(logfile,str);
+		CloseLogFile();
+	}
+	PrintStatusClear();			//clear status report
+}
+

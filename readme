@@ -5,6 +5,11 @@ Website: http://openprog.altervista.org
 These sources are given free of charge under the GNU General Public License version 2 
 
 Changelog (to use new features the corresponding firmware is required):
+V 0.11.0 january 2019:  added 16F15313-23-24-25-44-45-54-55-56-75-76-85-86,
+						16F18424-25-26-44-45-46-54-55-56,
+						16F18854-55-56-57-75-76-77,
+						16F19155-56-75-76-85-86-95-96-97
+
 V 0.10.1 december 2018: added 16F1764-65-68-69-73-76-77-78-79;
 						removed MSVC6 function definitions
 

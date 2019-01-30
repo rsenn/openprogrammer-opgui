@@ -1,6 +1,6 @@
 /**
  * \file progP32.c - algorithms to program the PIC32 family of microcontrollers
- * Copyright (C) 2016 Alberto Maccioni
+ * Copyright (C) 2019 Alberto Maccioni
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

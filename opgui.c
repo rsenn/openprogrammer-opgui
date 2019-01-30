@@ -2,7 +2,7 @@
  * \file opgui.c
  * main control program for the open programmer
  *
- * Copyright (C) 2009-2018 Alberto Maccioni
+ * Copyright (C) 2009-2019 Alberto Maccioni
  * for detailed info see:
  * http://openprog.altervista.org/
  *
@@ -1069,7 +1069,7 @@ void info(GtkWidget *widget,GtkWidget *window)
 		//"authors","Alberto Maccioni",NULL,
 		"comments", "A graphical interface for the Open Programmer",
 		"copyright",
-		"Copyright (C) Alberto Maccioni 2009-2018\n\n"
+		"Copyright (C) Alberto Maccioni 2009-2019\n\n"
 		"This program is free software; you can \n"
 		"redistribute it and/or modify it under \n"
 		"the terms of the GNU General Public License \n"
@@ -2677,9 +2677,9 @@ int main( int argc, char *argv[])
 
 	GtkWidget * ioBoxDCDC = gtk_hbox_new(FALSE,5);
 	gtk_box_pack_start(GTK_BOX(ioVbox1),ioBoxDCDC,FALSE,FALSE,0);
-	VDD_ON = gtk_check_button_new_with_label("VDD");	//""
+	VDD_ON = gtk_check_button_new_with_label("VDDU");	//""
 	gtk_box_pack_start(GTK_BOX(ioBoxDCDC),VDD_ON,FALSE,TRUE,2);
-	VPP_ON = gtk_check_button_new_with_label("VPP");	//""
+	VPP_ON = gtk_check_button_new_with_label("VPPU");	//""
 	gtk_box_pack_start(GTK_BOX(ioBoxDCDC),VPP_ON,FALSE,TRUE,2);
 	DCDC_ON = gtk_check_button_new_with_label("DCDC");	//""
 	gtk_box_pack_start(GTK_BOX(ioBoxDCDC),DCDC_ON,FALSE,TRUE,2);
@@ -3158,7 +3158,7 @@ void TestHw(GtkWidget *widget,GtkWindow* parent)
 	for(;j<DIMBUF;j++) bufferU[j]=0x0;
 	PacketIO(5);
 	strcpy(str,strings[I_TestMSG]);
-	strcat(str,"\n VDD=5V\n VPP=13V\n PGD(RB5)=0V\n PGC(RB6)=0V\n PGM(RB7)=0V");
+	strcat(str,"\n VDDU=5V\n VPPU=13V\n PGD(RB5)=0V\n PGC(RB6)=0V\n PGM(RB7)=0V");
 	MsgBox(str);
 	j=0;
 	bufferU[j++]=SET_CK_D;
@@ -3169,7 +3169,7 @@ void TestHw(GtkWidget *widget,GtkWindow* parent)
 	for(;j<DIMBUF;j++) bufferU[j]=0x0;
 	PacketIO(5);
 	strcpy(str,strings[I_TestMSG]);
-	strcat(str,"\n VDD=5V\n VPP=0V\n PGD(RB5)=5V\n PGC(RB6)=5V\n PGM(RB7)=5V");
+	strcat(str,"\n VDDU=5V\n VPPU=0V\n PGD(RB5)=5V\n PGC(RB6)=5V\n PGM(RB7)=5V");
 	MsgBox(str);
 	j=0;
 	bufferU[j++]=SET_CK_D;
@@ -3180,7 +3180,7 @@ void TestHw(GtkWidget *widget,GtkWindow* parent)
 	for(;j<DIMBUF;j++) bufferU[j]=0x0;
 	PacketIO(5);
 	strcpy(str,strings[I_TestMSG]);
-	strcat(str,"\n VDD=0V\n VPP=13V\n PGD(RB5)=5V\n PGC(RB6)=0V\n PGM(RB7)=0V");
+	strcat(str,"\n VDDU=0V\n VPPU=13V\n PGD(RB5)=5V\n PGC(RB6)=0V\n PGM(RB7)=0V");
 	MsgBox(str);
 	j=0;
 	bufferU[j++]=SET_CK_D;
@@ -3191,7 +3191,7 @@ void TestHw(GtkWidget *widget,GtkWindow* parent)
 	for(;j<DIMBUF;j++) bufferU[j]=0x0;
 	PacketIO(5);
 	strcpy(str,strings[I_TestMSG]);
-	strcat(str,"\n VDD=0V\n VPP=0V\n PGD(RB5)=0V\n PGC(RB6)=5V\n PGM(RB7)=0V");
+	strcat(str,"\n VDDU=0V\n VPPU=0V\n PGD(RB5)=0V\n PGC(RB6)=5V\n PGM(RB7)=0V");
 	MsgBox(str);
 	j=0;
 	bufferU[j++]=SET_CK_D;
