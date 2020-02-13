@@ -1064,18 +1064,20 @@ void Read16F1xxx(int dim,int dim2,int dim3,int options){
 void Read16F18xxx(int dim,int dim2,int dim3,int options)
 // read 14 bit enhanced PIC with new 8b commands
 // dim=program size (up to 0x8000)
-// dim2=if>0 use eeprom, size is automatic
+// dim2=if>0 use eeprom, size is automatic when reading DCI
 // dim3=not used
 // options:
 //		bit0=0 -> vpp before vdd
 //		bit0=1 -> vdd before vpp
 //		bit1=1 -> LVP programming
+//		bit4=1 -> do not use DIA&DCI
 // DevREV@0x8005     DevID@0x8006
 // Config1@0x8007    Config2@0x8008 ...
 // Device info area @0x8100
-// Device configuration area @0x8200
+// Device configuration info area @0x8200
 {
 	int k=0,k2=0,z=0,i,j;
+	int useDCI=options&0x10==0?1:0;
 	if(FWVersion<0xB00){		//only for 16F18xxx
 		PrintMessage1(strings[S_FWver2old],"0.11.0");	//"This firmware is too old. Version %s is required\r\n"
 		return;
@@ -1215,70 +1217,72 @@ void Read16F18xxx(int dim,int dim2,int dim3,int options)
 	}
 	else PrintMessage(strings[S_Compl]);
 //****************** read device info area ********************
-	if(saveLog) fprintf(logfile,"Read device info area @0x8100\n");
-	bufferU[j++]=ICSP8_LOAD;			//counter at 0x8000
-	bufferU[j++]=LOAD_PC_ADDR;
-	bufferU[j++]=0x81;
-	bufferU[j++]=0x00;
-	k2=0;
-	for(i=0x8100;i<0x8120;i++){		//DIA
-		bufferU[j++]=ICSP8_READ;
-		bufferU[j++]=READ_NVM_INC;
-		if((j+1)/2*3+3>DIMBUF||i==0x811F){		//2B cmd -> 3B data
-			bufferU[j++]=FLUSH;
-			for(;j<DIMBUF;j++) bufferU[j]=0x0;
-			PacketIO(5);
-			for(z=0;z<DIMBUF-2;z++){
-				if(bufferI[z]==ICSP8_READ){
-					memCODE_W[0x8100+k2++]=(bufferI[z+1]<<8)+bufferI[z+2];
-					z+=2;
+	if(useDCI){	//if not disabled
+		if(saveLog) fprintf(logfile,"Read device info area @0x8100\n");
+		bufferU[j++]=ICSP8_LOAD;			//counter at 0x8000
+		bufferU[j++]=LOAD_PC_ADDR;
+		bufferU[j++]=0x81;
+		bufferU[j++]=0x00;
+		k2=0;
+		for(i=0x8100;i<0x8120;i++){		//DIA
+			bufferU[j++]=ICSP8_READ;
+			bufferU[j++]=READ_NVM_INC;
+			if((j+1)/2*3+3>DIMBUF||i==0x811F){		//2B cmd -> 3B data
+				bufferU[j++]=FLUSH;
+				for(;j<DIMBUF;j++) bufferU[j]=0x0;
+				PacketIO(5);
+				for(z=0;z<DIMBUF-2;z++){
+					if(bufferI[z]==ICSP8_READ){
+						memCODE_W[0x8100+k2++]=(bufferI[z+1]<<8)+bufferI[z+2];
+						z+=2;
+					}
+				}
+				PrintStatus(strings[S_CodeReading],(i-0x8100+dim+0x20)*100/(dim+dim2+0x60),i);	//"Read: %d%%, addr %03X"
+				j=0;
+				if(saveLog){
+					fprintf(logfile,strings[S_Log7],i,i,k2,k2);	//"i=%d(0x%X), k=%d(0x%X)\n"
 				}
 			}
-			PrintStatus(strings[S_CodeReading],(i-0x8100+dim+0x20)*100/(dim+dim2+0x60),i);	//"Read: %d%%, addr %03X"
-			j=0;
-			if(saveLog){
-				fprintf(logfile,strings[S_Log7],i,i,k2,k2);	//"i=%d(0x%X), k=%d(0x%X)\n"
-			}
 		}
-	}
-	if(k2!=0x20){
-		PrintMessage("\r\n");
-		PrintMessage2(strings[S_ConfigErr],0x20,k2);	//"Error reading config area, requested %d words, read %d\r\n"
-	}
-//****************** read calibration area (Device Configuration Information) ********************
-	if(saveLog) fprintf(logfile,"Read Device Configuration Information @0x8200\n");
-	bufferU[j++]=ICSP8_LOAD;			//counter at 0x8200
-	bufferU[j++]=LOAD_PC_ADDR;
-	bufferU[j++]=0x82;
-	bufferU[j++]=0x00;
-	k2=0;
-	for(i=0x8200;i<0x8220;i++){		//DCI
-		bufferU[j++]=ICSP8_READ;
-		bufferU[j++]=READ_NVM_INC;
-		if((j+1)/2*3+3>DIMBUF||i==0x821F){		//2B cmd -> 3B data
-			bufferU[j++]=FLUSH;
-			for(;j<DIMBUF;j++) bufferU[j]=0x0;
-			PacketIO(5);
-			for(z=0;z<DIMBUF-2;z++){
-				if(bufferI[z]==ICSP8_READ){
-					memCODE_W[0x8200+k2++]=(bufferI[z+1]<<8)+bufferI[z+2];
-					z+=2;
+		if(k2!=0x20){
+			PrintMessage("\r\n");
+			PrintMessage2(strings[S_ConfigErr],0x20,k2);	//"Error reading config area, requested %d words, read %d\r\n"
+		}
+	//****************** read calibration area (Device Configuration Information) ********************
+		if(saveLog) fprintf(logfile,"Read Device Configuration Information @0x8200\n");
+		bufferU[j++]=ICSP8_LOAD;			//counter at 0x8200
+		bufferU[j++]=LOAD_PC_ADDR;
+		bufferU[j++]=0x82;
+		bufferU[j++]=0x00;
+		k2=0;
+		for(i=0x8200;i<0x8220;i++){		//DCI
+			bufferU[j++]=ICSP8_READ;
+			bufferU[j++]=READ_NVM_INC;
+			if((j+1)/2*3+3>DIMBUF||i==0x821F){		//2B cmd -> 3B data
+				bufferU[j++]=FLUSH;
+				for(;j<DIMBUF;j++) bufferU[j]=0x0;
+				PacketIO(5);
+				for(z=0;z<DIMBUF-2;z++){
+					if(bufferI[z]==ICSP8_READ){
+						memCODE_W[0x8200+k2++]=(bufferI[z+1]<<8)+bufferI[z+2];
+						z+=2;
+					}
+				}
+				PrintStatus(strings[S_CodeReading],(i-0x8200+dim+0x40)*100/(dim+dim2+0x60),i);	//"Read: %d%%, addr %03X"
+				j=0;
+				if(saveLog){
+					fprintf(logfile,strings[S_Log7],i,i,k2,k2);	//"i=%d(0x%X), k=%d(0x%X)\n"
 				}
 			}
-			PrintStatus(strings[S_CodeReading],(i-0x8200+dim+0x40)*100/(dim+dim2+0x60),i);	//"Read: %d%%, addr %03X"
-			j=0;
-			if(saveLog){
-				fprintf(logfile,strings[S_Log7],i,i,k2,k2);	//"i=%d(0x%X), k=%d(0x%X)\n"
-			}
 		}
-	}
-	if(k2!=0x20){
-		PrintMessage("\r\n");
-		PrintMessage2(strings[S_ConfigErr],0x20,k2);	//"Error reading config area, requested %d words, read %d\r\n"
+		if(k2!=0x20){
+			PrintMessage("\r\n");
+			PrintMessage2(strings[S_ConfigErr],0x20,k2);	//"Error reading config area, requested %d words, read %d\r\n"
+		}
 	}
 //****************** read eeprom ********************
 	if(dim2){					//EEPROM
-		dim2=memCODE_W[0x8203]; 	//EEPROM size from DCI
+		if(useDCI) dim2=memCODE_W[0x8203]; 	//EEPROM size from DCI
 		if(dim2>0x1000||dim2<0){		//Max 4K
 			PrintMessage(strings[S_EELim]);	//"EEPROM size exceeds limits\r\n"
 			return;
@@ -1344,37 +1348,39 @@ void Read16F18xxx(int dim,int dim2,int dim3,int options)
 	for(i=0;i<5;i++){
 		PrintMessage2(strings[S_ConfigWordX],i+1,memCODE_W[0x8007+i]);	//"Configuration word %d: 0x%04X\r\n"
 	}
-	PrintMessage("Device Information Area @0x8100\r\n");
-	s[0]=0;
-	for(i=0;i<0x20;i+=COL){
-		sprintf(t,"%04X: ",0x8100+i);
-		strcat(s,t);
-		for(j=i;j<i+COL&&j<0x20;j++){
-			sprintf(t,"%04X ",memCODE_W[0x8100+j]);
+	if(useDCI){	//if not disabled
+		PrintMessage("Device Information Area @0x8100\r\n");
+		s[0]=0;
+		for(i=0;i<0x20;i+=COL){
+			sprintf(t,"%04X: ",0x8100+i);
 			strcat(s,t);
+			for(j=i;j<i+COL&&j<0x20;j++){
+				sprintf(t,"%04X ",memCODE_W[0x8100+j]);
+				strcat(s,t);
+			}
+			strcat(s,"\r\n");
 		}
-		strcat(s,"\r\n");
-	}
-	PrintMessage(s);
-	PrintMessage("Device Configuration Information @0x8200\r\n");
-	s[0]=0;
-	for(i=0;i<0x20;i+=COL){
-		sprintf(t,"%04X: ",0x8200+i);
-		strcat(s,t);
-		for(j=i;j<i+COL&&j<0x20;j++){
-			sprintf(t,"%04X ",memCODE_W[0x8200+j]);
+		PrintMessage(s);
+		PrintMessage("Device Configuration Information @0x8200\r\n");
+		s[0]=0;
+		for(i=0;i<0x20;i+=COL){
+			sprintf(t,"%04X: ",0x8200+i);
 			strcat(s,t);
+			for(j=i;j<i+COL&&j<0x20;j++){
+				sprintf(t,"%04X ",memCODE_W[0x8200+j]);
+				strcat(s,t);
+			}
+			strcat(s,"\r\n");
 		}
-		strcat(s,"\r\n");
+		PrintMessage(s);
+		PrintMessage1("Erase row size: %d words\r\n",memCODE_W[0x8200]);
+		PrintMessage1("Write latches: %d\r\n",memCODE_W[0x8201]);
+		PrintMessage1("User rows: %d\r\n",memCODE_W[0x8202]);
+		PrintMessage1("->%d Flash words\r\n",memCODE_W[0x8200]*memCODE_W[0x8202]);
+		PrintMessage1("EE data memory size: %d\r\n",memCODE_W[0x8203]);
+		PrintMessage1("Pin count: %d\r\n",memCODE_W[0x8204]);
+		if(dim!=memCODE_W[0x8200]*memCODE_W[0x8202]) PrintMessage(strings[S_WarnFlashSize]);	//"Warning, flash size is different from the expected value"
 	}
-	PrintMessage(s);
-	PrintMessage1("Erase row size: %d words\r\n",memCODE_W[0x8200]);
-	PrintMessage1("Write latches: %d\r\n",memCODE_W[0x8201]);
-	PrintMessage1("User rows: %d\r\n",memCODE_W[0x8202]);
-	PrintMessage1("->%d Flash words\r\n",memCODE_W[0x8200]*memCODE_W[0x8202]);
-	PrintMessage1("EE data memory size: %d\r\n",memCODE_W[0x8203]);
-	PrintMessage1("Pin count: %d\r\n",memCODE_W[0x8204]);
-	if(dim!=memCODE_W[0x8200]*memCODE_W[0x8202]) PrintMessage(strings[S_WarnFlashSize]);	//"Warning, flash size is different from the expected value"
 	PrintMessage(strings[S_CodeMem2]);	//"\r\nCode memory:\r\n"
 	DisplayCODE16F(dim);
 	if(dim2) DisplayEE();	//visualize
@@ -5974,23 +5980,25 @@ void Write16F1xxx(int dim,int dim2,int options)
 void Write16F18xxx(int dim,int dim2,int options)
 // write 14 bit enhanced PIC
 // dim=program size (words)
-// dim2=if>0 use eeprom, size is automatic
+// dim2=eeprom size (bytes)
 // options:
 //		bit0=0 -> vpp before vdd
 //		bit0=1 -> vdd before vpp
 //		bit1=1 -> LVP programming
+//		bit4=1 -> do not use DIA&DCI
 // DevREV@0x8005     DevID@0x8006
 // Config@0x8007-800B
 // Device info area @0x8100
-// Device configuration area @0x8200
+// Device configuration info area @0x8200
 // erase: BULK_ERASE_PROGRAM_MEM (0x18) +10ms
 // write flash or eeprom: LOAD_NVM (0x0/2) + BEGIN_INT_PROG (0xE0) + 2.8ms (32 word algorithm)
-// config write: one word, 5.6ms
+// config write: one word, 10ms
 // verify after write
 {
 	int err=0;
 	WORD devID=0x3fff,devREV=0x3fff;
 	int k=0,k2=0,z=0,i,j,w;
+	int useDCI=options&0x10==0?1:0;
 	if(FWVersion<0xB00){
 		PrintMessage1(strings[S_FWver2old],"0.11.0");	//"This firmware is too old. Version %s is required\r\n"
 		return;
@@ -6085,86 +6093,88 @@ void Write16F18xxx(int dim,int dim2,int options)
 	PIC16_ID(devID);
 	if(memCODE_W[0x8006]<0x3FFF&&devID!=memCODE_W[0x8006]) PrintMessage(strings[S_DevMismatch]);	//"Warning: the device is different from what specified in source data"
 //****************** DIA-DCI ********************
-	if(saveLog) fprintf(logfile,"Device Information Area @0x8100\n");
-	WORD DIA[0x20];
-	bufferU[j++]=ICSP8_LOAD;			//counter at 0x8100
-	bufferU[j++]=LOAD_PC_ADDR;
-	bufferU[j++]=0x81;
-	bufferU[j++]=0x00;
-	k=0;
-	for(i=0;i<0x20;i++){		//DIA
-		bufferU[j++]=ICSP8_READ;
-		bufferU[j++]=READ_NVM_INC;
-		if((j+1)/2*3+3>DIMBUF||i==0x1F){		//2B cmd -> 3B data
-			bufferU[j++]=FLUSH;
-			for(;j<DIMBUF;j++) bufferU[j]=0x0;
-			PacketIO(5);
-			for(z=0;z<DIMBUF-2;z++){
-				if(bufferI[z]==ICSP8_READ){
-					DIA[k++]=(bufferI[z+1]<<8)+bufferI[z+2];
-					z+=2;
+	if(useDCI){	//if not disabled
+		if(saveLog) fprintf(logfile,"Device Information Area @0x8100\n");
+		WORD DIA[0x20];
+		bufferU[j++]=ICSP8_LOAD;			//counter at 0x8100
+		bufferU[j++]=LOAD_PC_ADDR;
+		bufferU[j++]=0x81;
+		bufferU[j++]=0x00;
+		k=0;
+		for(i=0;i<0x20;i++){		//DIA
+			bufferU[j++]=ICSP8_READ;
+			bufferU[j++]=READ_NVM_INC;
+			if((j+1)/2*3+3>DIMBUF||i==0x1F){		//2B cmd -> 3B data
+				bufferU[j++]=FLUSH;
+				for(;j<DIMBUF;j++) bufferU[j]=0x0;
+				PacketIO(5);
+				for(z=0;z<DIMBUF-2;z++){
+					if(bufferI[z]==ICSP8_READ){
+						DIA[k++]=(bufferI[z+1]<<8)+bufferI[z+2];
+						z+=2;
+					}
 				}
+				j=0;
 			}
-			j=0;
 		}
-	}
-	PrintMessage("Device Information Area @0x8100\r\n");
-	char s[256],t[256];
-	s[0]=0;
-	for(i=0;i<0x20;i+=COL){
-		sprintf(t,"%04X: ",0x8100+i);
-		strcat(s,t);
-		for(j=i;j<i+COL&&j<0x20;j++){
-			sprintf(t,"%04X ",DIA[j]);
+		PrintMessage("Device Information Area @0x8100\r\n");
+		char s[256],t[256];
+		s[0]=0;
+		for(i=0;i<0x20;i+=COL){
+			sprintf(t,"%04X: ",0x8100+i);
 			strcat(s,t);
+			for(j=i;j<i+COL&&j<0x20;j++){
+				sprintf(t,"%04X ",DIA[j]);
+				strcat(s,t);
+			}
+			strcat(s,"\r\n");
 		}
-		strcat(s,"\r\n");
-	}
-	PrintMessage(s);
-	if(saveLog) fprintf(logfile,"Device Configuration Information @0x8200\n");
-	WORD DCI[0x20];
-	j=0;
-	k=0;
-	bufferU[j++]=ICSP8_LOAD;
-	bufferU[j++]=LOAD_PC_ADDR;
-	bufferU[j++]=0x82;
-	bufferU[j++]=0x00;
-	for(i=0;i<0x20;i++){		//DCI
-		bufferU[j++]=ICSP8_READ;
-		bufferU[j++]=READ_NVM_INC;
-		if((j+1)/2*3+3>DIMBUF||i==0x1F){		//2B cmd -> 3B data
-			bufferU[j++]=FLUSH;
-			for(;j<DIMBUF;j++) bufferU[j]=0x0;
-			PacketIO(5);
-			for(z=0;z<DIMBUF-2;z++){
-				if(bufferI[z]==ICSP8_READ){
-					DCI[k++]=(bufferI[z+1]<<8)+bufferI[z+2];
-					z+=2;
+		PrintMessage(s);
+		if(saveLog) fprintf(logfile,"Device Configuration Information @0x8200\n");
+		WORD DCI[0x20];
+		j=0;
+		k=0;
+		bufferU[j++]=ICSP8_LOAD;
+		bufferU[j++]=LOAD_PC_ADDR;
+		bufferU[j++]=0x82;
+		bufferU[j++]=0x00;
+		for(i=0;i<0x20;i++){		//DCI
+			bufferU[j++]=ICSP8_READ;
+			bufferU[j++]=READ_NVM_INC;
+			if((j+1)/2*3+3>DIMBUF||i==0x1F){		//2B cmd -> 3B data
+				bufferU[j++]=FLUSH;
+				for(;j<DIMBUF;j++) bufferU[j]=0x0;
+				PacketIO(5);
+				for(z=0;z<DIMBUF-2;z++){
+					if(bufferI[z]==ICSP8_READ){
+						DCI[k++]=(bufferI[z+1]<<8)+bufferI[z+2];
+						z+=2;
+					}
 				}
+				j=0;
 			}
-			j=0;
 		}
-	}
-	PrintMessage("Device Configuration Information @0x8200\r\n");
-	s[0]=0;
-	for(i=0;i<0x20;i+=COL){
-		sprintf(t,"%04X: ",0x8200+i);
-		strcat(s,t);
-		for(j=i;j<i+COL&&j<0x20;j++){
-			sprintf(t,"%04X ",DCI[j]);
+		PrintMessage("Device Configuration Information @0x8200\r\n");
+		s[0]=0;
+		for(i=0;i<0x20;i+=COL){
+			sprintf(t,"%04X: ",0x8200+i);
 			strcat(s,t);
+			for(j=i;j<i+COL&&j<0x20;j++){
+				sprintf(t,"%04X ",DCI[j]);
+				strcat(s,t);
+			}
+			strcat(s,"\r\n");
 		}
-		strcat(s,"\r\n");
+		PrintMessage(s);
+		PrintMessage1("Erase row size: %d words\r\n",DCI[0]);
+		PrintMessage1("Write latches: %d\r\n",DCI[1]);
+		PrintMessage1("User rows: %d\r\n",DCI[2]);
+		PrintMessage1("->%d Flash words\r\n",DCI[0]*DCI[2]);
+		PrintMessage1("EE data memory size: %d\r\n",DCI[3]);
+		PrintMessage1("Pin count: %d\r\n",DCI[4]);
+		if(DCI[0]*DCI[2]!=dim) PrintMessage(strings[S_WarnFlashSize]);	//"Warning, flash size is different from the expected value"
+		if(dim2>DCI[3]) dim2=DCI[3];	//limit EE to the real one
 	}
-	PrintMessage(s);
-	PrintMessage1("Erase row size: %d words\r\n",DCI[0]);
-	PrintMessage1("Write latches: %d\r\n",DCI[1]);
-	PrintMessage1("User rows: %d\r\n",DCI[2]);
-	PrintMessage1("->%d Flash words\r\n",DCI[0]*DCI[2]);
-	PrintMessage1("EE data memory size: %d\r\n",DCI[3]);
-	PrintMessage1("Pin count: %d\r\n",DCI[4]);
-	if(DCI[0]*DCI[2]!=dim) PrintMessage(strings[S_WarnFlashSize]);	//"Warning, flash size is different from the expected value"
-	if(dim2>DCI[3]) dim2=DCI[3];	//limit EE to the real one
 //****************** erase memory ********************
 	PrintMessage(strings[S_StartErase]);	//"Erasing ... "
 	if(saveLog)	fprintf(logfile,"%s\n",strings[S_StartErase]);
@@ -6393,6 +6403,7 @@ void Write16F18xxx(int dim,int dim2,int options)
 	}
 //****************** write ID, CONFIG, CALIB ********************
 	if(max_err&&err<max_err){
+		char t[256];
 		PrintMessage(strings[S_ConfigAreaW]);	//"Writing CONFIG area ... "
 		PrintMessage("\r\n");
 		if(saveLog)	fprintf(logfile,"%s\n",strings[S_ConfigAreaW]);
@@ -6413,13 +6424,13 @@ void Write16F18xxx(int dim,int dim2,int options)
 				bufferU[j++]=memCODE_W[i]&0xff;		//LSB
 				bufferU[j++]=ICSP8_SHORT;
 				bufferU[j++]=BEGIN_INT_PROG;		//internally timed
-				bufferU[j++]=WAIT_T3;				//Tprogram 5.6ms
+				bufferU[j++]=WAIT_T3;				//Tprogram 10ms
 				bufferU[j++]=ICSP8_READ;
 				bufferU[j++]=READ_NVM_INC;
 			}
 			bufferU[j++]=FLUSH;
 			for(;j<DIMBUF;j++) bufferU[j]=0x0;
-			PacketIO(25);
+			PacketIO(45);
 			for(i=0,z=0;i<4;i++){
 				for(;z<DIMBUF-2&&bufferI[z]!=ICSP8_READ;z++);
 				if (memCODE_W[0x8000+i]!=(bufferI[z+1]<<8)+bufferI[z+2]){
@@ -6441,16 +6452,17 @@ void Write16F18xxx(int dim,int dim2,int options)
 			bufferU[j++]=memCODE_W[i]&0xff;		//LSB
 			bufferU[j++]=ICSP8_SHORT;
 			bufferU[j++]=BEGIN_INT_PROG;		//internally timed
-			bufferU[j++]=WAIT_T3;				//Tprogram 5.6ms
+			bufferU[j++]=WAIT_T3;				//Tprogram 10ms
 			bufferU[j++]=ICSP8_READ;
 			bufferU[j++]=READ_NVM_INC;
 		}
 		bufferU[j++]=FLUSH;
 		for(;j<DIMBUF;j++) bufferU[j]=0x0;
-		PacketIO(30);
+		PacketIO(55);
 		for(i=0,z=0;i<5;i++){
 			for(;z<DIMBUF-2&&bufferI[z]!=ICSP8_READ;z++);
 			if (~memCODE_W[0x8007+i]&((bufferI[z+1]<<8)+bufferI[z+2])){	//error if written 0 and read 1 (~W&R)
+				
 				sprintf(t,"config%d",i+1);
 				PrintMessage3(strings[S_WErr2],t,memCODE_W[0x8007+i],(bufferI[z+1]<<8)+bufferI[z+2]);	//"Error writing %s: written %04X, read %04X"
 				err_c++;

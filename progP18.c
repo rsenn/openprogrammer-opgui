@@ -1294,10 +1294,10 @@ void Write18Fx(int dim,int dim2,int wbuf,int eraseW1,int eraseW2,int options)
 				bufferU[j++]=FLUSH;
 				for(;j<DIMBUF;j++) bufferU[j]=0x0;
 				PacketIO(8);
-				PrintStatus(strings[S_CodeWriting],(i+dim)*100/(dim+dim2),i);	//"Scrittura: %d%%, ind. %03X"
+				PrintStatus(strings[S_CodeWriting],(i+dim)*100/(dim+dim2),i);	//"Writing: %d%%, addr. %03X"
 				if(RWstop) i=dim2;
 				j=0;
-				for(z=DIMBUF-1;z&&bufferI[z]!=SHIFT_TABLAT;z--);
+				for(z=DIMBUF-1;z&&!(bufferI[z]==SHIFT_TABLAT&&bufferI[z-1]==CORE_INS);z--);
 				if(z&&memEE[i]!=bufferI[z+1]) errEE++;
 				if(saveLog){
 					fprintf(logfile,strings[S_Log8],i,i,k,k,errEE);	//"i=%d, k=%d, errors=%d\n"

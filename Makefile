@@ -1,4 +1,5 @@
-VERSION = 0.11.0# equivalent to #define in c code
+# equivalent to #define in c code
+VERSION = 0.11.1
 CC = gcc
 PREFIX = /usr/local
 CFLAGS =  '-DVERSION="$(VERSION)"' -w `pkg-config --libs --cflags gtk+-2.0` 
@@ -12,7 +13,6 @@ OBJECTS = opgui.o \
 	progP16.o \
 	progP18.o \
 	progP24.o \
-	progP32.o \
 	progEEPROM.o \
 	progAVR.o \
 	fileIO.o \
@@ -21,6 +21,7 @@ OBJECTS = opgui.o \
 	icd.o \
 	strings.o \
 	icons.o
+#	progP32.o \
 
 # Check if we are running on windows
 UNAME := $(shell uname)
@@ -60,7 +61,7 @@ package:
 	@echo "Creating opgui_$(VERSION).tar.gz"
 	@mkdir opgui-$(VERSION)
 	@cp *.c *.h *.png gpl-2.0.txt Makefile readme opgui-$(VERSION)
-	@tar -czf opgui-$(VERSION).tar.gz opgui-$(VERSION)
+	@tar -czf opgui_$(VERSION).tar.gz opgui-$(VERSION)
 	@rm -rf opgui-$(VERSION)
 
 .PHONY: all clean install package

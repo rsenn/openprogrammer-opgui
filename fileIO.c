@@ -48,8 +48,8 @@ void Save(char* dev,char* savefile)
 	int i,sum=0,count=0,ext=0,s,base;
 //**************** 10-16F *******************************************
 	if(!strncmp(dev,"10",2)||!strncmp(dev,"12",2)||!strncmp(dev,"16",2)){
-		int x=0xfff,addr;
-		if(!strncmp(dev,"16",2)||!strncmp(dev,"12F6",4)) x=0x3fff;
+		int x=0x3fff,addr;
+		//if(!strncmp(dev,"16",2)||!strncmp(dev,"12F6",4)) x=0x3fff;
 		fprintf(f,":020000040000FA\n");			//extended address=0
 		for(i=0;i<sizeW;i++) memCODE_W[i]&=x;
 		for(i=0;i<sizeW&&memCODE_W[i]>=x;i++); //remove leading 0xFFF
