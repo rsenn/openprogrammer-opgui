@@ -20,9 +20,9 @@
 #define EN_VPP_VCC			0x0E	//+1B
 #define SET_CK_D			0x0F	//+1B
 #define READ_PINS			0x10	//		->1B
-#define LOAD_CONF			0x11	//2B			000000
-#define LOAD_DATA_PROG		0x12	//2B			000010
-#define LOAD_DATA_DATA		0x13	//2B			000011
+#define LOAD_CONF			0x11	//+2B			000000
+#define LOAD_DATA_PROG		0x12	//+2B			000010
+#define LOAD_DATA_DATA		0x13	//+2B			000011
 #define READ_DATA_PROG		0x14	//  	->2B	000100
 #define READ_DATA_DATA		0x15	//  	->1B	000101
 #define INC_ADDR			0x16	//				000110
@@ -78,15 +78,15 @@
 #define AT_HV_RTX			0x48	//+1+NB ->1B
 #define SIX_LONG5			0x49	//+3B
 #define LOAD_PC  			0x50	//+2B		011101
-#define LOAD_DATA_INC		0x51	//2B		100010
-#define READ_DATA_INC		0x52	//2B		100100
-#define JTAG_SET_MODE		0x53	//1B
-#define JTAG_SEND_CMD		0x54	//1B
-#define JTAG_XFER_DATA		0x55	//4B -> 4B
-#define JTAG_XFER_F_DATA	0x56	//4B -> 4B
+#define LOAD_DATA_INC		0x51	//+2B		100010
+#define READ_DATA_INC		0x52	//+2B		100100
+#define JTAG_SET_MODE		0x53	//+1B
+#define JTAG_SEND_CMD		0x54	//+1B
+#define JTAG_XFER_DATA		0x55	//+4B -> 4B
+#define JTAG_XFER_F_DATA	0x56	//+4B -> 4B
 #define ICSP8_SHORT  		0x57	//+1B
-#define ICSP8_READ  		0x58	//+1B -> 3B
-#define ICSP8_LOAD  		0x59	//+4B
+#define ICSP8_READ  		0x58	//+1B -> 2B
+#define ICSP8_LOAD  		0x59	//+3B
 // special ins.
 #define SPI_TEST			0xEF	//+2B	->2B
 #define READ_RAM			0xF0	//+2B	->3B

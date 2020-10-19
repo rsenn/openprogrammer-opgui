@@ -21,7 +21,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111 USA
  * or see <http://www.gnu.org/licenses/>
  */
-
 #include "common.h"
 #include "I2CSPI.h"
 #include "coff.h"
@@ -30,11 +29,10 @@
 #include "fileIO.h"
 #include "icons.h"
 #include "progAVR.h"
-
 #define MAXLINES 600
 #define  CONFIG_FILE "opgui.ini"
 #define  CONFIG_DIR ".opgui"
-
+#define MinDly 0
 void Connect(GtkWidget *widget,GtkWidget *window);
 void I2cspiR();
 void I2cspiS();
@@ -44,10 +42,9 @@ void ShowContext();
 int FindDevice(int vid,int pid);
 void TestHw();
 int CheckS1();
-
 char** strings;	//!localized strings
 int cmdline=0;
-int saveLog=0,programID=0,MinDly=1,load_osccal=0,load_BKosccal=0;
+int saveLog=0,programID=0,load_osccal=0,load_BKosccal=0;
 int use_osccal=1,use_BKosccal=0;
 int load_calibword=0,max_err=200;
 int AVRlock=0x100,AVRfuse=0x100,AVRfuse_h=0x100,AVRfuse_x=0x100;
@@ -63,7 +60,7 @@ int new_vid=0x1209,new_pid=0x5432;
 int old_vid=0x04D8,old_pid=0x0100;
 WORD *memCODE_W=0;
 int size=0,sizeW=0,sizeEE=0,sizeCONFIG=0,sizeUSERID=0;
-unsigned char *memCODE=0,*memEE=0,memID[8],memCONFIG[48],memUSERID[8];
+unsigned char *memCODE=0,*memEE=0,memID[64],memCONFIG[48],memUSERID[8];
 double hvreg=0;
 int DeviceDetected=0;
 int UseCoff=0;
@@ -94,7 +91,6 @@ int forceConfig=0;
 	unsigned short dataDebug=0;
 	unsigned short statusDebug=0x3FFF;
 #endif
-
 //List of gtk controls
 GtkTextBuffer * dataBuf;
 GtkWidget * data;
@@ -195,7 +191,6 @@ GtkWidget * devPIC_CW6;
 GtkWidget * devPIC_CW7;
 GtkWidget * devinfo;
 GtkWidget* stopBtn;
-
 ///array of radio buttons for IO manual control
 struct io_btn {	char * name;
 				int x;
@@ -205,7 +200,6 @@ struct io_btn {	char * name;
 				GtkWidget * r_I;	//radio button I
 				GtkWidget * e_I;	//entry
 				} ioButtons[13];
-
 int statusID;
 int ee = 0;
 int readRes=0;
@@ -214,11 +208,12 @@ int devType=-1;
 char str[4096];
 char* cur_path=0;
 char* cur_pathEE=0;
-
 #if !defined _WIN32 && !defined __CYGWIN__	//Linux
 	int fd = -1;
+#ifdef hiddevIO	
 	struct hiddev_report_info rep_info_i,rep_info_u;
 	struct hiddev_usage_ref_multi ref_multi_i,ref_multi_u;
+#endif
 	char path[512]="";
 	unsigned char bufferU[128],bufferI[128];
 #else	//Windows
@@ -230,7 +225,6 @@ char* cur_pathEE=0;
 	OVERLAPPED HIDOverlapped;
 	HANDLE hEventObject;
 #endif
-
 ///
 ///Exit
 gint delete_event( GtkWidget *widget,GdkEvent *event,gpointer data )
@@ -238,7 +232,6 @@ gint delete_event( GtkWidget *widget,GdkEvent *event,gpointer data )
 gtk_main_quit ();
 return FALSE;
 }
-
 ///
 ///Append a message on the data tab; shorten the length of the entry field to MAXLINES
 void PrintMessage(const char *msg){
@@ -257,7 +250,6 @@ void PrintMessage(const char *msg){
 	gtk_text_buffer_get_end_iter(dataBuf,&iter);
 	gtk_text_view_scroll_to_iter(GTK_TEXT_VIEW(data),&iter,0.0,FALSE,0,0);
 }
-
 ///
 ///Print a message on the I2C data field
 void PrintMessageI2C(const char *msg){
@@ -268,7 +260,6 @@ void PrintMessageI2C(const char *msg){
 	gtk_text_view_scroll_to_iter(GTK_TEXT_VIEW(I2CDataReceive),&iter,0.0,FALSE,0,0);
 	while (gtk_events_pending ()) gtk_main_iteration();
 }
-
 ///
 ///Print a message on the ICD data field
 void PrintMessageICD(const char *msg){
@@ -279,7 +270,6 @@ void PrintMessageICD(const char *msg){
 	gtk_text_view_scroll_to_iter(GTK_TEXT_VIEW(statusTxt),&iter,0.0,FALSE,0,0);
 	while (gtk_events_pending ()) gtk_main_iteration();
 }
-
 ///
 ///Append a message on the ICD data field
 void AppendMessageICD(const char *msg){
@@ -291,7 +281,6 @@ void AppendMessageICD(const char *msg){
 	gtk_text_view_scroll_to_iter(GTK_TEXT_VIEW(statusTxt),&iter,0.0,FALSE,0,0);
 	while (gtk_events_pending ()) gtk_main_iteration();
 }
-
 ///
 ///Update option variables according to actual control values
 void getOptions()
@@ -409,7 +398,6 @@ void getOptions()
 	}
 	free(str);
 }
-
 ///
 ///Choose a file to open and call Load()
 void Fopen(GtkWidget *widget,GtkWidget *window)
@@ -459,7 +447,6 @@ void Fopen(GtkWidget *widget,GtkWidget *window)
 	gtk_widget_destroy (GTK_WIDGET(dialog));
 	progress=0;
 }
-
 ///
 ///Choose a file to save and call Save()
 void Fsave(GtkWidget *widget,GtkWidget *window)
@@ -510,7 +497,6 @@ void Fsave(GtkWidget *widget,GtkWidget *window)
 	gtk_widget_destroy (GTK_WIDGET(dialog));
 	progress=0;
 }
-
 ///
 ///Call device write function
 void DevWrite(GtkWidget *widget,GtkWidget *window)
@@ -518,7 +504,6 @@ void DevWrite(GtkWidget *widget,GtkWidget *window)
 #ifndef DEBUG
 	if(DeviceDetected!=1) return;
 #endif
-	CleanIO();
 	gtk_statusbar_push(GTK_STATUSBAR(status_bar),statusID,"");
 	RWstop=0;
 	getOptions();
@@ -553,7 +538,6 @@ void DevWrite(GtkWidget *widget,GtkWidget *window)
 		gtk_widget_set_sensitive(stopBtn,FALSE);
 	}
 }
-
 ///
 ///Call device read function
 void DevRead(GtkWidget *widget,GtkWidget *window)
@@ -561,7 +545,6 @@ void DevRead(GtkWidget *widget,GtkWidget *window)
 #ifndef DEBUG
 	if(DeviceDetected!=1) return;
 #endif
-	CleanIO();
 	gtk_statusbar_push(GTK_STATUSBAR(status_bar),statusID,"");
 	getOptions();
 	RWstop=0;
@@ -596,7 +579,6 @@ void DevRead(GtkWidget *widget,GtkWidget *window)
 		gtk_widget_set_sensitive(stopBtn,FALSE);
 	}
 }
-
 ///
 /// Write fuse low byte at low frequency
 void WriteATfuseLowLF(GtkWidget *widget,GtkWidget *window){
@@ -611,7 +593,6 @@ void WriteATfuseLowLF(GtkWidget *widget,GtkWidget *window){
 		progress=0;
 	}
 }
-
 ///
 ///Callback function to set available options for each device type
 void DeviceChanged(GtkWidget *widget,GtkWidget *window)
@@ -746,7 +727,6 @@ void DeviceChanged(GtkWidget *widget,GtkWidget *window)
 	if(devType==PIC16)	//Program Calib
 		gtk_widget_show_all(GTK_WIDGET(WriteCalib12));
 	else gtk_widget_hide_all(GTK_WIDGET(WriteCalib12));
-
 	if(devType==PIC12||devType==PIC16||devType==PIC18){	//Force config
 		//gtk_widget_set_sensitive(GTK_WIDGET(devFrameConfigW),TRUE);
 		gtk_widget_show_all(GTK_WIDGET(devFrameConfigW));
@@ -840,8 +820,6 @@ void FilterDevType(GtkWidget *widget,GtkWidget *window)
 	g_signal_connect(G_OBJECT(devCombo),"changed",G_CALLBACK(DeviceChanged),NULL);	//enable callback
 	DeviceChanged(NULL,NULL);
 }
-
-
 ///
 ///Scroll source file
 void scrollToLine(int line)
@@ -862,7 +840,6 @@ void scrollToLine(int line)
 	while (gtk_events_pending ()) gtk_main_iteration();
 	gtk_text_view_scroll_to_iter(GTK_TEXT_VIEW(sourceTxt),&iter,0.0,TRUE,0,0.5);
 }
-
 ///
 ///Hilight line in source code
 void SourceHilightLine(int line)
@@ -881,7 +858,6 @@ void SourceHilightLine(int line)
 	}
 	while (gtk_events_pending ()) gtk_main_iteration();
 }
-
 ///
 ///Remove hilight line in source code
 void SourceRemoveHilightLine(int line)
@@ -897,7 +873,6 @@ void SourceRemoveHilightLine(int line)
 	}
 	while (gtk_events_pending ()) gtk_main_iteration();
 }
-
 ///
 ///load source file into source pane
 int loadSource(FILE *f){
@@ -914,7 +889,6 @@ int loadSource(FILE *f){
 	g_free(g);
 	return 1;
 }
-
 ///
 ///load and analyze coff file
 void loadCoff(GtkWidget *widget,GtkWidget *window)
@@ -947,7 +921,6 @@ void loadCoff(GtkWidget *widget,GtkWidget *window)
 	}
 	gtk_widget_destroy (GTK_WIDGET(dialog));
 }
-
 ///
 /// List of variables used when decoding an assembly word
 void initVar(){
@@ -1042,7 +1015,6 @@ void initVar(){
 	variables[0x18C].name="EECON1";
 	variables[0x18D].name="EECON2";
 }
-
 ///
 ///Show program info window
 void info(GtkWidget *widget,GtkWidget *window)
@@ -1062,14 +1034,13 @@ void info(GtkWidget *widget,GtkWidget *window)
     "License along with the Gnome Library; see the file COPYING.LIB.  If not,\n"
     "write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,\n"
     "Boston, MA 02111-1307, USA.\n";
-
 	gtk_show_about_dialog (NULL,
 		//"artists"                  GStrv*                : Read / Write
 		//"authors"                  GStrv*                : Read / Write
 		//"authors","Alberto Maccioni",NULL,
 		"comments", "A graphical interface for the Open Programmer",
 		"copyright",
-		"Copyright (C) Alberto Maccioni 2009-2019\n\n"
+		"Copyright (C) Alberto Maccioni 2009-2020\n\n"
 		"This program is free software; you can \n"
 		"redistribute it and/or modify it under \n"
 		"the terms of the GNU General Public License \n"
@@ -1088,9 +1059,7 @@ void info(GtkWidget *widget,GtkWidget *window)
   		"wrap-license",TRUE,
 		"title","Info about OPGUI",
 		NULL);
-
 }
-
 ///
 ///Show ICD help window
 void ICDHelp(GtkWidget *widget,GtkWidget *window)
@@ -1105,7 +1074,6 @@ void ICDHelp(GtkWidget *widget,GtkWidget *window)
 	gtk_window_set_title(GTK_WINDOW(dialog),strings[I_ICD_HELP]);
 	gtk_widget_show_all (dialog);
 }
-
 ///
 ///ICD: check if program is running
 void icdCheck(GtkWidget *widget,GtkWidget *window)
@@ -1118,7 +1086,6 @@ void icdCheck(GtkWidget *widget,GtkWidget *window)
 		ShowContext();
 	}
 }
-
 ///
 ///ICD: run program
 void icdRun(GtkWidget *widget,GtkWidget *window)
@@ -1144,7 +1111,6 @@ void icdRun(GtkWidget *widget,GtkWidget *window)
 		PrintMessageICD("running");
 	}
 }
-
 ///
 ///ICD: halt program
 void icdHalt(GtkWidget *widget,GtkWidget *window)
@@ -1158,7 +1124,6 @@ void icdHalt(GtkWidget *widget,GtkWidget *window)
 		ShowContext();
 	}
 }
-
 ///
 ///ICD: step program
 void icdStep(GtkWidget *widget,GtkWidget *window)
@@ -1176,7 +1141,6 @@ void icdStep(GtkWidget *widget,GtkWidget *window)
 #endif
 	ShowContext();
 }
-
 ///
 ///ICD: step program jumping over calls
 void icdStepOver(GtkWidget *widget,GtkWidget *window)
@@ -1203,7 +1167,6 @@ void icdStepOver(GtkWidget *widget,GtkWidget *window)
 		ShowContext();
 	}
 }
-
 ///
 ///ICD: stop program
 void icdStop(GtkWidget *widget,GtkWidget *window)
@@ -1230,7 +1193,6 @@ void icdStop(GtkWidget *widget,GtkWidget *window)
 	PrintMessageICD("stopped");
 	scrollToLine(source_info[0].src_line);
 }
-
 ///
 ///ICD: refresh status
 void icdRefresh(GtkWidget *widget,GtkWidget *window)
@@ -1242,7 +1204,6 @@ void icdRefresh(GtkWidget *widget,GtkWidget *window)
 		ShowContext();
 	}
 }
-
 ///
 /// Read and display an entire bank of memory
 void ShowBank(int bank,char* status){
@@ -1264,7 +1225,6 @@ void ShowBank(int bank,char* status){
 	}
 	strcat(status,"\n");
 }
-
 ///
 /// Main ICD show function:
 /// prints status info according to selected options
@@ -1385,9 +1345,7 @@ void ShowContext(){
 		}
 		AppendMessageICD(str);
 	}
-
 }
-
 ///
 ///Add symbol to the list of watched variables
 int addWatch(struct symbol s){
@@ -1410,7 +1368,6 @@ int addWatch(struct symbol s){
 	}
 	return 0;
 }
-
 ///
 /// ICD Command parser
 int executeCommand(char *command){
@@ -1662,7 +1619,6 @@ int executeCommand(char *command){
 	}
 	return 1;
 }
-
 ///
 ///Remove variable from watch list
 int removeWatch(char* name){
@@ -1679,7 +1635,6 @@ int removeWatch(char* name){
 	}
 	return 0;
 }
-
 ///
 ///Handle mouse events in source code window
 gint source_mouse_event(GtkWidget *widget, GdkEventButton *event, gpointer func_data)
@@ -1723,7 +1678,6 @@ gint source_mouse_event(GtkWidget *widget, GdkEventButton *event, gpointer func_
 	}
 	return FALSE;
 }
-
 ///
 ///Handle mouse events in ICD status window
 gint icdStatus_mouse_event(GtkWidget *widget, GdkEventButton *event, gpointer func_data)
@@ -1749,7 +1703,6 @@ gint icdStatus_mouse_event(GtkWidget *widget, GdkEventButton *event, gpointer fu
 	}
 	return FALSE;
 }
-
 ///
 ///Handle keyboard events in ICD command edit box
 gint icdCommand_key_event(GtkWidget *widget, GdkEventButton *event, gpointer func_data)
@@ -1770,7 +1723,6 @@ gint icdCommand_key_event(GtkWidget *widget, GdkEventButton *event, gpointer fun
 	}
 	return FALSE;
 }
-
 ///
 ///Handle keyboard events in ICD tab
 gint icd_key_event(GtkWidget *widget, GdkEventButton *event, gpointer func_data)
@@ -1800,7 +1752,6 @@ gint icd_key_event(GtkWidget *widget, GdkEventButton *event, gpointer func_data)
 	}
 	return FALSE;
 }
-
 ///
 /// Check or set IO signals according to IO tab controls
 void IOchanged(GtkWidget *widget,GtkWidget *window)
@@ -1811,16 +1762,17 @@ void IOchanged(GtkWidget *widget,GtkWidget *window)
 #endif
 	if(!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(b_io_active))) return;
 	int i,j=0;
-	int trisa=1,trisb=0,trisc=0x34,latac=0,latb=0;
+	int trisa=1,trisb=0,trisc=0x30,latac=0,latb=0;
 	int port=0,z;
 	//char str[128]="IO:";
-	//char s2[64];
+	char s2[64];
+	str[0]=0;
 	for(i=0;i<sizeof(ioButtons)/sizeof(ioButtons[0]);i++){
 		if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ioButtons[i].r_0))){
-			strcat(str,"0");
+			//strcat(str,"0");
 		}
 		else if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ioButtons[i].r_1))){
-			strcat(str,"1");
+			//strcat(str,"1");
 			if(i<8) latb|=1<<i;
 			else if(i==8) latac|=0x80; //RC7
 			else if(i==9) latac|=0x40; //RC6
@@ -1829,7 +1781,7 @@ void IOchanged(GtkWidget *widget,GtkWidget *window)
 			else if(i==12) latac|=0x08; //RA3
 		}
 		else if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(ioButtons[i].r_I))){
-			strcat(str,"I");
+			//strcat(str,"I");
 			if(i<8)	trisb|=1<<i;
 			else if(i==8) trisc|=0x80; //RC7
 			else if(i==9) trisc|=0x40; //RC6
@@ -1865,6 +1817,7 @@ void IOchanged(GtkWidget *widget,GtkWidget *window)
 	bufferU[j++]=EXT_PORT;
 	bufferU[j++]=latb;
 	bufferU[j++]=latac;
+	bufferU[j++]=READ_ADC;
 	bufferU[j++]=FLUSH;
 	for(;j<DIMBUF;j++) bufferU[j]=0x0;
 	PacketIO(2);
@@ -1883,23 +1836,23 @@ void IOchanged(GtkWidget *widget,GtkWidget *window)
 	port=bufferI[z+3];	//PORTC
 	gtk_entry_set_text(GTK_ENTRY(ioButtons[8].e_I),(port&0x80)?"1":"0");
 	gtk_entry_set_text(GTK_ENTRY(ioButtons[9].e_I),(port&0x40)?"1":"0");
-	GetTickCount();
+	for(z+=4;z<DIMBUF-2&&bufferI[z]!=READ_ADC;z++);
+	double vpp=((bufferI[z+1]<<8)+bufferI[z+2])/1024.0*5*34/12;	//VPP
+	sprintf(str,"VPP=%.2fV",vpp);
+	gtk_statusbar_push(GTK_STATUSBAR(status_bar),statusID,str);
 	return;
 }
-
 ///
 /// Start/stop timer to check for IO status
 void IOactive(GtkWidget *widget,GtkWidget *window)
 {
 	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(b_io_active))&&!icdTimer){
 		IOTimer=gtk_timeout_add(100,(GtkFunction)IOchanged,NULL);
-		//IOchanged(NULL,NULL);
 	}
 	else if(IOTimer){
 		gtk_timeout_remove(IOTimer);
 	}
 }
-
 ///
 /// Enable/disable VPP and VCC from IO tab
 void VPPVDDactive(GtkWidget *widget,GtkWidget *window)
@@ -1910,12 +1863,10 @@ void VPPVDDactive(GtkWidget *widget,GtkWidget *window)
 	int j=0,vdd_vpp=0;
 	char str[16]="";
 	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(VPP_ON))){
-//		gtk_statusbar_push(GTK_STATUSBAR(status_bar),statusID,"VPP");
 		vdd_vpp+=4;
 		strcat(str,"VPP ");
 	}
 	if(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(VDD_ON))){
-//		gtk_statusbar_push(GTK_STATUSBAR(status_bar),statusID,"VDD");
 		vdd_vpp+=1;
 		strcat(str,"VDD ");
 	}
@@ -1926,7 +1877,6 @@ void VPPVDDactive(GtkWidget *widget,GtkWidget *window)
 	for(;j<DIMBUF;j++) bufferU[j]=0x0;
 	PacketIO(2);
 }
-
 ///
 /// Enable/disable DCDC from IO tab or update DCDC voltage
 void DCDCactive(GtkWidget *widget,GtkWidget *window)
@@ -1956,7 +1906,6 @@ void DCDCactive(GtkWidget *widget,GtkWidget *window)
 		PacketIO(2);
 	}
 }
-
 ///
 /// convert hex line
 void HexConvert(GtkWidget *widget,GtkWidget *window)
@@ -2003,7 +1952,6 @@ void HexConvert(GtkWidget *widget,GtkWidget *window)
 	}
 	else gtk_entry_set_text(GTK_ENTRY(Hex_entry),"");
 }
-
 ///
 /// convert address & data to hex line
 void DataToHexConvert(GtkWidget *widget,GtkWidget *window)
@@ -2034,7 +1982,6 @@ void DataToHexConvert(GtkWidget *widget,GtkWidget *window)
 		gtk_entry_set_text(GTK_ENTRY(Hex_data2),str);
 	}
 }
-
 ///
 ///Choose a file to save a hex line
 void HexSave(GtkWidget *widget,GtkWidget *window)
@@ -2064,7 +2011,6 @@ void HexSave(GtkWidget *widget,GtkWidget *window)
 	  }
 	gtk_widget_destroy (GTK_WIDGET(dialog));
 }
-
 ///
 /// Stop read or write
 void Stop(GtkWidget *widget,GtkWidget *window)
@@ -2077,7 +2023,6 @@ void Stop(GtkWidget *widget,GtkWidget *window)
 		PrintMessage(strings[I_STOP]);
 	}
 }
-
 ///
 ///Close program
 void Xclose(){
@@ -2085,7 +2030,6 @@ void Xclose(){
 	if(str) strncpy(dev,str,sizeof(dev)-1);
 	gtk_main_quit();
 }
-
 ///-----------------------------------
 ///Main function
 ///-----------------------------------
@@ -2131,9 +2075,7 @@ int main( int argc, char *argv[])
 	bufferI0[0]=0;
 	bufferU0[0]=0;
 #endif
-
 	gtk_init(&argc, &argv);
-
 	unsigned int tmpbuf[128];
 	opterr = 0;
 	int option_index = 0;
@@ -2157,7 +2099,6 @@ int main( int argc, char *argv[])
 	}
 	for(j=0,i = optind; i < argc&&i<128; i++,j++) sscanf(argv[i], "%x", &tmpbuf[j]);
 	for(;j<128;j++) tmpbuf[j]=0;
-
 	strinit();
 	char* langid=0;
 	i=0;
@@ -2194,9 +2135,7 @@ int main( int argc, char *argv[])
 		}
 		else strings=strings_en;
 	}
-
 	if(langfile) GenerateLangFile(langid,"languages.rc");
-
 	if(help){
 		printf(strings[I_GUI_CMD_HELP]);
 		exit(0);
@@ -2225,7 +2164,6 @@ int main( int argc, char *argv[])
 		else printf(strings[S_noprog]);
 		exit(0);
 	}
-
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	sprintf(str,"opgui v%s",VERSION);
 	gtk_window_set_title(GTK_WINDOW(window),str);
@@ -2234,21 +2172,17 @@ int main( int argc, char *argv[])
 	g_signal_connect(GTK_WINDOW(window), "destroy",G_CALLBACK(Xclose),NULL);
 	GdkPixbuf* pixbuf = gdk_pixbuf_new_from_inline (-1, system_icon, FALSE, NULL);
 	gtk_window_set_icon(GTK_WINDOW(window),pixbuf);
-
 	GtkWidget * vbox = gtk_vbox_new(FALSE,0);
 	gtk_container_add(GTK_CONTAINER(window),vbox);
 	PangoFontDescription    *font_desc;
-
 //------toolbar-------------
 	toolbar = gtk_toolbar_new();
 	gtk_toolbar_set_style(GTK_TOOLBAR(toolbar),GTK_TOOLBAR_ICONS);
 	gtk_box_pack_start(GTK_BOX(vbox),toolbar,FALSE,FALSE,0);
-
 	pixbuf = gdk_pixbuf_new_from_inline (-1, read_icon, FALSE, NULL);
 	GtkWidget* iconRead = gtk_image_new_from_pixbuf(pixbuf);
 	pixbuf = gdk_pixbuf_new_from_inline (-1, write_icon, FALSE, NULL);
 	GtkWidget* iconWrite = gtk_image_new_from_pixbuf(pixbuf);
-
 	gtk_toolbar_insert_stock(GTK_TOOLBAR(toolbar),GTK_STOCK_OPEN,strings[I_Fopen],"",G_CALLBACK(Fopen),0,-1);//"Open File"
 	gtk_toolbar_insert_stock(GTK_TOOLBAR(toolbar),GTK_STOCK_SAVE,strings[I_Fsave],"",G_CALLBACK(Fsave),0,-1);//"Save File"
 	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar));
@@ -2259,11 +2193,9 @@ int main( int argc, char *argv[])
 	gtk_widget_set_sensitive(stopBtn,FALSE);
 	gtk_toolbar_insert_stock(GTK_TOOLBAR(toolbar),GTK_STOCK_CONNECT,strings[I_CONN],"",G_CALLBACK(Connect),0,-1);//"Reconnect"
 	gtk_toolbar_insert_stock(GTK_TOOLBAR(toolbar),GTK_STOCK_INFO,strings[I_Info],"",G_CALLBACK(info),0,-1);//"Info"
-
 //------tab widget-------------
 	notebook = gtk_notebook_new();
 	gtk_box_pack_start(GTK_BOX(vbox),notebook,TRUE,TRUE,0);
-
 //------data tab-------------
 	label = gtk_label_new(strings[I_Data]);	//"Data"
 	data_scroll = gtk_scrolled_window_new(NULL,NULL);
@@ -2275,12 +2207,10 @@ int main( int argc, char *argv[])
 	font_desc = pango_font_description_from_string ("monospace 8");
 	gtk_widget_modify_font (data, font_desc);
 	pango_font_description_free (font_desc);
-
 //------device tab-------------
 	label = gtk_label_new(strings[I_Dev]);	//"Device"
 	GtkWidget * table_dev = gtk_table_new(2,2,FALSE);
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook),table_dev,label);
-
 	GtkWidget * devHbox1 = gtk_hbox_new(FALSE,10);
 	gtk_table_attach(GTK_TABLE(table_dev),devHbox1,0,2,0,1,4,0,5,5);
 	label = gtk_label_new(strings[I_Type]);	//"Type"
@@ -2293,7 +2223,6 @@ int main( int argc, char *argv[])
 	gtk_box_pack_start(GTK_BOX(devHbox1),label,FALSE,TRUE,0);
 	devCombo = gtk_combo_box_new_text();
 	gtk_box_pack_start(GTK_BOX(devHbox1),devCombo,FALSE,TRUE,0);
-
 	GtkWidget * devHbox2 = gtk_hbox_new(FALSE,10);
 	gtk_table_attach(GTK_TABLE(table_dev),devHbox2,0,2,1,2,4,0,5,5);
 	label = gtk_label_new("info: ");
@@ -2301,11 +2230,9 @@ int main( int argc, char *argv[])
 	devinfo = gtk_label_new("i");
 //	gtk_table_attach(GTK_TABLE(table_dev),devinfo,0,1,1,2,0,0,5,5);
 	gtk_box_pack_start(GTK_BOX(devHbox2),devinfo,FALSE,FALSE,0);
-
 	EEPROM_RW = gtk_check_button_new_with_label(strings[I_EE]);	//"Read and write EEPROM"
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(EEPROM_RW),TRUE);
 	gtk_table_attach(GTK_TABLE(table_dev),EEPROM_RW,0,1,2,3,4,0,5,5);
-
 //	devFramePIC = gtk_frame_new(strings[I_PIC_CONFIG]);	//"PIC configuration"
 	devFramePIC = gtk_vbox_new(FALSE,0);//gtk_frame_new(NULL);	//"PIC configuration"
 	gtk_table_attach(GTK_TABLE(table_dev),devFramePIC,0,1,3,4,4,0,5,5);
@@ -2314,17 +2241,12 @@ int main( int argc, char *argv[])
 	gtk_box_pack_start(GTK_BOX(devFramePIC),table_PIC,FALSE,TRUE,0);
 	GtkWidget * devVboxPIC = gtk_vbox_new(FALSE,5);
 	gtk_table_attach(GTK_TABLE(table_PIC),devVboxPIC,0,1,0,1,0,0,0,0);
-
-
 	ReadReserved = gtk_check_button_new_with_label(strings[I_ReadRes]);	//"Read reserved area"
 	gtk_container_add(GTK_CONTAINER(devVboxPIC),GTK_WIDGET(ReadReserved));
-
 	Write_ID_BKCal = gtk_check_button_new_with_label(strings[I_ID_BKo_W]);	//"Write ID and BKOscCal"
 	gtk_container_add(GTK_CONTAINER(devVboxPIC),GTK_WIDGET(Write_ID_BKCal));
-
 	WriteCalib12 = gtk_check_button_new_with_label(strings[I_CalW]);	//"Write Calib 1 and 2"
 	gtk_container_add(GTK_CONTAINER(devVboxPIC),GTK_WIDGET(WriteCalib12));
-
 	devFrameOsc = gtk_frame_new(strings[I_OSCW]);	//"Write OscCal"
 	gtk_table_attach(GTK_TABLE(table_PIC),devFrameOsc,0,1,1,2,GTK_FILL,0,5,0);
 	GtkWidget * devVboxOsc = gtk_vbox_new(FALSE,5);
@@ -2337,7 +2259,6 @@ int main( int argc, char *argv[])
 	gtk_container_add(GTK_CONTAINER(devVboxOsc),GTK_WIDGET(UseOSCCAL));
 	gtk_container_add(GTK_CONTAINER(devVboxOsc),GTK_WIDGET(UseBKOSCCAL));
 	gtk_container_add(GTK_CONTAINER(devVboxOsc),GTK_WIDGET(UseFileCal));
-
 	devFrameICD = gtk_frame_new("ICD");
 	gtk_table_attach(GTK_TABLE(table_PIC),devFrameICD,0,2,2,3,GTK_FILL,0,5,5);
 	GtkWidget * devVboxICD = gtk_hbox_new(FALSE,25);
@@ -2351,7 +2272,6 @@ int main( int argc, char *argv[])
 	gtk_entry_set_width_chars(GTK_ENTRY(ICD_addr_entry),4);
 	gtk_box_pack_start(GTK_BOX(devHboxICD),GTK_WIDGET(ICD_addr_entry),0,0,2);
 	gtk_container_add(GTK_CONTAINER(devVboxICD),GTK_WIDGET(devHboxICD));
-
 	devFrameConfigW = gtk_frame_new("Config Word");
 	gtk_table_attach(GTK_TABLE(table_PIC),devFrameConfigW,1,2,0,2,0,GTK_FILL,5,0);
 	GtkWidget * table_devCW = gtk_table_new(2,2,FALSE);
@@ -2378,7 +2298,6 @@ int main( int argc, char *argv[])
 	gtk_table_attach(GTK_TABLE(table_devCW),devPIC_CW5,0,1,3,4,0,0,0,0);
 	gtk_table_attach(GTK_TABLE(table_devCW),devPIC_CW6,1,2,3,4,0,0,0,0);
 	gtk_table_attach(GTK_TABLE(table_devCW),devPIC_CW7,0,1,4,5,0,0,0,0);
-
 //	devFrameAVR = gtk_frame_new(strings[I_AT_CONFIG]);	//"Atmel configuration"
 	devFrameAVR = gtk_vbox_new(FALSE,0);	//Atmel configuration
 	gtk_table_attach(GTK_TABLE(table_dev),devFrameAVR,0,1,3,4,4,0,0,0);
@@ -2407,19 +2326,14 @@ int main( int argc, char *argv[])
 	gtk_table_attach(GTK_TABLE(devTableAVR),AVR_LockWrite,1,2,4,5,4,0,5,0);
 	b_WfuseLF = gtk_button_new_with_label(strings[I_AT_FUSELF]);		//"Write Fuse Low @3kHz"
 	gtk_table_attach(GTK_TABLE(devTableAVR),b_WfuseLF,0,2,5,6,4,0,5,5);
-
-
 //------options tab-------------
 	label = gtk_label_new(strings[I_Opt]);	//"Options"
 	GtkWidget * optTable = gtk_table_new(6,2,FALSE);
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook),optTable,label);
-
 	b_connect = gtk_button_new_with_label(strings[I_CONN]);	//"Reconnect"
 	gtk_table_attach(GTK_TABLE(optTable),b_connect,0,1,0,1,GTK_FILL,0,5,5);
-
 	b_testhw = gtk_button_new_with_label(strings[I_TestHWB]);	//"Hardware test"
 	gtk_table_attach(GTK_TABLE(optTable),b_testhw,0,1,2,3,GTK_FILL,0,5,5);
-
 	GtkWidget * optHboxVid = gtk_hbox_new(FALSE,5);
 	gtk_table_attach(GTK_TABLE(optTable),optHboxVid,0,1,1,2,GTK_FILL,0,5,5);
 	label = gtk_label_new("Vid");
@@ -2427,7 +2341,6 @@ int main( int argc, char *argv[])
 	VID_entry = gtk_entry_new();
 	gtk_entry_set_width_chars(GTK_ENTRY(VID_entry),4);
 	gtk_box_pack_start(GTK_BOX(optHboxVid),VID_entry,FALSE,TRUE,0);
-
 	GtkWidget * optHboxPid = gtk_hbox_new(FALSE,5);
 	gtk_table_attach(GTK_TABLE(optTable),optHboxPid,1,2,1,2,GTK_FILL,0,5,5);
 	label = gtk_label_new("Pid");
@@ -2435,16 +2348,12 @@ int main( int argc, char *argv[])
 	PID_entry = gtk_entry_new();
 	gtk_entry_set_width_chars(GTK_ENTRY(PID_entry),4);
 	gtk_box_pack_start(GTK_BOX(optHboxPid),PID_entry,FALSE,TRUE,0);
-
 	b_log = gtk_check_button_new_with_label(strings[I_LOG]);	//"Log activity"
 	gtk_table_attach(GTK_TABLE(optTable),b_log,0,2,6,7,GTK_FILL,0,5,5);
-
 	b_V33check = gtk_check_button_new_with_label(strings[I_CK_V33]);	//"Don't check for 3.3V regulator"
 	gtk_table_attach(GTK_TABLE(optTable),b_V33check,0,2,7,8,GTK_FILL,0,5,5);
-
 	b_WaitS1 = gtk_check_button_new_with_label(strings[I_WAITS1]);	//"Wait for S1 before read/write"
 	gtk_table_attach(GTK_TABLE(optTable),b_WaitS1,0,2,8,9,GTK_FILL,0,5,5);
-
 	GtkWidget * optHboxErr = gtk_hbox_new(FALSE,5);
 	gtk_table_attach(GTK_TABLE(optTable),optHboxErr,0,2,9,10,GTK_FILL,0,5,5);
 	label = gtk_label_new(strings[I_MAXERR]);	//"Max errors"
@@ -2452,12 +2361,10 @@ int main( int argc, char *argv[])
 	Errors_entry = gtk_entry_new();
 	gtk_entry_set_width_chars(GTK_ENTRY(Errors_entry),6);
 	gtk_container_add(GTK_CONTAINER(optHboxErr),GTK_WIDGET(Errors_entry));
-
 //------I2C tab-------------
 	label = gtk_label_new("I2C/SPI");
 	GtkWidget * i2cTable = gtk_table_new(4,2,FALSE);
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook),i2cTable,label);
-
 	GtkWidget * i2cModeFrame = gtk_frame_new(strings[I_I2CMode]);	//"Mode"
 	gtk_table_attach(GTK_TABLE(i2cTable),i2cModeFrame,0,1,0,5,GTK_FILL,0,5,0);
 	GtkWidget * i2cVboxMode = gtk_vbox_new(FALSE,10);
@@ -2480,14 +2387,12 @@ int main( int argc, char *argv[])
 	gtk_container_add(GTK_CONTAINER(i2cVboxMode),GTK_WIDGET(SPI01));
 	gtk_container_add(GTK_CONTAINER(i2cVboxMode),GTK_WIDGET(SPI10));
 	gtk_container_add(GTK_CONTAINER(i2cVboxMode),GTK_WIDGET(SPI11));
-
 	GtkWidget * i2cVboxTX = gtk_vbox_new(FALSE,2);
 	gtk_table_attach(GTK_TABLE(i2cTable),i2cVboxTX,1,3,3,4,GTK_FILL,0,5,0);
 	label = gtk_label_new(strings[I_I2CDATAOUT]);	//"Data to send"
 	gtk_container_add(GTK_CONTAINER(i2cVboxTX),label);
 	I2CDataSend = gtk_entry_new();
 	gtk_container_add(GTK_CONTAINER(i2cVboxTX),GTK_WIDGET(I2CDataSend));
-
 	GtkWidget * i2cVboxRX = gtk_vbox_new(FALSE,2);
 	gtk_table_attach(GTK_TABLE(i2cTable),i2cVboxRX,1,3,4,5,GTK_FILL,0,5,0);
 	label = gtk_label_new(strings[I_I2CDATATR]);	//"Data transferred"
@@ -2496,14 +2401,12 @@ int main( int argc, char *argv[])
 	gtk_text_view_set_editable(GTK_TEXT_VIEW(I2CDataReceive),FALSE);
 	gtk_container_add(GTK_CONTAINER(i2cVboxRX),GTK_WIDGET(I2CDataReceive));
 	gtk_widget_set_size_request(I2CDataReceive,100,60);
-
 	GtkWidget * i2cHboxNB = gtk_hbox_new(FALSE,5);
 	gtk_table_attach(GTK_TABLE(i2cTable),i2cHboxNB,1,3,0,1,GTK_FILL,0,5,0);
 	label = gtk_label_new(strings[I_I2C_NB]);	//"Byes to read/write"
 	gtk_container_add(GTK_CONTAINER(i2cHboxNB),label);
 	I2CNbyte = 	gtk_spin_button_new_with_range(0,64,1);
 	gtk_container_add(GTK_CONTAINER(i2cHboxNB),GTK_WIDGET(I2CNbyte));
-
 	GtkWidget * i2cHboxSpeed = gtk_hbox_new(FALSE,5);
 	gtk_table_attach(GTK_TABLE(i2cTable),i2cHboxSpeed,1,3,1,2,GTK_FILL,0,5,0);
 	label = gtk_label_new(strings[I_Speed]);	//"Speed"
@@ -2515,13 +2418,10 @@ int main( int argc, char *argv[])
 	gtk_combo_box_append_text(GTK_COMBO_BOX(I2CSpeed),"500/800 kbps");
 	gtk_combo_box_set_active(GTK_COMBO_BOX(I2CSpeed),0);
 	gtk_container_add(GTK_CONTAINER(i2cHboxSpeed),GTK_WIDGET(I2CSpeed));
-
 	I2CSendBtn = gtk_button_new_with_label(strings[I_I2CSend]);	//"Send"
 	gtk_table_attach(GTK_TABLE(i2cTable),I2CSendBtn,1,2,2,3,GTK_FILL,0,5,0);
-
 	I2CReceiveBtn = gtk_button_new_with_label(strings[I_I2CReceive]);	//"Receive"
 	gtk_table_attach(GTK_TABLE(i2cTable),I2CReceiveBtn,2,3,2,3,GTK_FILL,0,5,0);
-
 //------ICD tab-------------
 	label = gtk_label_new("ICD");
 	icdVbox1 = gtk_vbox_new(FALSE,5);
@@ -2560,7 +2460,6 @@ int main( int argc, char *argv[])
 	GtkWidget* iconSTEPOVER = gtk_image_new_from_pixbuf(pixbuf);
 	pixbuf = gdk_pixbuf_new_from_inline (-1, stop_icon, FALSE, NULL);
 	GtkWidget* iconSTOP = gtk_image_new_from_pixbuf(pixbuf);
-
 	GtkWidget * icdtoolbar = gtk_toolbar_new();
 	gtk_toolbar_set_style(GTK_TOOLBAR(icdtoolbar),GTK_TOOLBAR_ICONS);
 	gtk_box_pack_start(GTK_BOX(icdVbox1),icdtoolbar,FALSE,FALSE,0);
@@ -2579,7 +2478,6 @@ int main( int argc, char *argv[])
 	gtk_toolbar_insert_widget(GTK_TOOLBAR(icdtoolbar),icdCommand,strings[I_ICD_CMD],"",-1);//"command-line"
 	gtk_toolbar_append_space(GTK_TOOLBAR(icdtoolbar));
 	gtk_toolbar_insert_stock(GTK_TOOLBAR(icdtoolbar),GTK_STOCK_HELP,strings[I_ICD_HELP],"",G_CALLBACK(ICDHelp),0,-1);//"help"
-
 	GtkWidget *hpaned = gtk_hpaned_new ();
 	gtk_box_pack_start(GTK_BOX(icdVbox1),hpaned,TRUE,TRUE,0);
 	gint width,height;
@@ -2616,12 +2514,10 @@ int main( int argc, char *argv[])
 	gtk_widget_modify_font (statusTxt, font_desc);
 	pango_font_description_free (font_desc);
 	gtk_box_pack_start(GTK_BOX(icdVbox3),statusScroll,TRUE,TRUE,0);
-
 //------IO tab-------------
 	label = gtk_label_new("I/O");
 	GtkWidget * ioVbox1 = gtk_vbox_new(FALSE,5);
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook),ioVbox1,label);
-
 	GtkWidget * ioFrameIO = gtk_frame_new("I/O");
 	gtk_box_pack_start(GTK_BOX(ioVbox1),ioFrameIO,FALSE,FALSE,0);
 	GtkWidget * ioTable = gtk_table_new(9,2,FALSE);
@@ -2629,7 +2525,6 @@ int main( int argc, char *argv[])
 	b_io_active = gtk_check_button_new_with_label(strings[I_IO_Enable]);	//"Enable IO"
 	gtk_table_attach(GTK_TABLE(ioTable),b_io_active,0,1,0,1,GTK_FILL,0,5,5);
 	gtk_table_set_col_spacings(GTK_TABLE(ioTable),20);
-
 	int ii;
 	for(ii=0;ii<=7;ii++){
 		char ss[16];
@@ -2660,7 +2555,7 @@ int main( int argc, char *argv[])
 		gtk_box_pack_start(GTK_BOX(ioBoxRBx),label,FALSE,TRUE,0);
 		ioButtons[ii].r_0 = gtk_radio_button_new_with_label(NULL,"0");
 		ioButtons[ii].r_1 = gtk_radio_button_new_with_label(gtk_radio_button_get_group(GTK_RADIO_BUTTON(ioButtons[ii].r_0)),"1");
-		ioButtons[ii].r_I = gtk_radio_button_new_with_label(gtk_radio_button_get_group(GTK_RADIO_BUTTON(ioButtons[ii].r_0)),"IN");
+		ioButtons[ii].r_I = gtk_radio_button_new_with_label(gtk_radio_button_get_group(GTK_RADIO_BUTTON(ioButtons[ii].r_0)),"INPUT:");
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ioButtons[ii].r_I),TRUE);
 		gtk_box_pack_start(GTK_BOX(ioBoxRBx),ioButtons[ii].r_0,FALSE,TRUE,0);
 		gtk_box_pack_start(GTK_BOX(ioBoxRBx),ioButtons[ii].r_1,FALSE,TRUE,0);
@@ -2674,7 +2569,6 @@ int main( int argc, char *argv[])
 		g_signal_connect(G_OBJECT(ioButtons[ii].r_1),"toggled",G_CALLBACK(IOchanged),NULL);
 		g_signal_connect(G_OBJECT(ioButtons[ii].r_I),"toggled",G_CALLBACK(IOchanged),NULL);
 	}
-
 	GtkWidget * ioBoxDCDC = gtk_hbox_new(FALSE,5);
 	gtk_box_pack_start(GTK_BOX(ioVbox1),ioBoxDCDC,FALSE,FALSE,0);
 	VDD_ON = gtk_check_button_new_with_label("VDDU");	//""
@@ -2685,12 +2579,10 @@ int main( int argc, char *argv[])
 	gtk_box_pack_start(GTK_BOX(ioBoxDCDC),DCDC_ON,FALSE,TRUE,2);
 	DCDC_voltage=gtk_hscale_new_with_range(5,15,0.1);
 	gtk_box_pack_start(GTK_BOX(ioBoxDCDC),DCDC_voltage,TRUE,TRUE,2);
-
 //------Utility tab-------------
 	label = gtk_label_new("Utility");
 	GtkWidget * utVbox1 = gtk_vbox_new(FALSE,5);
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook),utVbox1,label);
-
 	GtkWidget * utFrameH2D = gtk_frame_new("HEX -> DATA");
 	gtk_box_pack_start(GTK_BOX(utVbox1),utFrameH2D,FALSE,FALSE,5);
 	GtkWidget * utVboxHex = gtk_vbox_new(FALSE,5);
@@ -2704,7 +2596,6 @@ int main( int argc, char *argv[])
 	Hex_data = gtk_entry_new();
 	gtk_entry_set_editable(GTK_ENTRY(Hex_data),0);
 	gtk_box_pack_start(GTK_BOX(utVboxHex),Hex_data,TRUE,TRUE,5);
-
 	GtkWidget * utFrameD2H = gtk_frame_new("DATA -> HEX");
 	gtk_box_pack_start(GTK_BOX(utVbox1),utFrameD2H,FALSE,FALSE,5);
 	GtkWidget * utTable1 = gtk_table_new(2,2,FALSE);
@@ -2724,12 +2615,10 @@ int main( int argc, char *argv[])
 	gtk_table_attach(GTK_TABLE(utTable1),Hex_data2,1,2,2,3,GTK_FILL,0,5,5);
 	GtkWidget * b_hexsave = gtk_button_new_with_label(strings[I_Fsave]);
 	gtk_table_attach(GTK_TABLE(utTable1),b_hexsave,0,1,3,4,GTK_FILL,0,5,5);
-
 //------status bar-------------
 	status_bar = gtk_statusbar_new();
 	gtk_box_pack_start(GTK_BOX(vbox),status_bar,FALSE,TRUE,0);
 	statusID=gtk_statusbar_get_context_id(GTK_STATUSBAR(status_bar),"ID");
-
 	g_signal_connect(G_OBJECT(b_testhw),"clicked",G_CALLBACK(TestHw),window);
 	g_signal_connect(G_OBJECT(b_connect),"clicked",G_CALLBACK(Connect),window);
 	g_signal_connect(G_OBJECT(I2CReceiveBtn),"clicked",G_CALLBACK(I2cspiR),window);
@@ -2751,9 +2640,7 @@ int main( int argc, char *argv[])
 	g_signal_connect(G_OBJECT(Data_entry),"changed",G_CALLBACK(DataToHexConvert),NULL);
 	g_signal_connect(G_OBJECT(b_hexsave),"clicked",G_CALLBACK(HexSave),window);
 	g_signal_connect(G_OBJECT(b_WfuseLF),"clicked",G_CALLBACK(WriteATfuseLowLF),window);
-
 	gtk_widget_show_all(window);
-
 //********Init*************
 	char text[16];
 	sprintf(text,"%04X",vid);
@@ -2817,7 +2704,6 @@ int main( int argc, char *argv[])
 	}
 	return 0;
 }
-
 ///
 /// Show a message box
 void MsgBox(const char* msg)
@@ -2831,7 +2717,6 @@ void MsgBox(const char* msg)
 	gtk_dialog_run (GTK_DIALOG (dialog));
 	gtk_widget_destroy (dialog);
 }
-
 ///
 /// Find the programmer and setup communication
 void Connect(GtkWidget *widget,GtkWidget *window){
@@ -2849,7 +2734,6 @@ void Connect(GtkWidget *widget,GtkWidget *window){
 	hvreg=0;
 	ProgID();
 }
-
 ///
 /// I2C/SPI receive
 void I2cspiR()
@@ -2880,7 +2764,6 @@ void I2cspiR()
 	for(;i<128;i++) tmpbuf[i]=0;
 	I2CReceive(mode,gtk_combo_box_get_active(GTK_COMBO_BOX(I2CSpeed)),nbyte,tmpbuf);
 }
-
 ///
 /// I2C/SPI send
 void I2cspiS()
@@ -2911,7 +2794,6 @@ void I2cspiS()
 	for(;i<128;i++) tmpbuf[i]=0;
 	I2CSend(mode,gtk_combo_box_get_active(GTK_COMBO_BOX(I2CSpeed)),nbyte,tmpbuf);
 }
-
 ///
 ///Display contents of EEprom memory
 void DisplayEE(){
@@ -2956,7 +2838,6 @@ void DisplayEE(){
 	}
 	free(aux);
 }
-
 ///
 ///Start HV regulator
 int StartHVReg(double V){
@@ -3023,7 +2904,6 @@ int StartHVReg(double V){
 		return vreg;
 	}
 }
-
 ///
 ///Read programmer ID
 void ProgID()
@@ -3044,56 +2924,12 @@ void ProgID()
 	else if(HwID==3) PrintMessage(" (18F2458/2553)\r\n\r\n");
 	else PrintMessage(" (?)\r\n\r\n");
 }
-
 ///
 ///Check if a 3.3V regulator is present
 int CheckV33Regulator()
 {
 	int i,j=0;
 	if(skipV33check) return 1;
-/*	bufferU[j++]=WRITE_RAM;
-	bufferU[j++]=0x0F;
-	bufferU[j++]=0x93;
-	bufferU[j++]=0x7E;	//B6,B0 = output
-	bufferU[j++]=EXT_PORT;
-	bufferU[j++]=0;		//B6=B0=0
-	bufferU[j++]=0;
-	bufferU[j++]=EXT_PORT;
-	bufferU[j++]=0x81;	//B6=B0=1
-	bufferU[j++]=0;
-	bufferU[j++]=READ_RAM;
-	bufferU[j++]=0x0F;
-	bufferU[j++]=0x81;	//Check if B1=1 or B7=1
-	bufferU[j++]=EXT_PORT;
-	bufferU[j++]=0x00;	//B6=B0=0
-	bufferU[j++]=0;
-	bufferU[j++]=WAIT_T3;
-	bufferU[j++]=WAIT_T3;
-	bufferU[j++]=READ_RAM;
-	bufferU[j++]=0x0F;
-	bufferU[j++]=0x81;	//Check if B1=0 or B7=0
-	bufferU[j++]=WRITE_RAM;
-	bufferU[j++]=0x0F;
-	bufferU[j++]=0x93;
-	bufferU[j++]=0xFF;	//BX = input
-	bufferU[j++]=FLUSH;
-	for(;j<DIMBUF;j++) bufferU[j]=0x0;
-	write();
-	msDelay(5);
-	read();
-	for(j=0;j<DIMBUF-3&&bufferI[j]!=READ_RAM;j++);
-	i=~(bufferI[j+3]&0x42);		//B1 or B7 should be high
-	PrintMessage1("i1=%X",i);
-	for(j+=3;j<DIMBUF-3&&bufferI[j]!=READ_RAM;j++);
-	i^=bufferI[j+3]&0x42;
-	i=~i;
-	PrintMessage1(" i2=%X\n",i);
-	// i1=10000010
-	//not=01111101
-	// i2=00000000
-	//xor=01111101
-	//not=10000010
-	return (i?1:0);*/
 	bufferU[j++]=WRITE_RAM;
 	bufferU[j++]=0x0F;
 	bufferU[j++]=0x93;
@@ -3122,7 +2958,6 @@ int CheckV33Regulator()
 	for(j+=3;j<DIMBUF-3&&bufferI[j]!=READ_RAM;j++);
 	return (i+(bufferI[j+3]&0x2))==2?1:0;
 }
-
 ///
 ///Check if S1 is pressed
 int CheckS1()
@@ -3138,7 +2973,6 @@ int CheckS1()
 	i=bufferI[j+3]&0x8;		//i=E3
 	return i?0:1;			//S1 open -> E3=1
 }
-
 ///
 ///Execute hardware test
 void TestHw(GtkWidget *widget,GtkWindow* parent)
@@ -3231,7 +3065,6 @@ void TestHw(GtkWidget *widget,GtkWindow* parent)
 		}
 	}
 }
-
 ///
 ///Wait for X milliseconds
 void msDelay(double delay)
@@ -3240,10 +3073,14 @@ void msDelay(double delay)
 	long x=(int)(delay*1000.0);
 	usleep(x>MinDly?x:MinDly);
 #else
-	Sleep((long)ceil(delay)>MinDly?(long)ceil(delay):MinDly);
+//	Sleep((long)ceil(delay)>MinDly?(long)ceil(delay):MinDly);
+	__int64 stop,freq,timeout;
+	QueryPerformanceCounter((LARGE_INTEGER *)&stop);
+	QueryPerformanceFrequency((LARGE_INTEGER *)&freq);
+	timeout=stop+delay*freq/1000.0;
+	while(stop<timeout) QueryPerformanceCounter((LARGE_INTEGER *)&stop);
 #endif
 }
-
 #if !defined _WIN32 && !defined __CYGWIN__	//Linux
 ///
 /// Get system time
@@ -3253,26 +3090,6 @@ DWORD GetTickCount(){
 	return now.time*1000+now.millitm;
 }
 #endif
-///
-///Clean read buffer
-void CleanIO(){
-#if !defined _WIN32 && !defined __CYGWIN__	//Linux
-//#undef read()
-	fd_set set;
-	struct timeval timeout;
-	struct hiddev_event ev[80];
-	FD_ZERO(&set); /* clear the set */
-	FD_SET(fd, &set); /* add our file descriptor to the set */
-	timeout.tv_sec = 0;
-	timeout.tv_usec = 0;
-	//read all packets left
-	for(;select(fd + 1, &set, NULL, NULL, &timeout)>0;){
-		read(fd, ev,sizeof(struct hiddev_event) *DIMBUF);
-		if(saveLog) WriteLogIO();
-	}
-#endif
-}
-
 
 ///
 ///Write data packet, wait for X milliseconds, read response
@@ -3281,26 +3098,64 @@ void PacketIO(double delay){
 	if(saveLog&&logfile) fprintf(logfile,"PacketIO(%.2f)\n",delay);
 	int delay0=delay;
 #if !defined _WIN32 && !defined __CYGWIN__	//Linux
+	struct timespec ts;
+	uint64_t start,stop;
 	fd_set set;
-	struct hiddev_event ev[80];
 	struct timeval timeout;
-	int rv,i,n=DIMBUF;
-    struct timespec ts;
-    uint64_t start,stop;
-	for(i=0;i<DIMBUF;i++) ref_multi_u.values[i]=bufferU[i];
+	int rv,i;
 	FD_ZERO(&set); /* clear the set */
 	FD_SET(fd, &set); /* add our file descriptor to the set */
 	timeout.tv_sec = 0;
 	timeout.tv_usec = TIMEOUT*1000;
-    clock_gettime( CLOCK_REALTIME, &ts );
-    start  = ts.tv_nsec / 1000 ;//+ ts.tv_sec * 1000000;
+	clock_gettime( CLOCK_REALTIME, &ts );
+	start=ts.tv_nsec/1000;
+	delay-=TIMEOUT-10;	//shorter delays are covered by 50ms timeout
+	if(delay<MinDly) delay=MinDly;
+	#ifndef hiddevIO	//use raw USB device
+	//wait before writing
+/*	rv = select(fd + 1, NULL, &set, NULL, &timeout); //wait for write event
+	if(rv == -1){
+		PrintMessage(strings[S_ErrSing]);	//error
+		if(saveLog&&logfile) fprintf(logfile,strings[S_ErrSing]);
+		return;
+	}
+	else if(rv == 0){
+		PrintMessage(strings[S_comTimeout]);	//"comm timeout\r\n"
+		if(saveLog&&logfile) fprintf(logfile,strings[S_comTimeout]);
+		return;
+	}*/
+	//write
+	int res = write(fd,bufferU,DIMBUF);
+	if (res < 0) {
+		printf("Error: %d\n", errno);
+		perror("write");
+	}
+	usleep((int)(delay*1000.0));
+	//wait before reading
+	rv = select(fd + 1, &set, NULL, NULL, &timeout); //wait for event
+	if(rv == -1){
+		PrintMessage(strings[S_ErrSing]);	/*error*/
+		if(saveLog&&logfile) fprintf(logfile,strings[S_ErrSing]);
+		return;
+	}
+	else if(rv == 0){
+		PrintMessage(strings[S_comTimeout]);	/*"comm timeout\r\n"*/
+		if(saveLog&&logfile) fprintf(logfile,strings[S_comTimeout]);
+		return;
+	}
+	//read
+	res = read(fd, bufferI, DIMBUF);
+	if (res < 0) {
+		perror("read");
+	}
+	#else		//use hiddev device (old method)
+	struct hiddev_event ev[80];
+	int n=DIMBUF;
+	for(i=0;i<DIMBUF;i++) ref_multi_u.values[i]=bufferU[i];
 	//write
 	ioctl(fd, HIDIOCSUSAGES, &ref_multi_u);
 	ioctl(fd,HIDIOCSREPORT, &rep_info_u);
-	delay-=TIMEOUT-10;	//shorter delays are covered by 50ms timeout
-	if(delay<0) delay=0;
-	long x=(int)(delay*1000.0);
-	usleep(x>MinDly?x:MinDly);
+	usleep((int)(delay*1000.0));
 	//read
 	rv = select(fd + 1, &set, NULL, NULL, &timeout); //wait for event
 	if(rv == -1){
@@ -3312,9 +3167,9 @@ void PacketIO(double delay){
 		if(saveLog&&logfile) fprintf(logfile,strings[S_comTimeout]);
 	}
 	else{
-//		ioctl(fd, HIDIOCGUSAGES, &ref_multi_i);
-//		ioctl(fd,HIDIOCGREPORT, &rep_info_i);
-#undef read()
+	//		ioctl(fd, HIDIOCGUSAGES, &ref_multi_i);
+	//		ioctl(fd,HIDIOCGREPORT, &rep_info_i);
+	#undef read()
 		rv=read(fd, ev,sizeof(struct hiddev_event) *n);
 		for(i=0;(ev[0].value!=bufferU[0])&&i<40;i++){		//read too early; try again after 5ms
 			msDelay(5);
@@ -3324,22 +3179,28 @@ void PacketIO(double delay){
 		if(i==40) fprintf(logfile,"Cannot read correct packet!!\n");
 		for(i=0;i<n;i++) bufferI[i]=ev[i].value&0xFF;
 	}
-	if(saveLog&&logfile) WriteLogIO();
-    clock_gettime( CLOCK_REALTIME, &ts );
-    stop  = ts.tv_nsec / 1000 ;//+ ts.tv_sec * 1000000;
-	if(saveLog&&logfile) fprintf(logfile,"T=%.2f ms (%+.2f ms)\n",(stop-start)/1000.0,(stop-start)/1000.0-delay0);
+	#endif
+	clock_gettime( CLOCK_REALTIME, &ts );
+	stop  = ts.tv_nsec / 1000;
+	if(saveLog&&logfile){
+		WriteLogIO();
+		fprintf(logfile,"T=%.2f ms (%+.2f ms)\n",(stop-start)/1000.0,(stop-start)/1000.0-delay0);
+		if(bufferU[0]!=bufferI[0]) fprintf(logfile,"Cannot read correct packet!!\n");
+	}
 #else	//Windows
-	__int64 start,stop,freq;
+	__int64 start,stop,freq,timeout;
 	QueryPerformanceCounter((LARGE_INTEGER *)&start);
 	QueryPerformanceFrequency((LARGE_INTEGER *)&freq);
 	delay-=TIMEOUT-10;	//shorter delays are covered by 50ms timeout
-	if(delay<0) delay=0;
+	if(delay<MinDly) delay=MinDly;
 	//write
 	Result = WriteFile(WriteHandle,bufferU0,DIMBUF+1,&BytesWritten,NULL);
-	Sleep((long)ceil(delay)>MinDly?(long)ceil(delay):MinDly);
+	QueryPerformanceCounter((LARGE_INTEGER *)&stop);
+	timeout=stop+delay*freq/1000.0;
+	while(stop<timeout) QueryPerformanceCounter((LARGE_INTEGER *)&stop);
 	//read
 	Result = ReadFile(ReadHandle,bufferI0,DIMBUF+1,&NumberOfBytesRead,(LPOVERLAPPED) &HIDOverlapped);
-	Result = WaitForSingleObject(hEventObject,50);
+	Result = WaitForSingleObject(hEventObject,TIMEOUT);
 	if(saveLog&&logfile) WriteLogIO();
 	ResetEvent(hEventObject);
 	if(Result!=WAIT_OBJECT_0){
@@ -3352,43 +3213,54 @@ void PacketIO(double delay){
 }
 
 ///
-///Write data packet
-void writeP(){
-#if !defined _WIN32 && !defined __CYGWIN__		//Linux
-	int i;
-	for(i=0;i<DIMBUF;i++) ref_multi_u.values[i]=bufferU[i];
-	ioctl(fd, HIDIOCSUSAGES, &ref_multi_u); ioctl(fd,HIDIOCSREPORT, &rep_info_u);
-#else	//Windows
-	Result = WriteFile(WriteHandle,bufferU0,DIMBUF+1,&BytesWritten,NULL);
-#endif
-}
-
-
-///
-///read data packet
-void readP(){
-#if !defined _WIN32 && !defined __CYGWIN__		//Linux
-	int i;
-	ioctl(fd, HIDIOCGUSAGES, &ref_multi_i); ioctl(fd,HIDIOCGREPORT, &rep_info_i);
-	for(i=0;i<DIMBUF;i++) bufferI[i]=ref_multi_i.values[i];
-#else	//Windows
-	Result = ReadFile(ReadHandle,bufferI0,DIMBUF+1,&NumberOfBytesRead,(LPOVERLAPPED) &HIDOverlapped);
-	Result = WaitForSingleObject(hEventObject,10);
-	ResetEvent(hEventObject);
-	if(Result!=WAIT_OBJECT_0){
-		PrintMessage(strings[S_comTimeout]);	/*"comm timeout\r\n"*/
-	}
-#endif
-}
-
-
-
-///
 ///Find the USB peripheral with proper vid&pid code
 /// return 0 if not found
 int FindDevice(int vid,int pid){
 	int MyDeviceDetected = FALSE;
-#if !defined _WIN32 && !defined __CYGWIN__
+#if !defined _WIN32 && !defined __CYGWIN__	//Linux
+	#ifndef hiddevIO	//use raw USB device
+	struct hidraw_devinfo device_info;
+	int i=-1;
+	if(path[0]==0){	//search all devices
+		if((fd = open("/dev/openprogrammer", O_RDWR|O_NONBLOCK))>0){ //try with this first
+			sprintf(path,"/dev/openprogrammer");
+			ioctl(fd, HIDIOCGRAWINFO, &device_info);
+			if(device_info.vendor==vid&&device_info.product==pid) i=0;
+			else{
+				close(fd);
+				i=-1;
+			}
+		}
+		if(i){
+			for(i=0;i<16;i++){
+				sprintf(path,"/dev/hidraw%d",i);
+				if((fd = open(path, O_RDWR|O_NONBLOCK))>0){
+					ioctl(fd, HIDIOCGRAWINFO, &device_info);
+					if(device_info.vendor==vid&&device_info.product==pid) break;
+					else close(fd);
+				}
+			}
+		}
+		if(i==16){
+			PrintMessage(strings[S_noprog]);
+			path[0]=0;
+			return 0;
+		}
+	}
+	else{	//user supplied path
+		if((fd = open(path, O_RDWR|O_NONBLOCK)) < 0) {
+			PrintMessage1(strings[S_DevPermission],path); //"cannot open %s, make sure you have read permission on it",path);
+			return 0;
+		}
+		ioctl(fd, HIDIOCGRAWINFO, &device_info);
+		if(device_info.vendor!=vid||device_info.product!=pid){
+			PrintMessage(strings[S_noprog]);
+			return 0;
+		}
+	}
+	printf(strings[S_progDev],path);
+	return 1;
+	#else		//use hiddev device (old method)
 	struct hiddev_devinfo device_info;
 	int i=-1;
 	if(path[0]==0){	//search all devices
@@ -3438,8 +3310,8 @@ int FindDevice(int vid,int pid){
 	ref_multi_u.uref.field_index=ref_multi_i.uref.field_index=0;
 	ref_multi_u.uref.usage_index=ref_multi_i.uref.usage_index=0;
 	ref_multi_u.num_values=ref_multi_i.num_values=DIMBUF;
-
-#else
+	#endif
+#else		//Windows
 	PSP_DEVICE_INTERFACE_DETAIL_DATA detailData;
 	HANDLE DeviceHandle;
 	HANDLE hDevInfo;
@@ -3453,7 +3325,6 @@ int FindDevice(int vid,int pid){
 	    USHORT  ProductID;
 	    USHORT  VersionNumber;
 	} HIDD_ATTRIBUTES, *PHIDD_ATTRIBUTES;
-
 	typedef void (__stdcall*GETHIDGUID) (OUT LPGUID HidGuid);
 	typedef BOOLEAN (__stdcall*GETATTRIBUTES)(IN HANDLE HidDeviceObject,OUT PHIDD_ATTRIBUTES Attributes);
 	typedef BOOLEAN (__stdcall*SETNUMINPUTBUFFERS)(IN  HANDLE HidDeviceObject,OUT ULONG  NumberBuffers);
@@ -3470,12 +3341,9 @@ int FindDevice(int vid,int pid){
 	int LastDevice = FALSE;
 	int MemberIndex = 0;
 	LONG Result;
-//	char UsageDescription[256];
-
 	Length=0;
 	detailData=NULL;
 	DeviceHandle=NULL;
-
 	HMODULE hHID=0;
 	GETHIDGUID HidD_GetHidGuid=0;
 	GETATTRIBUTES HidD_GetAttributes=0;
@@ -3512,8 +3380,6 @@ int FindDevice(int vid,int pid){
 		||HidD_GetProductString==NULL\
 		||HidD_SetNumInputBuffers==NULL\
 		||HidD_GetNumInputBuffers==NULL) return 0;
-
-
 	HMODULE hSAPI=0;
 	hSAPI = LoadLibrary("setupapi.dll");
 	if(!hSAPI){
@@ -3536,20 +3402,16 @@ int FindDevice(int vid,int pid){
 		||SetupDiEnumDeviceInterfaces==NULL\
 		||SetupDiDestroyDeviceInfoList==NULL\
 		||SetupDiGetDeviceInterfaceDetailA==NULL) return 0;
-
-
 	/*
 	The following code is adapted from Usbhidio_vc6 application example by Jan Axelson
 	for more information see see http://www.lvr.com/hidpage.htm
 	*/
-
 	/*
 	API function: HidD_GetHidGuid
 	Get the GUID for all system HIDs.
 	Returns: the GUID in HidGuid.
 	*/
 	HidD_GetHidGuid(&HidGuid);
-
 	/*
 	API function: SetupDiGetClassDevs
 	Returns: a handle to a device information set for all installed devices.
@@ -3557,7 +3419,6 @@ int FindDevice(int vid,int pid){
 	*/
 	hDevInfo=SetupDiGetClassDevs(&HidGuid,NULL,NULL,DIGCF_PRESENT|DIGCF_INTERFACEDEVICE);
 	devInfoData.cbSize = sizeof(devInfoData);
-
 	//Step through the available devices looking for the one we want.
 	//Quit on detecting the desired device or checking all available devices without success.
 	MemberIndex = 0;
@@ -3587,7 +3448,6 @@ int FindDevice(int vid,int pid){
 			Requires:
 			A DeviceInfoSet returned by SetupDiGetClassDevs
 			The SP_DEVICE_INTERFACE_DATA structure returned by SetupDiEnumDeviceInterfaces.
-
 			The final parameter is an optional pointer to an SP_DEV_INFO_DATA structure.
 			This application doesn't retrieve or use the structure.
 			If retrieving the structure, set
@@ -3597,16 +3457,12 @@ int FindDevice(int vid,int pid){
 			//Get the Length value.
 			//The call will return with a "buffer too small" error which can be ignored.
 			Result = SetupDiGetDeviceInterfaceDetail(hDevInfo, &devInfoData, NULL, 0, &Length, NULL);
-
 			//Allocate memory for the hDevInfo structure, using the returned Length.
 			detailData = (PSP_DEVICE_INTERFACE_DETAIL_DATA)malloc(Length);
-
 			//Set cbSize in the detailData structure.
 			detailData -> cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA);
-
 			//Call the function again, this time passing it the returned buffer size.
 			Result = SetupDiGetDeviceInterfaceDetail(hDevInfo, &devInfoData, detailData, Length,&Required, NULL);
-
 			// Open a handle to the device.
 			// To enable retrieving information about a system mouse or keyboard,
 			// don't request Read or Write access for this handle.
@@ -3620,7 +3476,6 @@ int FindDevice(int vid,int pid){
 			DeviceHandle=CreateFile(detailData->DevicePath,
 				0, FILE_SHARE_READ|FILE_SHARE_WRITE,
 				(LPSECURITY_ATTRIBUTES)NULL,OPEN_EXISTING, 0, NULL);
-
 			/*
 			API function: HidD_GetAttributes
 			Requests information from the device.
@@ -3630,11 +3485,9 @@ int FindDevice(int vid,int pid){
 			Use this information to decide if the detected device is
 			the one we're looking for.
 			*/
-
 			//Set the Size to the number of bytes in the structure.
 			Attributes.Size = sizeof(Attributes);
 			Result = HidD_GetAttributes(DeviceHandle,&Attributes);
-
 			//Is it the desired device?
 			MyDeviceDetected = FALSE;
 			if (Attributes.VendorID == vid)
@@ -3644,20 +3497,16 @@ int FindDevice(int vid,int pid){
 					//Both the Vendor ID and Product ID match.
 					MyDeviceDetected = TRUE;
 					strcpy(MyDevicePathName,detailData->DevicePath);
-
 					// Get a handle for writing Output reports.
 					WriteHandle=CreateFile(detailData->DevicePath,
 						GENERIC_WRITE, FILE_SHARE_READ|FILE_SHARE_WRITE,
 						(LPSECURITY_ATTRIBUTES)NULL,OPEN_EXISTING,0,NULL);
-
 					//Get a handle to the device for the overlapped ReadFiles.
 					ReadHandle=CreateFile(detailData->DevicePath,
 						GENERIC_READ,FILE_SHARE_READ|FILE_SHARE_WRITE,(LPSECURITY_ATTRIBUTES)NULL,
 						OPEN_EXISTING,FILE_FLAG_OVERLAPPED,NULL);
-
 					if (hEventObject) CloseHandle(hEventObject);
 					hEventObject = CreateEvent(NULL,TRUE,TRUE,"");
-
 					//Set the members of the overlapped structure.
 					HIDOverlapped.hEvent = hEventObject;
 					HIDOverlapped.Offset = 0;
@@ -3682,10 +3531,8 @@ int FindDevice(int vid,int pid){
 		MemberIndex = MemberIndex + 1;
 	} //do
 	while ((LastDevice == FALSE) && (MyDeviceDetected == FALSE));
-
 	//Free the memory reserved for hDevInfo by SetupDiClassDevs.
 	SetupDiDestroyDeviceInfoList(hDevInfo);
-
 /*	if(info){
 		PrintMessage3("Device detected: vid=0x%04X pid=0x%04X\nPath: %s\n",vid,pid,MyDevicePathName);
 		if(HidD_GetManufacturerString(DeviceHandle,string,sizeof(string))==TRUE) wprintf(L"Manufacturer string: %s\n",string);

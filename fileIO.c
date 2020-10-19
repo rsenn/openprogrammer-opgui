@@ -475,24 +475,25 @@ int Load(char*dev,char*loadfile){
 					else{
 						switch(htoi(line+7,2)){
 							case 0:		//Data record
-								if(ext_addr<0x20){		//Code
+								if(ext_addr<0x20){		//Code	<0x200000
 									sizeM=(ext_addr<<16)+input_address+hex_count;
 									if(sizeM>size) size=sizeM;
 									for (i=0;i<hex_count;i++){
 										buffer[(ext_addr<<16)+input_address+i]=htoi(line+9+i*2,2);
 									}
 								}
-								else if(ext_addr==0x20&&input_address<8){	//ID
+								else if(ext_addr==0x20&&input_address<64){	//ID: 0x200000
 									for (i=0;i<hex_count;i++){
 										memID[input_address+i]=htoi(line+9+i*2,2);
 									}
 								}
-								else if(ext_addr==0x30&&input_address<14){	//CONFIG
+								else if(ext_addr==0x30&&input_address<14){	//CONFIG: 0x300000
 									for (i=0;i<hex_count;i++){
 										memCONFIG[input_address+i]=htoi(line+9+i*2,2);
 									}
 								}
-								else if(ext_addr==0xF0&&input_address<0x1000){	//EEPROM
+								else if((ext_addr==0xF0||ext_addr==0x31||ext_addr==0x38)&&input_address<0x1000){	
+								//EEPROM: 0xF00000, 0x310000, 0x380000
 									for (i=0;i<hex_count;i++){
 										bufferEE[input_address+i]=htoi(line+9+i*2,2);
 									}

@@ -436,7 +436,7 @@ void DisplayEE16F(int size){
 #else
 			strcat(v,t);
 #endif
-			if(memCODE_W[j]<0xff) valid=1;/**/
+			if((memCODE_W[j]&0xFF)<0xff) valid=1;/**/
 		}
 		if(valid){
 			sprintf(t,"%04X: %s %s\r\n",i,s,v);
@@ -1077,7 +1077,7 @@ void Read16F18xxx(int dim,int dim2,int dim3,int options)
 // Device configuration info area @0x8200
 {
 	int k=0,k2=0,z=0,i,j;
-	int useDCI=options&0x10==0?1:0;
+	int useDCI=(options&0x10)==0?1:0;
 	if(FWVersion<0xB00){		//only for 16F18xxx
 		PrintMessage1(strings[S_FWver2old],"0.11.0");	//"This firmware is too old. Version %s is required\r\n"
 		return;
@@ -5558,7 +5558,7 @@ void Write16F1xxx(int dim,int dim2,int options)
 	int valid,inc;
 	for(;dim>0&&memCODE_W[dim]>=0x3fff;dim--); //skip empty space at end
 	if(!F18x){					//16F1xxx
-	dim+=dim%8;		//grow to 8 word multiple
+	if(dim%8) dim+=8-dim%8;		//grow to 8 word multiple
 	for(i=k=0,j=0;i<dim;i+=8){
 		valid=inc=0;
 		for(;i<dim&&!valid;){	//skip empty locations (8 words)
@@ -5606,7 +5606,7 @@ void Write16F1xxx(int dim,int dim2,int options)
 		}
 	}
 	else{					//16F18xxx 32 word algorithm
-		dim+=dim%32;		//grow to 32 word multiple
+		if(dim%32) dim+=32-dim%32;		//grow to 32 word multiple
 		for(i=k=0,j=0;i<dim;i+=32){
 			for(valid=0;i<dim&&!valid;i+=valid?0:32){	//skip empty locations (32 words)
 				valid=0;
@@ -6206,8 +6206,8 @@ void Write16F18xxx(int dim,int dim2,int options)
 	fflush(logfile);
 	int valid,inc;
 	#define rowN 32			//32 word algorithm
-	for(;dim>0&&memCODE_W[dim]>=0x3fff;dim--); //skip empty space at end
-	dim+=dim%rowN;		//grow to 32 word multiple
+	for(;dim>0&&memCODE_W[dim-1]>=0x3fff;dim--); //skip empty space at end
+	if(dim%rowN) dim+=rowN-dim%rowN;		//grow to 32 word multiple
 	for(i=k=0,j=0;i<dim;i+=rowN){
 		for(valid=0;i<dim&&!valid;i+=valid?0:rowN){	//skip empty locations (32 words)
 			valid=0;
@@ -6263,6 +6263,7 @@ void Write16F18xxx(int dim,int dim2,int options)
 			for(k2=i;k2<dim&&memCODE_W[k2]>=0x3fff;k2++);
 			if(k2>i+10){			//at least 10 skipped
 				i=k2;
+				k=i;
 				bufferU[j++]=ICSP8_LOAD;
 				bufferU[j++]=LOAD_PC_ADDR;	//update counter
 				bufferU[j++]=(i>>8)&0xFF;
@@ -6277,7 +6278,7 @@ void Write16F18xxx(int dim,int dim2,int options)
 			PacketIO(5);
 			for(z=0;z<DIMBUF-2;z++){
 				if(bufferI[z]==ICSP8_READ){
-					if(memCODE_W[k]<0x3FFF&&(memCODE_W[k]!=(bufferI[z+1]<<8)+bufferI[z+2])){
+					if(memCODE_W[k]!=(bufferI[z+1]<<8)+bufferI[z+2]){
 						PrintMessage3(strings[S_CodeWError2],k,memCODE_W[k],(bufferI[z+1]<<8)+bufferI[z+2]);	//"Error writing address %3X: written %04X, read %04X\r\n"
 						err++;
 					}

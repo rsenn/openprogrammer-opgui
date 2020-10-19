@@ -1,24 +1,28 @@
+#ifndef _COMMON_DECLARATIONS
+#define _COMMON_DECLARATIONS
 //#define DEBUG
 #define _APPNAME "OPGUI"
 
 #if !defined _WIN32 && !defined __CYGWIN__
-#include <sys/ioctl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <asm/types.h>
-#include <fcntl.h>
-#include <linux/hiddev.h>
-#include <linux/input.h>
-#include <sys/timeb.h>
-#include <stdint.h>
+	#include <sys/ioctl.h>
+	#include <sys/types.h>
+	#include <sys/stat.h>
+	#include <asm/types.h>
+	#include <fcntl.h>
+	#include <linux/hiddev.h>
+	#include <linux/hidraw.h>
+	#include <linux/input.h>
+	#include <sys/timeb.h>
+	#include <stdint.h>
+	#include <errno.h>
 #else
-#include <windows.h>
-#include <setupapi.h>
-#include <hidusage.h>
-#include <hidpi.h>
-#include <math.h>
-#include <sys/timeb.h>
-#include <wchar.h>
+	#include <windows.h>
+	#include <setupapi.h>
+	#include <hidusage.h>
+	#include <hidpi.h>
+	#include <math.h>
+	#include <sys/timeb.h>
+	#include <wchar.h>
 #endif
 
 #include <gtk/gtk.h>
@@ -49,9 +53,9 @@ typedef unsigned char BYTE;
 
 #define COL 16
 //Version defined in makefile
-//#if !defined VERSION
-//  #define VERSION "0.11.0"
-//#endif
+#if !defined VERSION
+  #define VERSION "unknown"
+#endif
 #define G (12.0/34*1024/5)		//=72,2823529412
 #define LOCK	1
 #define FUSE	2
@@ -63,25 +67,11 @@ typedef unsigned char BYTE;
 #if !defined _WIN32 && !defined __CYGWIN__		//Linux
 	#define SYSNAME "Linux"
 	#define DIMBUF 64
-//	#define write() ioctl(fd, HIDIOCSUSAGES, &ref_multi_u); ioctl(fd,HIDIOCSREPORT, &rep_info_u);
-//	#define read() ioctl(fd, HIDIOCGUSAGES, &ref_multi_i); ioctl(fd,HIDIOCGREPORT, &rep_info_i);
-//	#define bufferU ref_multi_u.values
-//	#define bufferI ref_multi_i.values
 	DWORD GetTickCount();
-//	struct hiddev_report_info rep_info_i,rep_info_u;
-//	struct hiddev_usage_ref_multi ref_multi_i,ref_multi_u;
 	extern unsigned char bufferU[128],bufferI[128];
 #else	//Windows
 	#define SYSNAME "Windows"
-	//#define DIMBUF 65
 	#define DIMBUF 64
-//	#define write()	Result = WriteFile(WriteHandle,bufferU0,DIMBUF+1,&BytesWritten,NULL);
-//	#define read()	Result = ReadFile(ReadHandle,bufferI0,DIMBUF+1,&NumberOfBytesRead,(LPOVERLAPPED) &HIDOverlapped);\
-					Result = WaitForSingleObject(hEventObject,10);\
-					ResetEvent(hEventObject);\
-					if(Result!=WAIT_OBJECT_0){\
-						PrintMessage(strings[S_comTimeout]);	/*"comm timeout\r\n"*/\
-					}
 	extern unsigned char bufferU0[128],bufferI0[128];
 	extern unsigned char *bufferU,*bufferI;
 	extern DWORD NumberOfBytesRead,BytesWritten;
@@ -108,7 +98,7 @@ extern char LogFileName[512];
 extern char loadfile[512],savefile[512];
 extern WORD *memCODE_W;
 extern int size,sizeW,sizeEE,sizeCONFIG,sizeUSERID;
-extern unsigned char *memCODE,*memEE,memID[8],memCONFIG[48],memUSERID[8];
+extern unsigned char *memCODE,*memEE,memID[64],memCONFIG[48],memUSERID[8];
 extern double hvreg;
 extern int RWstop;
 
@@ -123,6 +113,4 @@ void WriteLogIO();
 void CloseLogFile();
 unsigned int htoi(const char *hex, int length);
 void PacketIO(double delay);
-void CleanIO();
-void readP();
-void writeP();
+#endif
