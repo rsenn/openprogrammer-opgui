@@ -1,5 +1,5 @@
 # equivalent to #define in c code
-VERSION = 0.11.2
+VERSION = 0.11.3
 CC = gcc
 PREFIX = /usr/local
 CFLAGS =  '-DVERSION="$(VERSION)"' -w `pkg-config --libs --cflags gtk+-2.0` 

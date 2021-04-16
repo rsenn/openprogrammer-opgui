@@ -83,7 +83,7 @@ typedef struct syment
     unsigned char n_numaux;
 } syment_t;
 
-struct coff_lineno
+typedef struct coff_lineno
 {
     unsigned long l_srcndx;
     unsigned short l_lnno;

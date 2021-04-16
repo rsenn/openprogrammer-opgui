@@ -81,9 +81,9 @@ typedef unsigned char BYTE;
 	extern HANDLE hEventObject;
 #endif
 
-int statusID;
-GtkWidget *status_bar;
-char str[4096];
+extern int statusID;
+extern GtkWidget *status_bar;
+extern char str[4096];
 extern int saveLog;
 extern char** strings;
 extern int fd;

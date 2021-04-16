@@ -2,7 +2,7 @@
  * \file opgui.c
  * main control program for the open programmer
  *
- * Copyright (C) 2009-2019 Alberto Maccioni
+ * Copyright (C) 2009-2021 Alberto Maccioni
  * for detailed info see:
  * http://openprog.altervista.org/
  *
@@ -1040,7 +1040,7 @@ void info(GtkWidget *widget,GtkWidget *window)
 		//"authors","Alberto Maccioni",NULL,
 		"comments", "A graphical interface for the Open Programmer",
 		"copyright",
-		"Copyright (C) Alberto Maccioni 2009-2020\n\n"
+		"Copyright (C) Alberto Maccioni 2009-2021\n\n"
 		"This program is free software; you can \n"
 		"redistribute it and/or modify it under \n"
 		"the terms of the GNU General Public License \n"

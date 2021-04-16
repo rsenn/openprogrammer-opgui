@@ -1,6 +1,6 @@
 /*
  * fileIO.c - file read and write
- * Copyright (C) 2010-2016 Alberto Maccioni
+ * Copyright (C) 2010-2021 Alberto Maccioni
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

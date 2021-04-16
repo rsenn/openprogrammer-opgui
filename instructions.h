@@ -61,15 +61,15 @@
 #define REGOUT				0x37	//		->2B
 #define ICSP_NOP			0x38	//
 #define TX16				0x39	//+1+2NB
-#define RX16				0x3A	//+1	->1+2NB
+#define RX16				0x3A	//+1B	->1+2NB
 #define uW_INIT				0x3B	//
 #define uWTX				0x3C	//+1+NB
-#define uWRX				0x3D	//+1    ->+1+NB
+#define uWRX				0x3D	//+1B   ->+1+NB
 #define SIX_LONG			0x3E	//+3B
 #define SIX_N				0x3F	//+1+3NB ->1B
 #define OW_RESET			0x40	//      ->1B
 #define OW_WRITE			0x41	//+1+NB
-#define OW_READ				0x42	//+1    ->1+NB
+#define OW_READ				0x42	//+1B   ->1+NB
 #define UNIO_STBY			0x43	//
 #define UNIO_COM			0x44	//+2+NB ->1+NB
 #define SET_PORT_DIR		0x45	//+2B
@@ -77,9 +77,9 @@
 #define READ_AC				0x47	//      ->1B
 #define AT_HV_RTX			0x48	//+1+NB ->1B
 #define SIX_LONG5			0x49	//+3B
-#define LOAD_PC  			0x50	//+2B		011101
-#define LOAD_DATA_INC		0x51	//+2B		100010
-#define READ_DATA_INC		0x52	//+2B		100100
+#define LOAD_PC  			0x50	//+2B		 011101
+#define LOAD_DATA_INC		0x51	//+2B		 100010
+#define READ_DATA_INC		0x52	//      ->2B 100100
 #define JTAG_SET_MODE		0x53	//+1B
 #define JTAG_SEND_CMD		0x54	//+1B
 #define JTAG_XFER_DATA		0x55	//+4B -> 4B

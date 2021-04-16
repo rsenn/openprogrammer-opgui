@@ -424,7 +424,7 @@ void strinit()
 	strings_it[S_Calib2Err]="Errore in scrittura Calib2: scritto %04X, letto %04X" NL;
 	strings_it[S_CodeVError]="Errore in verifica, indirizzo %04X (%d), scritto %02X, letto %02X" NL;
 	strings_it[S_CodeVError2]="Errore in verifica area programma, richiesti %d byte, letti %d" NL;
-	strings_it[S_CodeVError3]="Errore in verifica area programma, richiest3 %d word, lett3 %d" NL;
+	strings_it[S_CodeVError3]="Errore in verifica area programma, richieste %d word, lette %d" NL;
 	strings_it[S_ErrSing]="errore";
 	strings_it[S_ErrPlur]="errori";
 	strings_it[S_MaxErr]="Superato il massimo numero di errori (%d), scrittura interrotta" NL;

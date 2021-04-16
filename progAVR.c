@@ -1,6 +1,6 @@
 /*
  * progAVR.c - algorithms to program the Atmel AVR family of microcontrollers
- * Copyright (C) 2009-2016 Alberto Maccioni
+ * Copyright (C) 2009-2021 Alberto Maccioni
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -736,10 +736,15 @@ void ReadAT(int dim, int dim2, int options)
 	}
 }
 
-#define PB0 0x10
-#define PB1 0x1
-#define PB2 0x2
-#define PB3 0x8
+// function 18F ATtiny1x ATtiny84
+// SCI (I)  RC6   PB3      PB0
+// SII (I)  RB0   PB1      PA5
+// SDI (I)  RC7   PB0      PA6
+// SDO (O)  RB1   PB2      PA4
+#define SDI 0x10
+#define SII 0x1
+#define SDO 0x2
+#define SCI 0x8
 /// read ATMEL AVR using HV serial programming
 /// dim=FLASH size in bytes, dim2=EEPROM size
 /// options: LOCK,FUSE,FUSE_H,FUSE_X,CAL
@@ -789,43 +794,43 @@ void ReadAT_HV(int dim, int dim2, int options)
 	bufferU[j++]=0x1;
 	bufferU[j++]=EXT_PORT;
 	bufferU[j++]=0;
-	bufferU[j++]=PB3;
+	bufferU[j++]=SCI;
 	bufferU[j++]=EXT_PORT;
 	bufferU[j++]=0;
 	bufferU[j++]=0;
 	bufferU[j++]=EXT_PORT;
 	bufferU[j++]=0;
-	bufferU[j++]=PB3;
+	bufferU[j++]=SCI;
 	bufferU[j++]=EXT_PORT;
 	bufferU[j++]=0;
 	bufferU[j++]=0;
 	bufferU[j++]=EXT_PORT;
 	bufferU[j++]=0;
-	bufferU[j++]=PB3;
+	bufferU[j++]=SCI;
 	bufferU[j++]=EXT_PORT;
 	bufferU[j++]=0;
 	bufferU[j++]=0;
 	bufferU[j++]=EXT_PORT;
 	bufferU[j++]=0;
-	bufferU[j++]=PB3;
+	bufferU[j++]=SCI;
 	bufferU[j++]=EXT_PORT;
 	bufferU[j++]=0;
 	bufferU[j++]=0;
 	bufferU[j++]=EXT_PORT;
 	bufferU[j++]=0;
-	bufferU[j++]=PB3;
+	bufferU[j++]=SCI;
 	bufferU[j++]=EXT_PORT;
 	bufferU[j++]=0;
 	bufferU[j++]=0;
 	bufferU[j++]=EXT_PORT;
 	bufferU[j++]=0;
-	bufferU[j++]=PB3;
+	bufferU[j++]=SCI;
 	bufferU[j++]=EXT_PORT;
 	bufferU[j++]=0;
 	bufferU[j++]=0;
 	bufferU[j++]=EN_VPP_VCC;	//VDD + VPP
 	bufferU[j++]=0x5;
-	bufferU[j++]=SET_PORT_DIR;	//RELEASE PB2
+	bufferU[j++]=SET_PORT_DIR;	//RELEASE SDO
 	bufferU[j++]=0xFE;
 	bufferU[j++]=0x7;
 	bufferU[j++]=FLUSH;
@@ -1808,43 +1813,43 @@ void WriteAT_HV(int dim, int dim2, int page, int options)
 	bufferU[j++]=0x1;
 	bufferU[j++]=EXT_PORT;
 	bufferU[j++]=0;
-	bufferU[j++]=PB3;
+	bufferU[j++]=SCI;
 	bufferU[j++]=EXT_PORT;
 	bufferU[j++]=0;
 	bufferU[j++]=0;
 	bufferU[j++]=EXT_PORT;
 	bufferU[j++]=0;
-	bufferU[j++]=PB3;
+	bufferU[j++]=SCI;
 	bufferU[j++]=EXT_PORT;
 	bufferU[j++]=0;
 	bufferU[j++]=0;
 	bufferU[j++]=EXT_PORT;
 	bufferU[j++]=0;
-	bufferU[j++]=PB3;
+	bufferU[j++]=SCI;
 	bufferU[j++]=EXT_PORT;
 	bufferU[j++]=0;
 	bufferU[j++]=0;
 	bufferU[j++]=EXT_PORT;
 	bufferU[j++]=0;
-	bufferU[j++]=PB3;
+	bufferU[j++]=SCI;
 	bufferU[j++]=EXT_PORT;
 	bufferU[j++]=0;
 	bufferU[j++]=0;
 	bufferU[j++]=EXT_PORT;
 	bufferU[j++]=0;
-	bufferU[j++]=PB3;
+	bufferU[j++]=SCI;
 	bufferU[j++]=EXT_PORT;
 	bufferU[j++]=0;
 	bufferU[j++]=0;
 	bufferU[j++]=EXT_PORT;
 	bufferU[j++]=0;
-	bufferU[j++]=PB3;
+	bufferU[j++]=SCI;
 	bufferU[j++]=EXT_PORT;
 	bufferU[j++]=0;
 	bufferU[j++]=0;
 	bufferU[j++]=EN_VPP_VCC;	//VDD + VPP
 	bufferU[j++]=0x5;
-	bufferU[j++]=SET_PORT_DIR;	//RELEASE PB2
+	bufferU[j++]=SET_PORT_DIR;	//RELEASE SDO
 	bufferU[j++]=0xFE;
 	bufferU[j++]=0x7;
 	bufferU[j++]=FLUSH;

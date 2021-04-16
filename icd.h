@@ -18,7 +18,7 @@
 #define pclath_temp 0x6D
 #define fsr_temp 0x6E
 
-struct var{	char* name;	int display;} variables[0x200];
+extern struct var{	char* name;	int display;} variables[0x200];
 
 //Prepare ICD interface by resetting the target with a power-up sequence.
 //MCLR is low so the target is reset even if power is not supplied by the programmer.
