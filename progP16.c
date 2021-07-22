@@ -683,7 +683,7 @@ void Read16Fxxx(int dim,int dim2,int dim3,int vdd)
 				if(memCODE_W[j]<0x3fff) valid=1;
 			}
 			if(valid){
-				sprintf(t,"%04X: %s\r\n",i,s);
+				snprintf(t,sizeof(t),"%04X: %s\r\n",i,s);
 				empty=0;
 				strcat(aux,t);
 			}
@@ -6002,7 +6002,7 @@ void Write16F18xxx(int dim,int dim2,int options)
 	int err=0;
 	WORD devID=0x3fff,devREV=0x3fff;
 	int k=0,k2=0,z=0,i,j,w;
-	int useDCI=options&0x10==0?1:0;
+	int useDCI=(options&0x10)==0?1:0;
 	int rowN=32;		//32 word algorithm
 	if(FWVersion<0xB00){
 		PrintMessage1(strings[S_FWver2old],"0.11.0");	//"This firmware is too old. Version %s is required\r\n"

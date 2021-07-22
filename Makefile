@@ -1,7 +1,9 @@
 # equivalent to #define in c code
-VERSION = 0.11.3
+VERSION = 0.11.4
 CC = gcc
 PREFIX = /usr/local
+appimage: PREFIX = ./opgui.AppDir/usr
+
 CFLAGS =  '-DVERSION="$(VERSION)"' -w `pkg-config --libs --cflags gtk+-2.0` 
 CFLAGS += -Os -s #size
 #CFLAGS += -O3 -s #speed
@@ -56,11 +58,36 @@ install: all
 	@echo "Installing opgui"
 	mkdir -p $(PREFIX)/bin
 	install -m 0755 opgui $(PREFIX)/bin;
+	
+appimage: install
+	@echo "Installing data in opgui.AppDir/ ..."
+	@cp opgui.desktop ./opgui.AppDir
+	@cp opgui_icon_linux.svg ./opgui.AppDir
+	@echo "Downloading appimagetool.AppImage ..."
+	@wget https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage
+	@chmod +x appimagetool-x86_64.AppImage
+	@echo "Downloading appimagetool.AppImage ..."
+	@wget https://github.com/AppImage/AppImageKit/releases/download/13/AppRun-x86_64
+	@chmod +x AppRun-x86_64
+	@mv AppRun-x86_64 ./opgui.AppDir/AppRun
+	@echo "Deploy dependencies..."
+	@ldd opgui | grep "/usr/lib*" > dependencies.txt
+	@gcc deploy_dependencies_appimage.c -o deploy_dependencies_appimage
+	@./deploy_dependencies_appimage
+	@echo "Generating appimage..."
+	@appimagetool ./opgui.AppDir
+	@mv Opgui-x86_64.AppImage Opgui-$(VERSION)-x86_64.AppImage
+	@echo "Cleaning..."
+	@make clean
+	@rm appimagetool-x86_64.AppImage
+	@rm -r ./opgui.AppDir/
+	@rm dependencies.txt
+	@rm deploy_dependencies_appimage
 
 package:
 	@echo "Creating opgui_$(VERSION).tar.gz"
 	@mkdir opgui-$(VERSION)
-	@cp *.c *.h *.png gpl-2.0.txt Makefile readme opgui-$(VERSION)
+	@cp *.c *.h *.png gpl-2.0.txt Makefile readme opgui.desktop opgui_icon_linux.svg opgui-$(VERSION)
 	@tar -czf opgui_$(VERSION).tar.gz opgui-$(VERSION)
 	@rm -rf opgui-$(VERSION)
 

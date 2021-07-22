@@ -5,6 +5,8 @@ Website: http://openprog.altervista.org
 These sources are given free of charge under the GNU General Public License version 2 
 
 Changelog (to use new features the corresponding firmware is required):
+V 0.11.4 july 2021:     fixed missing parentheses in progP18.c and progP16.c
+
 V 0.11.3 april 2021:    fixed EEPROM write on 16F184xx/188xx/191xx
 
 V 0.11.2 october 2020:  fixed 16F18xxx write with empty space at address 0;

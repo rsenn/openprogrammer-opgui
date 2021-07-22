@@ -1731,7 +1731,7 @@ void Read18FKx(int dim,int dim2,int options)
 	for(z+=3;bufferI[z]!=ICSP8_READ&&z<DIMBUF;z++);
 	if(z<DIMBUF-2){
 		PrintMessage1("EEPROM size: %d\r\n",(bufferI[z+1]<<8)+bufferI[z+2]);
-		sizeEE=bufferI[z+1]<<8+bufferI[z+2];
+		sizeEE=(bufferI[z+1]<<8)+bufferI[z+2];
 	}
 	for(z+=3;bufferI[z]!=ICSP8_READ&&z<DIMBUF;z++);
 	if(z<DIMBUF-3){
@@ -2103,7 +2103,7 @@ void Write18FKx(int dim,int dim2,int options,int nu1,int nu2, int nu3)
 	for(z+=3;bufferI[z]!=ICSP8_READ&&z<DIMBUF;z++);
 	if(z<DIMBUF-2){
 		PrintMessage1("EEPROM size: %d\r\n",(bufferI[z+1]<<8)+bufferI[z+2]);
-		sizeEE=bufferI[z+1]<<8+bufferI[z+2];
+		sizeEE=(bufferI[z+1]<<8)+bufferI[z+2];
 	}
 	for(z+=3;bufferI[z]!=ICSP8_READ&&z<DIMBUF;z++);
 	if(z<DIMBUF-3){
