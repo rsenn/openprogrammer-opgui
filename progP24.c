@@ -1,6 +1,6 @@
 /**
  * \file progP24F.c - algorithms to program the PIC24 family of microcontrollers
- * Copyright (C) 2009-2016 Alberto Maccioni
+ * Copyright (C) 2009-2021 Alberto Maccioni
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -3014,17 +3014,18 @@ void Write24Fx(int dim,int dim2,int options,int appIDaddr,int rowSize, double wa
 			bufferU[j++]=0xBB;
 			bufferU[j++]=0x1B;
 			bufferU[j++]=0x80;
-			//if(memCONFIG[i*4]<0xFF){			//write if not empty
-			bufferU[j++]=SIX_LONG;				//BSET NVMCON,#WR
-			bufferU[j++]=0xA8;
-			bufferU[j++]=0xE7;
-			bufferU[j++]=0x61;
+			if(memCONFIG[i*4]<0xFF){			//write if not empty
+				bufferU[j++]=SIX_LONG;				//BSET NVMCON,#WR
+				bufferU[j++]=0xA8;
+				bufferU[j++]=0xE7;
+				bufferU[j++]=0x61;
 				bufferU[j++]=ICSP_NOP;
 				bufferU[j++]=ICSP_NOP;
-			//}
+			}
 			bufferU[j++]=FLUSH;
 			for(;j<DIMBUF;j++) bufferU[j]=0x0;
-			PacketIO(27);
+			PacketIO(5);
+			msDelay(27);
 			j=0;
 			if(saveLog){
 				fprintf(logfile,strings[S_Log7],i,i,0,0);	//"i=%d(0x%X), k=%d(0x%X)\n"

@@ -1,6 +1,6 @@
 /**
  * \file progP18F.c - algorithms to program the PIC18 family of microcontrollers
- * Copyright (C) 2009-2016 Alberto Maccioni
+ * Copyright (C) 2009-2021 Alberto Maccioni
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -804,7 +804,8 @@ void Write18Fx(int dim,int dim2,int wbuf,int eraseW1,int eraseW2,int options)
 		bufferU[j++]=0x00;
 		bufferU[j++]=FLUSH;
 		for(;j<DIMBUF;j++) bufferU[j]=0x0;
-		PacketIO(optWrite==0?16:550);	//bulk erase delay
+		PacketIO(16);	
+		if(optWrite!=0)	msDelay(550);//bulk erase delay
 		j=0;
 	}
 	else{	//separate block erase

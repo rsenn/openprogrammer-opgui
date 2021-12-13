@@ -1,5 +1,5 @@
 # equivalent to #define in c code
-VERSION = 0.11.4
+VERSION = 0.11.5
 CC = gcc
 PREFIX = /usr/local
 appimage: PREFIX = ./opgui.AppDir/usr
