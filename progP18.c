@@ -1,6 +1,6 @@
 /**
  * \file progP18F.c - algorithms to program the PIC18 family of microcontrollers
- * Copyright (C) 2009-2021 Alberto Maccioni
+ * Copyright (C) 2009-2022 Alberto Maccioni
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -289,8 +289,41 @@ struct ID18{
 	{0x7480,"18F27Q43 rev%c%d\r\n",0xFFFF},
 	{0x74A0,"18F47Q43 rev%c%d\r\n",0xFFFF},
 	{0x74C0,"18F57Q43 rev%c%d\r\n",0xFFFF},
+	{0x74E0,"18F15Q41 rev%c%d\r\n",0xFFFF},
+	{0x7500,"18F05Q41 rev%c%d\r\n",0xFFFF},
+	{0x7520,"18F14Q41 rev%c%d\r\n",0xFFFF},
+	{0x7540,"18F04Q41 rev%c%d\r\n",0xFFFF},
+	{0x7560,"18F16Q41 rev%c%d\r\n",0xFFFF},
+	{0x7580,"18F06Q41 rev%c%d\r\n",0xFFFF},
+	{0x75A0,"18F16Q40 rev%c%d\r\n",0xFFFF},
+	{0x75C0,"18F06Q40 rev%c%d\r\n",0xFFFF},
+	{0x75E0,"18F15Q40 rev%c%d\r\n",0xFFFF},
+	{0x7600,"18F05Q40 rev%c%d\r\n",0xFFFF},
+	{0x7620,"18F14Q40 rev%c%d\r\n",0xFFFF},
+	{0x7640,"18F04Q40 rev%c%d\r\n",0xFFFF},
+	{0x7660,"18F24Q71 rev%c%d\r\n",0xFFFF},
+	{0x76A0,"18F25Q71 rev%c%d\r\n",0xFFFF},
+	{0x76E0,"18F26Q71 rev%c%d\r\n",0xFFFF},
+	{0x7720,"18F46Q71 rev%c%d\r\n",0xFFFF},
+	{0x7760,"18F56Q71 rev%c%d\r\n",0xFFFF},
+	{0x77A0,"18F44Q71 rev%c%d\r\n",0xFFFF},
+	{0x77E0,"18F45Q71 rev%c%d\r\n",0xFFFF},
+	{0x7820,"18F54Q71 rev%c%d\r\n",0xFFFF},
+	{0x7860,"18F55Q71 rev%c%d\r\n",0xFFFF},
+	{0x9900,"18F26Q84 rev%c%d\r\n",0xFFFF},
+	{0x9901,"18F46Q84 rev%c%d\r\n",0xFFFF},
+	{0x9902,"18F56Q84 rev%c%d\r\n",0xFFFF},
+	{0x9903,"18F27Q84 rev%c%d\r\n",0xFFFF},
+	{0x9904,"18F47Q84 rev%c%d\r\n",0xFFFF},
+	{0x9905,"18F57Q84 rev%c%d\r\n",0xFFFF},
+	{0x9906,"18F26Q83 rev%c%d\r\n",0xFFFF},
+	{0x9907,"18F46Q83 rev%c%d\r\n",0xFFFF},
+	{0x9908,"18F56Q83 rev%c%d\r\n",0xFFFF},
+	{0x9909,"18F27Q83 rev%c%d\r\n",0xFFFF},
+	{0x990A,"18F47Q83 rev%c%d\r\n",0xFFFF},
+	{0x990B,"18F57Q83 rev%c%d\r\n",0xFFFF},
 };
-	
+
 void PIC18_ID(int id)
 {
 	char s[128];
@@ -1596,9 +1629,10 @@ void Read18FKx(int dim,int dim2,int options)
 //	bit [3:0]
 //   	0 = vpp before vdd (8.5V)
 //	bit [7:4] 	memory layout
-//		code		EE			DCI			DIA		model
-//		 0		0x310000	0x3FFF00	0x3F0000	K42 K83
-//		 1		0x380000	0x3C0000	0x2C0000	Q43
+//		code	config	EE			DCI			DIA			model
+//		 0		5		0x310000	0x3FFF00	0x3F0000	K42 K83
+//		 1		10		0x380000	0x3C0000	0x2C0000	Q40-43
+//		 2		35		0x380000	0x3C0000	0x2C0000	Q83-84
 {
 	int k=0,k2=0,z=0,i,j;
 	int devID=0,devREV=0;
@@ -1621,6 +1655,15 @@ void Read18FKx(int dim,int dim2,int options)
 		UIDlen=0x40;
 		CONFIGlen=10;
 	}
+	else if(type==2){		//Q83-84
+		EEaddr=0x380000;
+		DCIaddr=0x3C0000;
+		DIAaddr=0x2C0000;
+		DIAlen=0x100;
+		UIDlen=0x40;
+		CONFIGlen=35;
+	}
+	else PrintMessage("unexpected parameter");
 	if(dim>0x1FFFFF||dim<0){
 		PrintMessage(strings[S_CodeLim]);	//"Code size out of limits\r\n"
 		return;
@@ -1967,9 +2010,10 @@ void Write18FKx(int dim,int dim2,int options,int nu1,int nu2, int nu3)
 //	bit [3:0]
 //   	0 = vpp before vdd (8.5V)
 //	bit [7:4] 	memory layout
-//		code		EE			DCI			DIA		model	program cycle	delays ms (E,W,EE)
-//		 0		0x310000	0x3FFF00	0x3F0000	K42 K83	multiple-word	25.5 2.8 5.6
-//		 1		0x380000	0x3C0000	0x2C0000	Q43    	one-word 		11 0.075 11
+//		code	config	EE			DCI			DIA			model	program cycle	delays ms (E,W,EE)
+//		 0		5		0x310000	0x3FFF00	0x3F0000	K42 K83	multiple-word	25.5 2.8 5.6
+//		 1		10		0x380000	0x3C0000	0x2C0000	Q40-43  one-word 		11 0.075 11
+//		 2		35		0x380000	0x3C0000	0x2C0000	Q83-84	one-word 		11 0.075 11
 {
 	int k=0,k2,z=0,i,j,x,w=0;
 	int err=0;
@@ -1993,6 +2037,15 @@ void Write18FKx(int dim,int dim2,int options,int nu1,int nu2, int nu3)
 		UIDlen=0x40;
 		CONFIGlen=10;
 	}
+	else if(type==2){		//Q83-84
+		EEaddr=0x380000;
+		DCIaddr=0x3C0000;
+		DIAaddr=0x2C0000;
+		DIAlen=0x100;
+		UIDlen=0x40;
+		CONFIGlen=35;
+	}
+	else PrintMessage("unexpected parameter");
 	if(dim>0x1FFFFF||dim<0){
 		PrintMessage(strings[S_CodeLim]);	//"Code size out of limits\r\n"
 		return;

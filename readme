@@ -5,6 +5,16 @@ Website: http://openprog.altervista.org
 These sources are given free of charge under the GNU General Public License version 2 
 
 Changelog (to use new features the corresponding firmware is required):
+V 0.12.0 october 2022: 	port to GTK3; device selected via tree;	added possibility to send manual commands;
+						added 16F15213-14-23-24-25-43-44-45-54-55-56-74-75-76, 
+						16F18013-14-15-23-24-25-26-44-45-46-54-55-56-74-75-76,
+						16F18114-15-24-25-26-44-45-46-54-55-56-74-75-76,
+						16F17114-15-24-25-26-44-45-46-54-55-56-74-75-76,
+						18F04-05-06-14-15-16Q40-41,
+						18F24-25-26-44-45-46-54-55-56Q71,
+						18F26-27-46-47-56-57Q83-84;
+						fixed write on 254005
+
 V 0.11.5 december 2021: fixed config word write on some 33FJXX devices
 
 V 0.11.4 july 2021:     fixed missing parentheses in progP18.c and progP16.c
@@ -19,7 +29,7 @@ V 0.11.2 october 2020:  fixed 16F18xxx write with empty space at address 0;
 V 0.11.1 february 2020: fixes: save file for 12F1XXX; 
 						timeout writing config for 16F18XXX; 
 						avoid reading DIA-DCI on 16F188XX;
-						EE verification of 0x22 on 18FXXX;
+						EE verification of 0x22 on 18FXXX
 
 V 0.11.0 january 2019:  added 16F15313-23-24-25-44-45-54-55-56-75-76-85-86,
 						16F18424-25-26-44-45-46-54-55-56,

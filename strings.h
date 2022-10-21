@@ -1,4 +1,4 @@
-// Strings.h v0.11.0
+// Strings.h v0.12.0
 
 enum S {
 	S_NL,
@@ -183,6 +183,9 @@ enum S {
 	S_WaitS1R,
 	S_WarnFlashSize,
 // GUI strings
+	I_CANCEL,
+	I_OPEN,
+	I_SAVE,
 	I_Fopen,
 	I_Fsave,
 	I_DevR,
@@ -218,6 +221,7 @@ enum S {
 	I_TestHWB,
 	I_TestMSG,
 	I_IO_Enable,
+	I_IO_Commands,
 	I_SPIMEM,
 	I_I2CMEM,
 	I_UWMEM,

@@ -20,6 +20,22 @@
 
 extern struct var{	char* name;	int display;} variables[0x200];
 
+extern GtkWidget * statusTxt;
+extern GtkWidget * sourceTxt;
+extern GtkTextBuffer * sourceBuf;
+extern GtkWidget * icdVbox1;
+extern GtkWidget * icdMenuPC;
+extern GtkWidget * icdMenuSTAT;
+extern GtkWidget * icdMenuBank0;
+extern GtkWidget * icdMenuBank1;
+extern GtkWidget * icdMenuBank2;
+extern GtkWidget * icdMenuBank3;
+extern GtkWidget * icdMenuEE;
+extern GtkWidget * icdCommand;
+extern GtkTextBuffer * statusBuf;
+
+extern int icdTimer;
+
 //Prepare ICD interface by resetting the target with a power-up sequence.
 //MCLR is low so the target is reset even if power is not supplied by the programmer.
 //Set communication speed at 1/(2*Tck us)
@@ -73,3 +89,97 @@ char* decodeCmd(int cmd,char *str, int addrH);
 
 // get register name from list
 char* getVar(int addr,char *var);
+
+///
+///Scroll source file
+void scrollToLine(int line);
+
+///
+///Hilight line in source code
+void SourceHilightLine(int line);
+
+///
+///Remove hilight line in source code
+void SourceRemoveHilightLine(int line);
+
+///
+///load source file into source pane
+int loadSource(FILE *f);
+
+///
+///load and analyze coff file
+void loadCoff(GtkWidget *widget,GtkWidget *window);
+
+///
+/// List of variables used when decoding an assembly word
+void initVar();
+
+///
+///Show ICD help window
+void ICDHelp(GtkWidget *widget,GtkWidget *window);
+
+///
+///ICD: check if program is running
+void icdCheck(GtkWidget *widget,GtkWidget *window);
+
+///
+///ICD: run program
+void icdRun(GtkWidget *widget,GtkWidget *window);
+
+///
+///ICD: halt program
+void icdHalt(GtkWidget *widget,GtkWidget *window);
+
+///
+///ICD: step program
+void icdStep(GtkWidget *widget,GtkWidget *window);
+
+///
+///ICD: step program jumping over calls
+void icdStepOver(GtkWidget *widget,GtkWidget *window);
+
+///
+///ICD: stop program
+void icdStop(GtkWidget *widget,GtkWidget *window);
+
+///
+///ICD: refresh status
+void icdRefresh(GtkWidget *widget,GtkWidget *window);
+
+///
+/// Read and display an entire bank of memory
+void ShowBank(int bank,char* status);
+
+///
+/// Main ICD show function:
+/// prints status info according to selected options
+/// and the value of variables in the watch list
+void ShowContext();
+
+///
+///Add symbol to the list of watched variables
+int addWatch(struct symbol s);
+
+///
+/// ICD Command parser
+int executeCommand(char *command);
+
+///
+///Remove variable from watch list
+int removeWatch(char* name);
+
+///
+///Handle mouse events in source code window
+gint source_mouse_event(GtkWidget *widget, GdkEventButton *event, gpointer func_data);
+
+///
+///Handle mouse events in ICD status window
+gint icdStatus_mouse_event(GtkWidget *widget, GdkEventButton *event, gpointer func_data);
+
+///
+///Handle keyboard events in ICD command edit box
+gint icdCommand_key_event(GtkWidget *widget, GdkEventButton *event, gpointer func_data);
+
+///
+///Handle keyboard events in ICD tab
+gint icd_key_event(GtkWidget *widget, GdkEventButton *event, gpointer func_data);

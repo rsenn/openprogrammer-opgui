@@ -4,6 +4,7 @@
 #define _APPNAME "OPGUI"
 
 #if !defined _WIN32 && !defined __CYGWIN__
+//linux:
 	#include <sys/ioctl.h>
 	#include <sys/types.h>
 	#include <sys/stat.h>
@@ -16,6 +17,7 @@
 	#include <stdint.h>
 	#include <errno.h>
 #else
+//windows
 	#include <windows.h>
 	#include <setupapi.h>
 	#include <hidusage.h>
@@ -26,7 +28,6 @@
 #endif
 
 #include <gtk/gtk.h>
-//#include <gtk.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>

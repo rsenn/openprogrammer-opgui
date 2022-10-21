@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+	<gresource prefix="res">
+		<file preprocess="xml-stripblanks">opgui.glade</file>
+		<file>read.png</file>
+		<file>sys.png</file>
+		<file>write.png</file>
+		<file>style.css</file>
+	</gresource>
+</gresources>

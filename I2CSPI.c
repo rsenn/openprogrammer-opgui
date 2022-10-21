@@ -1,6 +1,6 @@
 /*
  * I2CSPI.c - algorithms to interface generic I2C/SPI devices
- * Copyright (C) 2010 Alberto Maccioni
+ * Copyright (C) 2010-2022 Alberto Maccioni
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 #endif
 
 
-#ifdef defined _GTKGUI
+#ifdef _GTKGUI
 	#define printM(id) PrintMessageI2C(id);
 #else
 	#define printM(id) printf(id);
@@ -108,22 +108,22 @@ void I2CReceive(int mode,int speed,int N,BYTE *buffer)
 	if(saveLog){
 		CloseLogFile();
 	}
-	if(bufferI[1]==I2C_READ||bufferI[1]==I2C_READ2||bufferI[1]==SPI_READ){
-		if(bufferI[2]==0xFD){
+	if(bufferI[0]==I2C_READ||bufferI[0]==I2C_READ2||bufferI[0]==SPI_READ){
+		if(bufferI[1]==0xFD){
 			printM(strings[S_I2CAckErr]); //"acknowledge error"
 		}
-		else if(bufferI[2]>0xFA){
+		else if(bufferI[1]>0xFA){
 			printM(strings[S_InsErr]); //"unknown instruction"
 		}
 		else{
-			char str[1024];
-			char t[16];
+			char str[1024]="";
+			char t[16]="";
 			int i;
-			if(mode==0)	sprintf(str,"> %02X %02X\r\n",bufferU[3],bufferU[4]);
-			if(mode==1)	sprintf(str,"> %02X %02X %02X\r\n",bufferU[3],bufferU[4],bufferU[5]);
+			if(mode==0)	sprintf(str,"> %02X %02X\r\n",bufferU[2],bufferU[3]);
+			else if(mode==1)	sprintf(str,"> %02X %02X\r\n",bufferU[2],bufferU[3]);
 			strcat(str,"< ");
-			for(i=0;i<bufferI[2];i++){
-				sprintf(t,"%02X ",(BYTE)bufferI[i+3]);
+			for(i=0;i<bufferI[1];i++){
+				sprintf(t,"%02X ",bufferI[i+2]);
 				strcat(str,t);
 				if(i&&i%16==15){
 					strcat(str,"\r\n");
@@ -189,7 +189,7 @@ void I2CSend(int mode,int speed,int N,BYTE *buffer)
 		bufferU[j++]=N>(DIMBUF-5)?DIMBUF-5:N;
 		bufferU[j++]=buffer[0];		//Control byte
 		bufferU[j++]=buffer[1];		//Address
-		for(i=0;i<bufferU[2];i++) bufferU[j++]=buffer[i+2];
+		for(i=0;i<bufferU[1];i++) bufferU[j++]=buffer[i+2];
 	}
 	else if(mode==1){				//I2C write 16bit
 		bufferU[j++]=I2C_WRITE;
@@ -197,12 +197,12 @@ void I2CSend(int mode,int speed,int N,BYTE *buffer)
 		bufferU[j++]=buffer[0];		//Control byte
 		bufferU[j++]=buffer[1];		//Address
 		bufferU[j++]=buffer[2];		//Address L
-		for(i=0;i<bufferU[2]-1;i++) bufferU[j++]=buffer[i+3];
+		for(i=0;i<bufferU[1]-1;i++) bufferU[j++]=buffer[i+3];
 	}
-	if(mode==2){					//SPI write
+	if(mode>=2){					//SPI write
 		bufferU[j++]=SPI_WRITE;
 		bufferU[j++]=N>(DIMBUF-5)?DIMBUF-5:N;
-		for(i=0;i<bufferU[2];i++) bufferU[j++]=buffer[i];
+		for(i=0;i<bufferU[1];i++) bufferU[j++]=buffer[i];
 		bufferU[j++]=EXT_PORT;	//CS=1
 		bufferU[j++]=CS;
 		bufferU[j++]=0;
@@ -213,22 +213,22 @@ void I2CSend(int mode,int speed,int N,BYTE *buffer)
 	if(saveLog){
 		CloseLogFile();
 	}
-	if(bufferI[1]==I2C_WRITE||bufferI[1]==SPI_WRITE){
-		if(bufferI[2]==0xFD){
+	if(bufferI[0]==I2C_WRITE||bufferI[0]==SPI_WRITE){
+		if(bufferI[1]==0xFD){
 			printM(strings[S_I2CAckErr]); //"acknowledge error"
 		}
-		else if(bufferI[2]>0xFA){
+		else if(bufferI[1]>0xFA){
 			printM(strings[S_InsErr]); //"unknown instruction"
 		}
 		else{
 			char str[1024];
 			char t[16];
-			int n=3;
+			int n=2;
 			int i;
 			sprintf(str,"> ");
-			if(mode<2) n=5;
-			for(i=3;i<bufferU[2]+n;i++){
-				sprintf(t,"%02X ",(BYTE)bufferU[i]);
+			if(mode<2) n=4;
+			for(i=0;i<bufferU[1];i++){
+				sprintf(t,"%02X ",(BYTE)bufferU[i+n]);
 				strcat(str,t);
 				if(i&&i%16==15){
 					strcat(str,"\r\n");

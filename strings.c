@@ -1,4 +1,4 @@
-// Strings.c v0.11.0
+// Strings.c v0.12.0
 
 #include "common.h"
 #define NL "\n"
@@ -286,6 +286,7 @@ void strinit()
 	STR_ID[I_TestHWB]="I_TestHWB";
 	STR_ID[I_TestMSG]="I_TestMSG";
 	STR_ID[I_IO_Enable]="I_IO_Enable";
+	STR_ID[I_IO_Commands]="I_IO_Commands";
 	STR_ID[I_SPIMEM]="I_SPIMEM";
 	STR_ID[I_I2CMEM]="I_I2CMEM";
 	STR_ID[I_UWMEM]="I_UWMEM";
@@ -524,6 +525,9 @@ void strinit()
 	strings_it[S_ForceConfigW]="Forzo config word" NL;
 	strings_it[S_ForceConfigWx]="Forzo config word%d [0x%04X]=0x%04X" NL;
 						//
+	strings_it[I_CANCEL]="A_nnulla";
+	strings_it[I_OPEN]="_Apri";
+	strings_it[I_SAVE]="_Salva";
 	strings_it[I_Fopen]="Apri file";
 	strings_it[I_Fsave]="Salva file";
 	strings_it[I_DevR]="Leggi dispositivo";
@@ -559,6 +563,7 @@ void strinit()
 	strings_it[I_TestHWB]="Test hardware";
 	strings_it[I_TestMSG]="Verifica sul programmatore il valore delle seguenti tensioni:";
 	strings_it[I_IO_Enable]="Abilita IO";
+	strings_it[I_IO_Commands]="Comandi manuali";
 	strings_it[I_SPIMEM]="Memoria SPI";
 	strings_it[I_I2CMEM]="Memoria I2C";
 	strings_it[I_UWMEM]="Memoria Microwire";
@@ -886,6 +891,9 @@ void strinit()
 	strings_en[S_ForceConfigWx]="Forcing config word%d [0x%04X]=0x%04X" NL;
 	strings_en[S_WarnFlashSize]="Warning, flash size is different from the expected value" NL;
 		//
+	strings_en[I_CANCEL]="_Cancel";
+	strings_en[I_OPEN]="_Open";
+	strings_en[I_SAVE]="_Save";
 	strings_en[I_Fopen]="Open file";
 	strings_en[I_Fsave]="Save file";
 	strings_en[I_DevR]="Read device";
@@ -921,6 +929,7 @@ void strinit()
 	strings_en[I_TestHWB]="Hardware test";
 	strings_en[I_TestMSG]="Verify on the programmer the value of the following voltages:";
 	strings_en[I_IO_Enable]="Enable IO";
+	strings_en[I_IO_Commands]="Manual commands";
 	strings_en[I_SPIMEM]="SPI Memory";
 	strings_en[I_I2CMEM]="I2C Memory";
 	strings_en[I_UWMEM]="Microwire Memory";

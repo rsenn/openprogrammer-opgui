@@ -1,7 +1,7 @@
 /**
  * \file progEEPROM.c
  * algorithms to program various EEPROM types
- * Copyright (C) 2009-2016 Alberto Maccioni
+ * Copyright (C) 2009-2022 Alberto Maccioni
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,7 +65,7 @@ void ReadI2C(int dim,int addr)
 		if(!addr){									//1 byte address
 			bufferU[j++]=I2C_READ;
 			bufferU[j++]=inc;
-			bufferU[j++]=0xA0+(i>>7&0x0E);
+			bufferU[j++]=0xA0+((i>>7)&0x0E);
 			bufferU[j++]=i&0xFF;
 		}
 		else{										//2 byte address
@@ -167,7 +167,7 @@ void WriteI2C(int dim,int addr,int page)
 		bufferU[j++]=I2C_WRITE;
 		if(!addr){									//1 byte address
 			bufferU[j++]=page;
-			bufferU[j++]=0xA0+(i>>7&0x0E);
+			bufferU[j++]=0xA0+((i>>7)&0x0E);
 			bufferU[j++]=i&0xFF;
 		}
 		else{										//2 byte address
@@ -216,7 +216,7 @@ void WriteI2C(int dim,int addr,int page)
 		if(!addr){									//1 byte address
 			bufferU[j++]=I2C_READ;
 			bufferU[j++]=inc;
-			bufferU[j++]=0xA0+(i>>7&0x0E);
+			bufferU[j++]=0xA0+((i>>7)&0x0E);
 			bufferU[j++]=i&0xFF;
 		}
 		else{										//2 byte address
@@ -860,26 +860,26 @@ void Read25xx(int dim)
 	bufferU[j++]=VREG_DIS;
 	bufferU[j++]=SPI_INIT;
 	bufferU[j++]=3;				//0=100k, 1=200k, 2=300k, 3=500k (in reality 200k)
-	bufferU[j++]=SET_T1T2;
-	bufferU[j++]=2;			//force T=28us -> 286 kbps
-	bufferU[j++]=0;
+//	bufferU[j++]=SET_T1T2;
+//	bufferU[j++]=2;			//force T=28us -> 286 kbps
+//	bufferU[j++]=0;
 	bufferU[j++]=EN_VPP_VCC;		//VDD
 	bufferU[j++]=0x1;
 	bufferU[j++]=WAIT_T3;
 	bufferU[j++]=EXT_PORT;	//CS=1, HLD=1, WP=0
 	bufferU[j++]=CS+HLD;
 	bufferU[j++]=0;
-	bufferU[j++]=EXT_PORT;	//CS=0, HLD=1, WP=1
+	bufferU[j++]=EXT_PORT;	//CS=0, HLD=1, WP=0
 	bufferU[j++]=HLD;
-	bufferU[j++]=WP;
+	bufferU[j++]=0;
 	bufferU[j++]=SPI_WRITE;		//READ ID
 	bufferU[j++]=1;
 	bufferU[j++]=0x9F;
 	bufferU[j++]=SPI_READ;
 	bufferU[j++]=3;
-	bufferU[j++]=EXT_PORT;	//CS=1, HLD=1, WP=1
+	bufferU[j++]=EXT_PORT;	//CS=1, HLD=1, WP=0
 	bufferU[j++]=CS+HLD;
-	bufferU[j++]=WP;
+	bufferU[j++]=0;
 	bufferU[j++]=EXT_PORT;	//CS=0, HLD=1, WP=0
 	bufferU[j++]=HLD;
 	bufferU[j++]=0;
@@ -958,6 +958,168 @@ void Read25xx(int dim)
 	}
 }
 
+/*void Read25xxFast(int dim)
+// read 25xx SPI memories
+// dim=size in bytes
+{
+	int k=0,z=0,i,j,ID;
+	hvreg=0;
+	if(dim>0x1000000||dim<0){
+		PrintMessage(strings[S_EELim]);	//"EEPROM size out of limits\r\n"
+		return;
+	}
+	if(saveLog){
+		OpenLogFile();	//"Log.txt"
+		fprintf(logfile,"Read25xxF(%d)    (0x%X)\n",dim,dim);
+	}
+	sizeEE=dim;
+	if(memEE) free(memEE);
+	memEE=(unsigned char*)malloc(dim);			//EEPROM
+	unsigned int start=GetTickCount();
+	j=0;
+	bufferU[j++]=VREG_DIS;
+	bufferU[j++]=SPI_INIT;
+	bufferU[j++]=3;				//0=100k, 1=200k, 2=300k, 3=500k (in reality 200k)
+//	bufferU[j++]=SET_T1T2;
+//	bufferU[j++]=2;			//force T=28us -> 286 kbps
+//	bufferU[j++]=0;
+	bufferU[j++]=EN_VPP_VCC;		//VDD
+	bufferU[j++]=0x1;
+	bufferU[j++]=WAIT_T3;
+	bufferU[j++]=EXT_PORT;	//CS=1, HLD=1, WP=0
+	bufferU[j++]=CS+HLD;
+	bufferU[j++]=0;
+	bufferU[j++]=EXT_PORT;	//CS=0, HLD=1, WP=1
+	bufferU[j++]=HLD;
+	bufferU[j++]=WP;
+	bufferU[j++]=SPI_WRITE;		//READ ID
+	bufferU[j++]=1;
+	bufferU[j++]=0x9F;
+	bufferU[j++]=SPI_READ;
+	bufferU[j++]=3;
+	bufferU[j++]=EXT_PORT;	//CS=1, HLD=1, WP=1
+	bufferU[j++]=CS+HLD;
+	bufferU[j++]=WP;
+	bufferU[j++]=EXT_PORT;	//CS=0, HLD=1, WP=0
+	bufferU[j++]=HLD;
+	bufferU[j++]=0;
+	bufferU[j++]=SPI_WRITE;		//Read
+	if(dim>0x10000){				//24 bit address
+		bufferU[j++]=4;
+		bufferU[j++]=3;
+		bufferU[j++]=0;
+		bufferU[j++]=0;
+		bufferU[j++]=0;
+	}
+	else if(dim>0x200){				//16 bit address
+		bufferU[j++]=3;
+		bufferU[j++]=3;
+		bufferU[j++]=0;
+		bufferU[j++]=0;
+	}
+	else{						//8 bit address
+		bufferU[j++]=2;
+		bufferU[j++]=3;
+		bufferU[j++]=0;
+	}
+	bufferU[j++]=FLUSH;
+	for(;j<DIMBUF;j++) bufferU[j]=0x0;
+	PacketIO(5);
+	for(z=0;z<DIMBUF-4&&bufferI[z]!=SPI_READ;z++);
+	ID=(bufferI[z+2]<<16)+(bufferI[z+3]<<8)+bufferI[z+4];
+	if(ID>0&&ID!=0xFFFFFF) 	PrintMessage1("DEVICE ID=0x%06X\r\n",ID);
+//****************** read ********************
+	PrintMessage(strings[S_ReadEE]);		//read EEPROM ...
+	PrintStatusSetup();
+	#define rSize (DIMBUF-5-2)
+	#define npack 255
+	j=0;
+	bufferU[j++]=0xF6;
+	bufferU[j++]=npack;
+	bufferU[j++]=SPI_READ;
+	bufferU[j++]=rSize;
+	bufferU[j++]=0xF7;
+	bufferU[j++]=FLUSH;
+	for(;j<DIMBUF;j++) bufferU[j]=0x0;
+	for(i=0;i<dim;i+=rSize*npack){
+	#define TIMEOUT 50
+		ULONG Result;
+		__int64 start,stop,freq,timeout;
+		QueryPerformanceCounter((LARGE_INTEGER *)&start);
+		QueryPerformanceFrequency((LARGE_INTEGER *)&freq);
+		//write
+		Result = WriteFile(WriteHandle,bufferU0,DIMBUF+1,&BytesWritten,NULL);
+//		QueryPerformanceCounter((LARGE_INTEGER *)&stop);
+//		timeout=stop+delay*freq/1000.0;
+//		while(stop<timeout) QueryPerformanceCounter((LARGE_INTEGER *)&stop);
+		//read
+	fprintf(logfile,"bufferU=[");
+	for(int i=0;i<DIMBUF;i++){
+		if(i%32==0) fprintf(logfile,"\n");
+		fprintf(logfile,"%02X ",bufferU[i]);
+	}
+	fprintf(logfile,"]\n");
+		for(int r=0;r<npack;r++){
+			Result = ReadFile(ReadHandle,bufferI0,DIMBUF+1,&NumberOfBytesRead,(LPOVERLAPPED) &HIDOverlapped);
+			Result = WaitForSingleObject(hEventObject,TIMEOUT);
+//			if(saveLog&&logfile) WriteLogIO();
+	fprintf(logfile,"bufferI=[");
+		for(int i=0;i<DIMBUF;i++){
+		if(i%32==0) fprintf(logfile,"\n");
+		fprintf(logfile,"%02X ",bufferI[i]);
+	}
+	fprintf(logfile,"]\n");
+			ResetEvent(hEventObject);
+			if(Result!=WAIT_OBJECT_0){
+				PrintMessage(strings[S_comTimeout]);	//"comm timeout\r\n"
+				if(saveLog&&logfile) fprintf(logfile,strings[S_comTimeout]);
+			}
+			QueryPerformanceCounter((LARGE_INTEGER *)&stop);
+			if(saveLog&&logfile) fprintf(logfile,"T=%.2f ms (%+.2f ms)\n",(stop-start)*1000.0/freq,(stop-start)*1000.0/freq);
+			QueryPerformanceCounter((LARGE_INTEGER *)&start);
+			for(j=0;j<DIMBUF-1&&bufferI[j]!=SPI_READ;j++);
+			if(bufferI[j]==SPI_READ&&bufferI[j+1]<0xFA){
+				for(z=j+2;z<j+2+bufferI[j+1]&&z<DIMBUF&&k<dim;z++) memEE[k++]=bufferI[z];
+			}
+			PrintStatus(strings[S_CodeReading2],i*100/(dim),i);	//"Read: %d%%, addr. %05X"
+			if(RWstop) i=dim;
+			j=0;
+			if(saveLog){
+				fprintf(logfile,strings[S_Log7],i,i,k,k);	//"i=%d(0x%X), k=%d(0x%X) \n"
+			}
+		}
+	}
+	PrintStatusEnd();
+	if(k!=dim){
+		PrintMessage("\r\n");
+		PrintMessage2(strings[S_ReadEEErr],dim,k);	//"Error reading EEPROM area, requested %d bytes, read %d\r\n"
+		sizeEE=k;
+	}
+	else PrintMessage(strings[S_Compl]);
+//****************** exit ********************
+	bufferU[j++]=EXT_PORT;
+	bufferU[j++]=0;
+	bufferU[j++]=0;
+	bufferU[j++]=EN_VPP_VCC;		//0
+	bufferU[j++]=0x0;
+	bufferU[j++]=FLUSH;
+	for(;j<DIMBUF;j++) bufferU[j]=0x0;
+	PacketIO(2);
+	unsigned int stop=GetTickCount();
+	PrintStatusClear();
+	DisplayEE();	//visualize
+	int sum=0;
+	for(i=0;i<sizeEE;i++) sum+=memEE[i];
+	PrintMessage1("Checksum: 0x%X\r\n",sum&0xFFFF);
+	sprintf(str,strings[S_End],(stop-start)/1000.0);	//"\r\nEnd (%.2f s)\r\n"
+	PrintMessage(str);
+	if(saveLog){
+		fprintf(logfile,str);
+		CloseLogFile();
+	}
+}
+*/ 
+
 void Write25xx(int dim,int options)
 // write SPI memories
 // dim=size in bytes
@@ -997,12 +1159,12 @@ void Write25xx(int dim,int options)
 	bufferU[j++]=EN_VPP_VCC;		//VDD
 	bufferU[j++]=0x1;
 	bufferU[j++]=WAIT_T3;
-	bufferU[j++]=EXT_PORT;	//CS=1, HLD=1, WP=1
+	bufferU[j++]=EXT_PORT;	//CS=1, HLD=1, WP=0
 	bufferU[j++]=CS+HLD;
-	bufferU[j++]=WP;
-	bufferU[j++]=EXT_PORT;	//CS=0, HLD=1, WP=1
+	bufferU[j++]=0;
+	bufferU[j++]=EXT_PORT;	//CS=0, HLD=1, WP=0
 	bufferU[j++]=HLD;
-	bufferU[j++]=WP;
+	bufferU[j++]=0;
 	bufferU[j++]=SPI_WRITE;		//READ ID
 	bufferU[j++]=1;
 	bufferU[j++]=0x9F;
@@ -1041,7 +1203,10 @@ void Write25xx(int dim,int options)
 	j=0;
 	for(z=0;z<DIMBUF-4&&bufferI[z]!=SPI_READ;z++);
 	ID=(bufferI[z+2]<<16)+(bufferI[z+3]<<8)+bufferI[z+4];
-	if(ID>0&&ID!=0xFFFFFF) 	PrintMessage1("DEVICE ID=0x%06X\r\n",ID);
+	if(ID>0&&ID!=0xFFFFFF){
+		PrintMessage1("DEVICE ID=0x%06X\r\n",ID);
+		if(saveLog) fprintf(logfile,"DEVICE ID=0x%06X\n",ID);
+	}
 	msDelay(10);	//wait power-up timer in some devices
 	bufferU[j++]=EXT_PORT;	//CS=0, HLD=1, WP=1
 	bufferU[j++]=HLD;
@@ -1084,10 +1249,11 @@ void Write25xx(int dim,int options)
 	bufferU[j++]=WP;
 	bufferU[j++]=FLUSH;
 	for(;j<DIMBUF;j++) bufferU[j]=0x0;
-	PacketIO(25);
+	PacketIO(5);
 	j=0;
 	if(options&0x1000){		//erase before write
 		PrintMessage(strings[S_StartErase]);	//"Erasing ... "
+		if(saveLog) fprintf(logfile,"%s\n",strings[S_StartErase]);	//"Erasing ... "
 		bufferU[j++]=EXT_PORT;	//CS=0, HLD=1, WP=1
 		bufferU[j++]=HLD;
 		bufferU[j++]=WP;
@@ -1153,9 +1319,11 @@ void Write25xx(int dim,int options)
 			msDelay(100);
 			for(z=0;z<DIMBUF-1&&bufferI[z]!=SPI_READ;z++);
 			pp=bufferI[z+2]&1;	//WIP bit
+			PrintStatus(strings[S_StartErase],0,0);	//"Erasing ... "	Also allows the gui loop to run
 		}
 		if(saveLog) fprintf(logfile,"Erase time %d ms\n",j*100);
 		PrintMessage(strings[S_Compl]);	//"completed"
+		PrintStatus(strings[S_Compl],0,0);	//"completed"
 //		msDelay(100);
 	}
 //****************** write ********************
