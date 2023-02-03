@@ -1101,7 +1101,7 @@ enum group_t nameToGroup(const char *devName) {
 	if(!strncmp(devName,"24",2)||!strncmp(devName,"25",2)||!strncmp(devName,"93",2)|| \
 		!strncmp(devName,"95",2)||!strncmp(devName,"11",2)||!strncmp(devName,"DS",2))
 		return G_EEPROM;
-	//Debug1("can't determine group of device '%s'\n",devName);
+	PrintMessage1("can't determine group of device '%s'\n",devName);
 	return -1;
 }
 

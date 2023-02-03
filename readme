@@ -5,6 +5,8 @@ Website: http://openprog.altervista.org
 These sources are given free of charge under the GNU General Public License version 2 
 
 Changelog (to use new features the corresponding firmware is required):
+V 0.12.1 february 2023: fixed crash when selecting "*" filter;
+
 V 0.12.0 october 2022: 	port to GTK3; device selected via tree;	added possibility to send manual commands;
 						added 16F15213-14-23-24-25-43-44-45-54-55-56-74-75-76, 
 						16F18013-14-15-23-24-25-26-44-45-46-54-55-56-74-75-76,

@@ -2015,7 +2015,7 @@ void Write18FKx(int dim,int dim2,int options,int nu1,int nu2, int nu3)
 //		 1		10		0x380000	0x3C0000	0x2C0000	Q40-43  one-word 		11 0.075 11
 //		 2		35		0x380000	0x3C0000	0x2C0000	Q83-84	one-word 		11 0.075 11
 {
-	int k=0,k2,z=0,i,j,x,w=0;
+	int k=0,k2,z=0,i,j,x=0,w=0;
 	int err=0;
 	int devID=0,devREV=0;
 	int MemAddr,rowN=0;

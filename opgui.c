@@ -2,7 +2,7 @@
  * \file opgui.c
  * main control program for the open programmer
  *
- * Copyright (C) 2009-2022 Alberto Maccioni
+ * Copyright (C) 2009-2023 Alberto Maccioni
  * for detailed info see:
  * http://openprog.altervista.org/
  *
@@ -795,11 +795,11 @@ void AddDevices(enum group_t groupFilter, const char *textFilter) {
 		strcpy(devices,DEVLIST[i].device);
 		struct DevInfo info;
 		populateDevInfo(&info, &(DEVLIST[i]));
-		for(tok=strtok(devices,",");tok;tok=strtok(NULL,",")) {
-			info.device=malloc(strlen(tok)+1);
-			strcpy(info.device,tok);
+		for(tok=strtok(devices,", \t");tok;tok=strtok(NULL,", \t")) {
+			//info.device=malloc(strlen(tok)+1);
+			//strcpy(info.device,tok);
 			info.group=nameToGroup(tok);
-			if ((!textFilter || strlen(textFilter) == 0 || strstr(tok, textFilter)) &&
+			if(info.group!=-1&&(!textFilter || strlen(textFilter) == 0 || strstr(tok, textFilter)) &&
 				(groupFilter == -1 || info.group == groupFilter)) {
 					gtk_list_store_insert_with_values(devStore, NULL, -1,
 						DEVICE_ID_COLUMN, j++,

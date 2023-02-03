@@ -1,5 +1,5 @@
 # equivalent to #define in c code
-VERSION = 0.12.0
+VERSION = 0.12.1
 CC = gcc
 PREFIX = /usr/local
 
